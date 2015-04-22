@@ -6,6 +6,7 @@
 # module elsewhere
 
 src/main/resources
+webroot
 target/classes
 target/dependencies
 bin
