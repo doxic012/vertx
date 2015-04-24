@@ -9,7 +9,7 @@ $(document).ready(function() {
 //		});
 //	};
 	if (window.WebSocket) {
-		socket = new WebSocket("ws://localhost:8080/chat");
+		socket = new WebSocket("ws://192.168.178.59:8080/chat");
 		socket.onmessage = function(event) {
 			console.log("Received data from websocket: ");
 			console.log(event.data);
