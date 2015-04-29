@@ -16,8 +16,8 @@ import io.vertx.ext.apex.sstore.LocalSessionStore;
 import io.vertx.ext.auth.AuthProvider;
 import io.vertx.ext.auth.shiro.ShiroAuthProvider;
 import io.vertx.ext.auth.shiro.ShiroAuthRealmType;
-import io.vertx.webchat.comm.MessageHandler;
-import io.vertx.webchat.entity.User;
+import io.vertx.webchat.server.websocket.WebChatServerSocket;
+
 
 public class WebChatServer extends AbstractVerticle {
 	private static String PATHS_CHAT = "/chat/*";
@@ -25,25 +25,27 @@ public class WebChatServer extends AbstractVerticle {
 	@Override
 	public void start() {
 		System.out.println("started chat server");
-
+		// create http-server on port 8080
 		Router router = Router.router(vertx);
-		
-		LocalSessionStore sessions = LocalSessionStore.create(vertx);
-		
+
+		LocalSessionStore sessionStore = LocalSessionStore.create(vertx);
+
 		// We need cookies, sessions and request bodies
 		router.route().handler(CookieHandler.create());
-		router.route().handler(SessionHandler.create(sessions));
+		router.route().handler(SessionHandler.create(sessionStore));
 		router.route().handler(BodyHandler.create()); // for request body
-
-		// static resources for chat
-		// router.route(WEBROOT_CHAT).handler(handler -> {
-		// System.out.println("chat route");
-		// handler.response().putHeader("location", "/chat/chatIndex.html");
-		// });
 
 		// Simple auth service which uses a properties file for user/role info
 		AuthProvider authProvider = ShiroAuthProvider.create(vertx, ShiroAuthRealmType.PROPERTIES, new JsonObject());
 
+//		router.route("/chat/").handler(handle -> {
+//
+//			System.out.println("chat route");
+//			System.out.println(handle.request().absoluteURI());
+//
+//			System.out.println("is logged in: " + handle.session().isLoggedIn());
+//			handle.next();
+//		});
 		// Any requests to URI starting '/chat/' require login
 		router.route(PATHS_CHAT).handler(RedirectAuthHandler.create(authProvider, "/login.html"));
 
@@ -67,44 +69,15 @@ public class WebChatServer extends AbstractVerticle {
 
 		// static resources (css, js, ...)
 		// StaticHandlers ALWAYS represent the final invocation!
-//		router.route().handler(handle -> {
-//			System.out.println("is logged in:" + handle.session().isLoggedIn());
-//			handle.next();
-//		});
 		router.route(PATHS_CHAT).handler(StaticHandler.create().setCachingEnabled(false).setWebRoot("chat"));
 		router.route().handler(StaticHandler.create());
 
-		// create http-server on port 8080
 		HttpServerOptions serverOptions = new HttpServerOptions().setMaxWebsocketFrameSize(100000);
-		HttpServer server = vertx.createHttpServer(serverOptions).requestHandler(router::accept).websocketHandler(socket -> {
-			
-			if (!socket.path().matches(PATHS_CHAT)) {
-				socket.reject();
-				return;
-			}
-
-			final String id = socket.textHandlerID();
-			User user = new User("user", "email");
-
-			MessageHandler.addActiveUser(vertx, user, id);
-
-			System.out.println("registering new connection with id: " + id);
-
-			socket.closeHandler(handler -> {
-				System.out.println("un-registering connection with id: " + id);
-			});
-
-			socket.frameHandler(handler -> {
-				try {
-					System.out.println("Framehandler for id: " + id);
-					MessageHandler.broadcastMessage(vertx, handler.textData());
-					// socket.writeFrame(handler);
-
-				} catch (Exception ex) {
-					socket.reject();
-				}
-
-			});
-		}).listen(8080);
+		HttpServer server = vertx.createHttpServer(serverOptions).requestHandler(handler -> {
+			System.out.println("request: " + handler.absoluteURI());
+			router.accept(handler);
+		})
+		.websocketHandler(new WebChatServerSocket(vertx, PATHS_CHAT, sessionStore))
+		.listen(8080);
 	}
 }
