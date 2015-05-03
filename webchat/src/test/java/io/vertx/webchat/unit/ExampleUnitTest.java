@@ -1,6 +1,6 @@
 package io.vertx.webchat.unit;
 
-import io.vertx.webchat.PingVerticle;
+import io.vertx.webchat.server.ChatServerVerticle;
 
 import org.junit.Test;
 
@@ -25,7 +25,7 @@ public class ExampleUnitTest {
 
   @Test
   public void testVerticle() {
-    PingVerticle vert = new PingVerticle();
+    ChatServerVerticle server = new ChatServerVerticle();
 
     // do something with verticle
   }

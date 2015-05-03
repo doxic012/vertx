@@ -2,9 +2,7 @@ package io.vertx.webchat.comm;
 
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.EventBus;
-import io.vertx.core.shareddata.LocalMap;
-import io.vertx.core.shareddata.SharedData;
-import io.vertx.webchat.entity.User;
+import io.vertx.webchat.models.User;
 
 import java.util.HashMap;
 

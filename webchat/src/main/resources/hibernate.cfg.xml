@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-configuration PUBLIC
+        "-//Hibernate/Hibernate Configuration DTD 3.0//EN"
+        "http://hibernate.org/dtd/hibernate-configuration-3.0.dtd">
+<hibernate-configuration>
+	<session-factory>
+		<property name="hibernate.dialect">org.hibernate.dialect.MySQLDialect</property> <!-- MySQLInnoDBDialect -->
+		<property name="hibernate.connection.driver_class">com.mysql.jdbc.Driver</property>
+		<property name="hibernate.connection.url">jdbc:mysql://localhost:3306/webchat</property>
+		<property name="hibernate.connection.username">root</property>
+		<property name="hibernate.connection.password">root</property>
+		<property name="hibernate.connection.autoReconnect">true</property>
+
+		<!-- Connection Pool Size -->
+		<!-- <property name="hibernate.connection.pool_size">1</property>
+ -->
+		<property name="hibernate.cache.provider_class">org.cache.HashtableCacheProvider</property>
+		<!-- <property name="hibernate.transaction.factory_class">org.hibernate.transaction.JDBCTransactionFactory</property>
+ -->
+		<!-- Enable Hibernate's automatic session context management -->
+		<property name="hibernate.current_session_context_class">thread</property>
+
+		<!-- Debug -->
+		<property name="hibernate.show_sql">true</property>
+
+		<!-- Mappings -->
+		<mapping class="io.vertx.webchat.models.User"></mapping>
+		<mapping class="io.vertx.webchat.models.RolesPermission"></mapping>
+		<!-- <mapping class="io.vertx.webchat.models.UserRole"></mapping> -->
+	</session-factory>
+</hibernate-configuration>

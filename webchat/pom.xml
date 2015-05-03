@@ -30,7 +30,17 @@
 		</repository>
 	</repositories>
 	<dependencies>
+		<dependency>
+			<groupId>mysql</groupId>
+			<artifactId>mysql-connector-java</artifactId>
+			<version>5.1.35</version>
+		</dependency>
 
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-core</artifactId>
+			<version>4.3.9.Final</version>
+		</dependency>
 		<dependency>
 			<groupId>io.vertx</groupId>
 			<artifactId>vertx-core</artifactId>
@@ -87,11 +97,11 @@
 			<version>${vertx.version}</version>
 		</dependency>
 
-<!-- 		<dependency> -->
-<!-- 			<groupId>io.vertx</groupId> -->
-<!-- 			<artifactId>vertx-docgen</artifactId> -->
-<!-- 			<version>${vertx.version}</version> -->
-<!-- 		</dependency> -->
+		<!-- <dependency> -->
+		<!-- <groupId>io.vertx</groupId> -->
+		<!-- <artifactId>vertx-docgen</artifactId> -->
+		<!-- <version>${vertx.version}</version> -->
+		<!-- </dependency> -->
 		<dependency>
 			<groupId>io.vertx</groupId>
 			<artifactId>vertx-auth-service</artifactId>
