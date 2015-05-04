@@ -38,6 +38,7 @@ public class FormLoginRememberHandlerImpl implements FormLoginRememberHandler {
 			context.fail(405);
 			return;
 		}
+
 		if (!req.isExpectMultipart()) {
 			throw new IllegalStateException("Form body not parsed - do you forget to include a BodyHandler?");
 		}
@@ -48,37 +49,39 @@ public class FormLoginRememberHandlerImpl implements FormLoginRememberHandler {
 		boolean rememberMe = Boolean.parseBoolean(params.get(rememberMeParam));
 
 		if (username == null || password == null) {
-			System.out.println("No username or password provided in form - did you forget to include a BodyHandler?");
 			context.fail(400);
-		} else {
-			Session session = context.session();
-
-			if (session == null) {
-				context.fail(new NullPointerException("No session - did you forget to include a SessionHandler?"));
-			} else {
-				JsonObject principal = new JsonObject().put("username", username);
-				JsonObject credentials = new JsonObject().put("password", password).put("rememberMe", rememberMe);
-
-				// the general login-process
-				authProvider.login(principal, credentials, res -> {
-					System.out.println("login process: " + res.succeeded() + ", principal: " + username + "; pw: " + password + ", rememberMe: " + rememberMe);
-
-					if (res.succeeded()) {
-						session.setPrincipal(principal);
-						session.setAuthProvider(authProvider);
-						String returnURL = session.remove(returnURLParam);
-
-						// Redirecting if possible
-						if (returnURL == null) {
-							context.fail(new IllegalStateException("Logged in OK, but no return URL"));
-						} else {
-							req.response().putHeader("location", returnURL).setStatusCode(302).end();
-						}
-					} else {
-						context.fail(403); 
-					}
-				});
-			}
+			return;
 		}
+
+		Session session = context.session();
+		if (session == null) {
+			context.fail(new NullPointerException("No session - did you forget to include a SessionHandler?"));
+			return;
+		}
+
+		JsonObject principal = new JsonObject().put("username", username);
+		JsonObject credentials = new JsonObject().put("password", password).put("rememberMe", rememberMe);
+
+		// Authentication-process
+		authProvider.login(principal, credentials, res -> {
+			log.debug("login invoked, success: " + res.succeeded() + ", principal: " + username + ", rememberMe: " + rememberMe);
+
+			if (res.failed()) {
+				context.fail(403);
+				return;
+			}
+
+			// Mark the user as logged in
+			session.setPrincipal(principal);
+			session.setAuthProvider(authProvider);
+			String returnURL = session.remove(returnURLParam);
+
+			// Redirecting if possible
+			if (returnURL == null) {
+				context.fail(new IllegalStateException("Logged in OK, but no return URL"));
+			} else {
+				req.response().putHeader("location", returnURL).setStatusCode(302).end();
+			}
+		});
 	}
 }

@@ -89,7 +89,7 @@ public class FormRegistrationHandlerImpl implements FormRegistrationHandler {
 			}
 		}
 
-		// Redirection
+		// Redirecting if possible
 		String returnURL = session.remove(returnURLParam);
 		if (returnURL == null)
 			context.fail(new IllegalStateException("Logged in OK, but no return URL"));

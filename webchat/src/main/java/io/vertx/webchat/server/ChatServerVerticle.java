@@ -149,6 +149,6 @@ public class ChatServerVerticle extends AbstractVerticle {
 		router.route().handler(StaticHandler.create());
 
 		HttpServerOptions serverOptions = new HttpServerOptions().setMaxWebsocketFrameSize(100000);
-		HttpServer server = vertx.createHttpServer(serverOptions).requestHandler(router::accept).listen(8080);
+		vertx.createHttpServer(serverOptions).requestHandler(router::accept).listen(8080);
 	}
 }
