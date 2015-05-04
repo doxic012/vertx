@@ -15,16 +15,57 @@ import io.vertx.ext.apex.handler.SessionHandler;
 import io.vertx.ext.apex.handler.StaticHandler;
 import io.vertx.ext.auth.AuthProvider;
 import io.vertx.ext.auth.shiro.ShiroAuthProvider;
+import io.vertx.webchat.auth.handler.FormLoginRememberHandler;
 import io.vertx.webchat.auth.handler.FormRegistrationHandler;
+import io.vertx.webchat.auth.hash.HashInfo;
 import io.vertx.webchat.auth.realm.ChatAuthRealm;
 import io.vertx.webchat.hibernate.HibernateUtil;
+import io.vertx.webchat.models.User;
 import io.vertx.webchat.sessions.ChatSessionStore;
 import io.vertx.webchat.websocket.WebSocketManager;
 
+import org.apache.shiro.crypto.SecureRandomNumberGenerator;
+import org.apache.shiro.crypto.hash.Sha256Hash;
+import org.apache.shiro.crypto.hash.SimpleHash;
+import org.apache.shiro.util.ByteSource;
+
 public class ChatServerVerticle extends AbstractVerticle {
+
+	private HashInfo hashInfo = new HashInfo(Sha256Hash.ALGORITHM_NAME, 1024, false);
+
+	/**
+	 * Register a new user with a username, email an password.
+	 * Optional: Admin role
+	 *
+	 * @param session
+	 * @param username
+	 * @param email
+	 * @param plainTextPassword
+	 * @param isAdmin
+	 */
+	private void registerUser(org.hibernate.Session session, HashInfo hashingInfo, String username, String email, String plainTextPassword) {
+
+		ByteSource salt = new SecureRandomNumberGenerator().nextBytes();
+		SimpleHash hash = new SimpleHash(hashingInfo.getAlgorithmName(), plainTextPassword, salt, hashingInfo.getIterations());
+
+		User user = new User();
+		user.setUsername(username);
+		user.setEmail(email);
+		user.setRoleNames("user");
+
+		// Generate hashing-function and encode password
+		user.setPassword(hashingInfo.isHexEncoded() ? hash.toHex() : hash.toBase64());
+		user.setSalt(salt.toString());
+
+		System.out.println("User with email:" + user.getEmail() + " hashedPassword:" + user.getPassword() + " salt:" + user.getSalt());
+
+		session.save(user);
+
+	}
 
 	@Override
 	public void start() {
+
 		// create http-server on port 8080
 		Router router = Router.router(vertx);
 
@@ -58,17 +99,36 @@ public class ChatServerVerticle extends AbstractVerticle {
 					return;
 				}
 			} else {
-				context.fail(403);				
+				context.fail(403);
 			}
 		});
 
-		// Map all requests to /chat/* to a redirect-handler that sends the user to the loginpage
+		// Map all requests to /chat/* to a redirect-handler that sends the user
+		// to the loginpage
 		// Using the custom chat authentication realm with hibernate
-		AuthProvider authProvider = ShiroAuthProvider.create(vertx, new ChatAuthRealm(HibernateUtil.getSessionFactory()));
+		AuthProvider authProvider = ShiroAuthProvider.create(vertx, new ChatAuthRealm(HibernateUtil.getSessionFactory(), hashInfo));
 		router.route("/chat/*").handler(RedirectAuthHandler.create(authProvider, "/login.html"));
 
+		// Handles the registration
+		router.route("/register").handler(FormRegistrationHandler.create(handler -> {
+			org.hibernate.Session session = HibernateUtil.getSessionFactory().openSession();
+			session.beginTransaction();
+
+			String username = handler.getString(FormRegistrationHandler.DEFAULT_USERNAME_PARAM);
+			String email = handler.getString(FormRegistrationHandler.DEFAULT_EMAIL_PARAM);
+			String password = handler.getString(FormRegistrationHandler.DEFAULT_PASSWORD_PARAM);
+
+			try {
+				registerUser(session, hashInfo, username, email, password);
+			} finally {
+				session.getTransaction().commit();
+				if (session.isOpen())
+					session.close();
+			}
+		}));
+
 		// Handles the actual login and logout
-		router.route("/login").handler(FormRegistrationHandler.create(authProvider));
+		router.route("/login").handler(FormLoginRememberHandler.create(authProvider));
 		router.route("/logout").handler(context -> {
 			System.out.println("logging out");
 			context.session().logout();
