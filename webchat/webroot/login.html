@@ -1,43 +1,45 @@
 <!DOCTYPE html>
 <html>
-	<head>
-		<meta charset="ISO-8859-1">
-	  	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/>
-	    <meta http-equiv="Pragma" content="no-cache"/>
-	    <meta http-equiv="Expires" content="0"/>
-		<title>Vert.x Webchat login</title>
-		
-		<link rel="stylesheet" href="/css/bootstrap.min.css" type="text/css"/>
-		<link rel="stylesheet" href="/css/bootstrap-theme.min.css" type="text/css"/>
-		
-		<script src="/js/jquery-1.11.2.min.js" type="text/javascript"></script>
-		<script src="/js/bootstrap.min.js" type="text/javascript"></script>
-	</head>
-	<body>
-		<h2>Please login</h2><br>
-		
-		<br>
-		(Username is 'tim', password is 'sausages')
-		<br>
-		<br>
-		
-		<form action="/login" method="post">
-		    <div>
-		        <label>Username:</label>
-		        <input type="text" name="username"/>
-		    </div>
-		    <div>
-		        <label>Password:</label>
-		        <input type="password" name="password"/>
-		    </div>
-		    <div>
-			    <label>Remember me:</label>
-			    <input type="checkbox" name="rememberMe" />
-		    </div>
-		    <div>
-		        <input type="submit" value="Log In"/>
-		    </div>
-		</form>
-	</body>
+<head>
+<meta charset="ISO-8859-1">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+<meta http-equiv="Pragma" content="no-cache" />
+<meta http-equiv="Expires" content="0" />
+<title>Vert.x Webchat: Login</title>
+<link rel="stylesheet" href="/css/bootstrap.css" type="text/css" />
+<link rel="stylesheet" href="/css/forms.css" type="text/css" />
+<script src="/js/jquery-1.11.2.min.js" type="text/javascript"></script>
+<script src="/js/bootstrap.min.js" type="text/javascript"></script>
+</head>
+<body>
+	<form class="form-horizontal webchat-form login" action="/login" method="post">
+		<div class="form-group">
+			<label for="userInput" class="col-md-3">Benutzername oder E-Mail:</label>
+			<div class="col-md-9">
+				<input id="userinput" class="form-control" type="text" name="username" placeholder="Benutzername oder E-Mail" />
+			</div>
+		</div>
+		<div class="form-group">
+			<label for="passwordInput" class="col-md-3">Password:</label>
+			<div class="col-md-9">
+				<input id="passwordInput" class="form-control" type="password" name="password" placeholder="Passwort" />
+			</div>
+		</div>
+		<div class="form-group">
+			<div class="col-md-offset-3 col-md-9">
+				<div class="checkbox">
+					<label for="rememberStatus"> <input id="rememberStatus" type="checkbox" name="rememberMe" /> 
+						Eingeloggt bleiben
+					</label>
+				</div>
+			</div>
+		</div>
+		<div class="form-group">
+			<div class="col-md-offset-3 col-md-9">
+				<button type="submit" class="btn btn-primary">Einloggen</button>
+			</div>
+		</div>
+	</form>
+</body>
 </html>

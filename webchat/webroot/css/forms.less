@@ -1,0 +1,23 @@
+@import "bootstrap/variables.less";
+
+.box-shadow(@shadow) {
+	-webkit-box-shadow: @shadow;
+	box-shadow: @shadow;
+}
+
+.webchat-form {
+	&.login, &.register {
+		margin-top: 50px;
+		padding: 15px;
+		background-color: white;
+		border-radius: 4px 4px 0 0;
+		.box-shadow(none);
+
+		@media (min-width: @screen-xs-min) {
+			margin-left: 15%;
+			margin-right: 15%;
+			border: 1px solid #ddd;
+		}
+	}
+}
+

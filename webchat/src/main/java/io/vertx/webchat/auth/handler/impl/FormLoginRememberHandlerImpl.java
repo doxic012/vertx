@@ -20,13 +20,15 @@ public class FormLoginRememberHandlerImpl implements FormLoginRememberHandler {
 	private final String passwordParam;
 	private final String returnURLParam;
 	private final String rememberMeParam;
+	private final String defaultReturnURL;
 
-	public FormLoginRememberHandlerImpl(AuthProvider authProvider, String usernameParam, String passwordParam, String returnURLParam, String rememberMeParam) {
+	public FormLoginRememberHandlerImpl(AuthProvider authProvider, String usernameParam, String passwordParam, String returnURLParam, String rememberMeParam, String defaultReturnURL) {
 		this.authProvider = authProvider;
 		this.usernameParam = usernameParam;
 		this.passwordParam = passwordParam;
 		this.returnURLParam = returnURLParam;
 		this.rememberMeParam = rememberMeParam;
+		this.defaultReturnURL = defaultReturnURL;
 	}
 
 	@Override
@@ -76,12 +78,9 @@ public class FormLoginRememberHandlerImpl implements FormLoginRememberHandler {
 			session.setAuthProvider(authProvider);
 			String returnURL = session.remove(returnURLParam);
 
-			// Redirecting if possible
-			if (returnURL == null) {
-				context.fail(new IllegalStateException("Logged in OK, but no return URL"));
-			} else {
-				req.response().putHeader("location", returnURL).setStatusCode(302).end();
-			}
+			if (returnURL == null)
+				returnURL = defaultReturnURL;
+			req.response().putHeader("location", returnURL).setStatusCode(302).end();
 		});
 	}
 }
