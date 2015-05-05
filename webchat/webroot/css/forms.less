@@ -1,22 +1,27 @@
 @import "bootstrap/variables.less";
-
-.box-shadow(@shadow) {
+@max-form-width: 550px;
+.box-shadow (@shadow) {
 	-webkit-box-shadow: @shadow;
 	box-shadow: @shadow;
 }
 
-.webchat-form {
-	&.login, &.register {
-		margin-top: 50px;
+.webchat-tabs {
+	max-width: @max-form-width;
+	margin-top: 50px;
+	margin-left: auto;
+	margin-right: auto;
+	background-color: white;
+	.webchat-form {
 		padding: 15px;
 		background-color: white;
-		border-radius: 4px 4px 0 0;
-		.box-shadow(none);
+		.box-shadow (none);
+	}
 
-		@media (min-width: @screen-xs-min) {
-			margin-left: 15%;
-			margin-right: 15%;
+	.tab-content {
+		@media (min-width: @max-form-width) {
 			border: 1px solid #ddd;
+			border-radius: 4px 4px 0 0;
+			border-top: none;
 		}
 	}
 }
