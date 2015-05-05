@@ -44,11 +44,11 @@ public class FormLoginRememberHandlerImpl implements FormLoginRememberHandler {
 		}
 
 		MultiMap params = req.formAttributes();
-		String username = params.get(usernameParam);
+		String user = params.get(usernameParam); // may be email or username
 		String password = params.get(passwordParam);
 		boolean rememberMe = Boolean.parseBoolean(params.get(rememberMeParam));
 
-		if (username == null || password == null) {
+		if (user == null || password == null) {
 			context.fail(400);
 			return;
 		}
@@ -59,12 +59,12 @@ public class FormLoginRememberHandlerImpl implements FormLoginRememberHandler {
 			return;
 		}
 
-		JsonObject principal = new JsonObject().put("username", username);
+		JsonObject principal = new JsonObject().put("username", user);
 		JsonObject credentials = new JsonObject().put("password", password).put("rememberMe", rememberMe);
 
 		// Authentication-process
 		authProvider.login(principal, credentials, res -> {
-			log.debug("login invoked, success: " + res.succeeded() + ", principal: " + username + ", rememberMe: " + rememberMe);
+			log.debug("login invoked, success: " + res.succeeded() + ", principal: " + user + ", rememberMe: " + rememberMe);
 
 			if (res.failed()) {
 				context.fail(403);

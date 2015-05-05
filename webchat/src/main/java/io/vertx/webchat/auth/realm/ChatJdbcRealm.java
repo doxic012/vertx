@@ -1,5 +1,7 @@
 package io.vertx.webchat.auth.realm;
 
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.impl.LoggerFactory;
 import io.vertx.webchat.auth.hash.HashInfo;
 import io.vertx.webchat.models.User;
 
@@ -18,6 +20,8 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 
 public class ChatJdbcRealm extends JdbcRealm {
+
+	private static final Logger log = LoggerFactory.getLogger(ChatJdbcRealm.class);
 
 	private SessionFactory sessionFactory = null;
 	private HashInfo hashingInfo = null;
@@ -62,24 +66,20 @@ public class ChatJdbcRealm extends JdbcRealm {
 
 		UsernamePasswordToken userPassToken = (UsernamePasswordToken) token;
 
-		if (userPassToken.getUsername() == null) {
-			System.out.println("Username is null.");
-			return null;
-		}
+		if (userPassToken.getUsername() == null) 
+			throw new AuthenticationException("Invalid AuthenticationToken: username is null");
 
 		// Open hibernate session and read user credentials
 		Session session = sessionFactory.openSession();
 		session.beginTransaction();
 		try {
-			User user = User.getUserByUsername(session, userPassToken.getUsername());
+			User user = User.getUser(session, userPassToken.getUsername());
 
-			if (user == null) {
-				System.out.println("No account found for user '" + userPassToken.getUsername() + "'");
-				return null;
-			}
+			if (user == null) 
+				throw new AuthenticationException("No account found for user '" + userPassToken.getUsername() + "'");
 
-			System.out.println("found user: " + user.getUsername() + ", mail: " + user.getEmail() + ", pw: " + user.getPassword() + ", salt: " + user.getSalt());
-			System.out.println(hashingInfo);
+			log.debug("found user: " + user.getUsername() + ", mail: " + user.getEmail() + ", pw: " + user.getPassword() + ", salt: " + user.getSalt());
+			log.debug(hashingInfo);
 			return new SimpleAuthenticationInfo(user.getUsername(), user.getPassword().toCharArray(), getHashedSalt(user.getSalt()), user.getUsername());
 		} finally {
 			session.getTransaction().commit();

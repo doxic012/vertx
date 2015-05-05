@@ -35,7 +35,6 @@ public class FormRegistrationHandlerImpl implements FormRegistrationHandler {
 
 		this.returnURLParam = returnURLParam;
 		this.loginOnSuccess = loginOnSuccess;
-
 	}
 
 	@Override
@@ -68,8 +67,8 @@ public class FormRegistrationHandlerImpl implements FormRegistrationHandler {
 		}
 
 		// Call the registration handler with the registration information
-		JsonObject user = new JsonObject().put(usernameParam, username).put(emailParam, email).put(passwordParam, password);
-		registrationHandler.handle(user);
+		JsonObject registrationData = new JsonObject().put(usernameParam, username).put(emailParam, email).put(passwordParam, password);
+		registrationHandler.handle(registrationData);
 
 		Session session = context.session();
 		if (session == null) {
@@ -81,8 +80,9 @@ public class FormRegistrationHandlerImpl implements FormRegistrationHandler {
 		if (loginOnSuccess) {
 			if (authProvider != null) {
 				log.debug("auto login after registration for principal " + username);
-				JsonObject principal = new JsonObject().put("username", username);
-				session.setPrincipal(principal);
+				
+				JsonObject userData = new JsonObject().put(usernameParam, username).put(emailParam, email);
+				session.setPrincipal(userData);
 				session.setAuthProvider(authProvider);
 			} else {
 				log.error("No valid auth-provider - skipping login");

@@ -1,7 +1,6 @@
 package io.vertx.webchat.server;
 
 import io.vertx.core.AbstractVerticle;
-import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerOptions;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.http.HttpServerResponse;
@@ -43,7 +42,7 @@ public class ChatServerVerticle extends AbstractVerticle {
 	 * @param plainTextPassword
 	 * @param isAdmin
 	 */
-	private void registerUser(org.hibernate.Session session, HashInfo hashingInfo, String username, String email, String plainTextPassword) {
+	private User registerUser(org.hibernate.Session session, HashInfo hashingInfo, String username, String email, String plainTextPassword) {
 
 		ByteSource salt = new SecureRandomNumberGenerator().nextBytes();
 		SimpleHash hash = new SimpleHash(hashingInfo.getAlgorithmName(), plainTextPassword, salt, hashingInfo.getIterations());
@@ -61,6 +60,7 @@ public class ChatServerVerticle extends AbstractVerticle {
 
 		session.save(user);
 
+		return user;
 	}
 
 	@Override
@@ -90,7 +90,7 @@ public class ChatServerVerticle extends AbstractVerticle {
 				ServerWebSocket socket = request.upgrade();
 
 				try {
-					WebSocketManager socketManager = WebSocketManager.create(vertx, socket);
+					WebSocketManager socketManager = WebSocketManager.create(vertx, socket, session);
 				} catch (Exception ex) {
 					ex.printStackTrace();
 
@@ -122,6 +122,7 @@ public class ChatServerVerticle extends AbstractVerticle {
 				registerUser(session, hashInfo, username, email, password);
 			} finally {
 				session.getTransaction().commit();
+
 				if (session.isOpen())
 					session.close();
 			}

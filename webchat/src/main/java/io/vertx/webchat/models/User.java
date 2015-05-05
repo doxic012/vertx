@@ -88,14 +88,18 @@ public class User implements Serializable {
 
 	public static User getUserByEmail(Session session, String email) {
 		System.out.println("getting user by email: "+email);
-		return (User) session.createQuery("from User where email=:email").setString("email", email).uniqueResult();
+		return (User) session.createQuery("from User where email=:email").setParameter("email", email).uniqueResult();
 	}
 
 	public static User getUserByUsername(Session session, String username) {
 		System.out.println("getting user by username: "+username);
-		return (User) session.createQuery("from User where username=:username").setString("username", username).uniqueResult();
+		return (User) session.createQuery("from User where username=:username").setParameter("username", username).uniqueResult();
 	}
 
+	public static User getUser(Session session, String param) {
+		return (User) session.createQuery("from User where username=:param or email=:param").setParameter("param", param).uniqueResult();
+	}
+	
 	public String toString() {
 		return "id: " + getId() + ", nick: " + getUsername() + ", email: " + getEmail();
 	}
