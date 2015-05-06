@@ -126,7 +126,7 @@ public class ChatServerVerticle extends AbstractVerticle {
 				if (session.isOpen())
 					session.close();
 			}
-		}));
+		}, authProvider));
 
 		// Handles the actual login and logout
 		router.route("/login").handler(FormLoginRememberHandler.create(authProvider));

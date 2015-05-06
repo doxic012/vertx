@@ -7,8 +7,7 @@ import io.vertx.core.http.WebSocketFrame;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.impl.LoggerFactory;
 import io.vertx.ext.apex.Session;
-import io.vertx.webchat.auth.handler.impl.FormLoginRememberHandlerImpl;
-import io.vertx.webchat.comm.MessageHandler;
+import io.vertx.webchat.comm.MessageHandlerImpl;
 
 /**
  * This class handles the actual ServerWebSocket with a vertx-context.
@@ -22,7 +21,8 @@ public class WebSocketManagerImpl implements WebSocketManager {
 	private final Session session;
 	private Vertx vertx = null;
 	private ServerWebSocket socket = null;
-
+	private MessageHandlerImpl messageHandler = null;
+	
 	/**
 	 * The frame-handler
 	 * 
@@ -36,8 +36,8 @@ public class WebSocketManagerImpl implements WebSocketManager {
 				return;
 			}
 
-			log.debug("got message from id: " + sessionId);
-			MessageHandler.broadcastMessage(vertx, handler.textData());
+			System.out.println("got message from id: " + sessionId);
+			messageHandler.broadcastMessage(sessionId, handler.textData());
 		};
 	}
 
@@ -58,6 +58,7 @@ public class WebSocketManagerImpl implements WebSocketManager {
 		this.socket = ws;
 		this.sessionId = ws.textHandlerID();
 
+		this.messageHandler = new MessageHandlerImpl(vertx);
 		initWebSocket();
 	}
 
@@ -70,7 +71,7 @@ public class WebSocketManagerImpl implements WebSocketManager {
 		final String sessionId = socket.textHandlerID();
 
 		// User user = new User("user", "email");
-		MessageHandler.addActiveUser(vertx, session.getPrincipal(), sessionId);
+		messageHandler.addActiveUser(session.getPrincipal(), sessionId);
 
 		// TODO: Broadcast Message with new registered Id + online status
 		System.out.println("registering new connection with id: " + sessionId);

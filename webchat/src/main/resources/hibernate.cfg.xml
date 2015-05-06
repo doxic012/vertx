@@ -12,11 +12,10 @@
 		<property name="hibernate.connection.autoReconnect">true</property>
 
 		<!-- Connection Pool Size -->
-		<!-- <property name="hibernate.connection.pool_size">1</property>
- -->
+		<!-- <property name="hibernate.connection.pool_size">1</property> -->
 		<property name="hibernate.cache.provider_class">org.cache.HashtableCacheProvider</property>
-		<!-- <property name="hibernate.transaction.factory_class">org.hibernate.transaction.JDBCTransactionFactory</property>
- -->
+		<!-- <property name="hibernate.transaction.factory_class">org.hibernate.transaction.JDBCTransactionFactory</property> -->
+		
 		<!-- Enable Hibernate's automatic session context management -->
 		<property name="hibernate.current_session_context_class">thread</property>
 
