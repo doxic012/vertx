@@ -10,6 +10,8 @@ import io.vertx.ext.apex.RoutingContext;
 import io.vertx.ext.apex.Session;
 import io.vertx.ext.auth.AuthProvider;
 import io.vertx.webchat.auth.handler.FormLoginRememberHandler;
+import io.vertx.webchat.core.ValueHandler;
+
 
 public class FormLoginRememberHandlerImpl implements FormLoginRememberHandler {
 
@@ -22,13 +24,17 @@ public class FormLoginRememberHandlerImpl implements FormLoginRememberHandler {
 	private final String rememberMeParam;
 	private final String defaultReturnURL;
 
-	public FormLoginRememberHandlerImpl(AuthProvider authProvider, String usernameParam, String passwordParam, String returnURLParam, String rememberMeParam, String defaultReturnURL) {
+	private final ValueHandler<String, JsonObject> getPrincipalData;
+	
+	public FormLoginRememberHandlerImpl(AuthProvider authProvider, String usernameParam, String passwordParam, String returnURLParam, String rememberMeParam, String defaultReturnURL, ValueHandler<String, JsonObject> getPrincipalData) {
 		this.authProvider = authProvider;
 		this.usernameParam = usernameParam;
 		this.passwordParam = passwordParam;
 		this.returnURLParam = returnURLParam;
 		this.rememberMeParam = rememberMeParam;
 		this.defaultReturnURL = defaultReturnURL;
+	
+		this.getPrincipalData = getPrincipalData;
 	}
 
 	@Override
@@ -72,14 +78,23 @@ public class FormLoginRememberHandlerImpl implements FormLoginRememberHandler {
 				context.fail(403);
 				return;
 			}
-
+			
+			JsonObject principleData = null;
+			
+			// Get principle-data to save in the session
+			if(getPrincipalData != null)
+			principleData = getPrincipalData.handle(user);
+			
 			// Mark the user as logged in
-			session.setPrincipal(principal);
+			session.setPrincipal(principleData != null ? principleData : principal);
 			session.setAuthProvider(authProvider);
-			String returnURL = session.remove(returnURLParam);
 
+			String returnURL = params.get(returnURLParam);
+			if (returnURL == null)
+				returnURL = session.remove(returnURLParam);
 			if (returnURL == null)
 				returnURL = defaultReturnURL;
+			
 			req.response().putHeader("location", returnURL).setStatusCode(302).end();
 		});
 	}

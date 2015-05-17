@@ -3,13 +3,16 @@ package io.vertx.webchat.comm;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.json.JsonObject;
+import io.vertx.webchat.models.User;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 public class MessageHandlerImpl {
 	private static String WEBCHAT_USERS_ONLINE = "webchat.users.online";
 
-	private HashMap<JsonObject, String> userMap = new HashMap<JsonObject, String>();
+	private static HashMap<String, JsonObject> userMap = new HashMap<String, JsonObject>();
 
 	private Vertx vertx;
 
@@ -24,28 +27,38 @@ public class MessageHandlerImpl {
 	 * @param vertx
 	 * @return
 	 */
-	public HashMap<JsonObject, String> getActiveUsers(Vertx vertx) {
+	public HashMap<String, JsonObject> getActiveUsers(Vertx vertx) {
 		// SharedData data = vertx.sharedData();
 		return userMap;// data.<String, String>getLocalMap(WEBCHAT_USERS_ONLINE);
 	}
 
 	public void addActiveUser(JsonObject principal, String textHandlerID) {
-		HashMap<JsonObject, String> users = getActiveUsers(vertx);
+		HashMap<String, JsonObject> users = getActiveUsers(vertx);
 
 		System.out.println("adding user " + textHandlerID);
-		users.put(principal, textHandlerID);
+		users.put(textHandlerID, principal);
 		System.out.println(users.size());
 	}
 
 	public void broadcastMessage(String senderId, String message) {
-		HashMap<JsonObject, String> users = getActiveUsers(vertx);
+		HashMap<String, JsonObject> users = getActiveUsers(vertx);
 		EventBus bus = vertx.eventBus();
 
 		// publish message to everyone except for sender
-		for (JsonObject user : users.keySet()) {
-			if (users.get(user) != senderId) {
-				System.out.println("Sending message to User " + user + " with handlerID: " + users.get(user));
-				bus.publish(users.get(user), String.join(";", senderId, message));
+		for (String handlerId : users.keySet()) {
+			
+			if (handlerId != senderId) {
+				JsonObject sender = users.get(senderId);
+				JsonObject receiver = users.get(handlerId);
+				
+				// check for same Principal
+				if (sender.getString("name") != receiver.getString("name")) {
+					System.out.println("Sending message to User " + receiver.getString("name") + " with handlerID: " + handlerId);
+					bus.publish(handlerId, message);
+				}
+				else {
+					//send different message type to own user (e.g: message-type: sender)
+				}
 			}
 		}
 	}

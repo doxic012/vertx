@@ -66,25 +66,19 @@ public class ChatJdbcRealm extends JdbcRealm {
 
 		UsernamePasswordToken userPassToken = (UsernamePasswordToken) token;
 
-		if (userPassToken.getUsername() == null) 
+		if (userPassToken.getUsername() == null)
 			throw new AuthenticationException("Invalid AuthenticationToken: username is null");
 
 		// Open hibernate session and read user credentials
-		Session session = sessionFactory.openSession();
-		session.beginTransaction();
-		try {
-			User user = User.getUser(session, userPassToken.getUsername());
 
-			if (user == null) 
-				throw new AuthenticationException("No account found for user '" + userPassToken.getUsername() + "'");
+		User user = User.getUser(userPassToken.getUsername());
 
-			log.debug("found user: " + user.getUsername() + ", mail: " + user.getEmail() + ", pw: " + user.getPassword() + ", salt: " + user.getSalt());
-			log.debug(hashingInfo);
-			return new SimpleAuthenticationInfo(user.getUsername(), user.getPassword().toCharArray(), getHashedSalt(user.getSalt()), user.getUsername());
-		} finally {
-			session.getTransaction().commit();
-			if (session.isOpen())
-				session.close();
-		}
+		if (user == null)
+			throw new AuthenticationException("No account found for user '" + userPassToken.getUsername() + "'");
+
+		log.debug("found user: " + user.getUsername() + ", mail: " + user.getEmail() + ", pw: " + user.getPassword() + ", salt: " + user.getSalt());
+		log.debug(hashingInfo);
+		return new SimpleAuthenticationInfo(user.getUsername(), user.getPassword().toCharArray(), getHashedSalt(user.getSalt()), user.getUsername());
+
 	}
 }

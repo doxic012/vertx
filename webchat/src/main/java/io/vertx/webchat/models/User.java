@@ -1,5 +1,8 @@
 package io.vertx.webchat.models;
 
+import io.vertx.core.json.JsonObject;
+import io.vertx.webchat.hibernate.HibernateUtil;
+
 import java.io.Serializable;
 
 import javax.persistence.Column;
@@ -86,18 +89,32 @@ public class User implements Serializable {
 		this.roleNames = roleNames;
 	}
 
+	public JsonObject toJson() {
+		JsonObject user = new JsonObject()
+		.put("name", getUsername())
+		.put("email", getEmail());
+		
+		return user;
+	}
 	public static User getUserByEmail(Session session, String email) {
 		System.out.println("getting user by email: "+email);
 		return (User) session.createQuery("from User where email=:email").setParameter("email", email).uniqueResult();
 	}
 
-	public static User getUserByUsername(Session session, String username) {
+	public static User getUserByUsername(String username) {
+		Session session = HibernateUtil.getSessionFactory().openSession();
+		
 		System.out.println("getting user by username: "+username);
 		return (User) session.createQuery("from User where username=:username").setParameter("username", username).uniqueResult();
 	}
 
-	public static User getUser(Session session, String param) {
+	public static User getUser(String param) {
+		Session session = HibernateUtil.getSessionFactory().openSession();
 		return (User) session.createQuery("from User where username=:param or email=:param").setParameter("param", param).uniqueResult();
+	}
+	
+	public static boolean getUserExists(String param) {
+		return getUser(param) != null;
 	}
 	
 	public String toString() {

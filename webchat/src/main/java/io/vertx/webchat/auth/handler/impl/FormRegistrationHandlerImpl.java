@@ -1,6 +1,5 @@
 package io.vertx.webchat.auth.handler.impl;
 
-import io.vertx.core.Handler;
 import io.vertx.core.MultiMap;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServerRequest;
@@ -11,6 +10,13 @@ import io.vertx.ext.apex.RoutingContext;
 import io.vertx.ext.apex.Session;
 import io.vertx.ext.auth.AuthProvider;
 import io.vertx.webchat.auth.handler.FormRegistrationHandler;
+import io.vertx.webchat.auth.hash.HashInfo;
+import io.vertx.webchat.hibernate.HibernateUtil;
+import io.vertx.webchat.models.User;
+
+import org.apache.shiro.crypto.SecureRandomNumberGenerator;
+import org.apache.shiro.crypto.hash.SimpleHash;
+import org.apache.shiro.util.ByteSource;
 
 public class FormRegistrationHandlerImpl implements FormRegistrationHandler {
 	private static final Logger log = LoggerFactory.getLogger(FormRegistrationHandlerImpl.class);
@@ -19,14 +25,44 @@ public class FormRegistrationHandlerImpl implements FormRegistrationHandler {
 	private final String passwordParam;
 	private final String emailParam;
 	private final String returnURLParam;
+	private final String defaultReturnURL;
 
 	private final boolean loginOnSuccess;
 
-	private final Handler<JsonObject> registrationHandler;
+	private final HashInfo hashInfo;
 	private final AuthProvider authProvider;
 
-	public FormRegistrationHandlerImpl(Handler<JsonObject> registrationHandler, AuthProvider authProvider, String usernameParam, String emailParam, String passwordParam, String returnURLParam, boolean loginOnSuccess) {
-		this.registrationHandler = registrationHandler;
+	/**
+	 * Register a new user with a username, email an password.
+	 * Optional: Admin role
+	 *
+	 * @param session
+	 * @param username
+	 * @param email
+	 * @param plainTextPassword
+	 * @param isAdmin
+	 */
+	private User registerUser(HashInfo hashingInfo, String username, String email, String plainTextPassword) {
+
+		ByteSource salt = new SecureRandomNumberGenerator().nextBytes();
+		SimpleHash hash = new SimpleHash(hashingInfo.getAlgorithmName(), plainTextPassword, salt, hashingInfo.getIterations());
+
+		User user = new User();
+		user.setUsername(username);
+		user.setEmail(email);
+		user.setRoleNames("user");
+
+		// Generate hashing-function and encode password
+		user.setPassword(hashingInfo.isHexEncoded() ? hash.toHex() : hash.toBase64());
+		user.setSalt(salt.toString());
+
+		System.out.println("User with email:" + user.getEmail() + " hashedPassword:" + user.getPassword() + " salt:" + user.getSalt());
+
+		return user;
+	}
+
+	public FormRegistrationHandlerImpl(HashInfo hashInfo, AuthProvider authProvider, String usernameParam, String emailParam, String passwordParam, String returnURLParam, boolean loginOnSuccess, String defaultReturnURL) {
+		this.hashInfo = hashInfo;
 		this.authProvider = authProvider;
 
 		this.usernameParam = usernameParam;
@@ -35,6 +71,7 @@ public class FormRegistrationHandlerImpl implements FormRegistrationHandler {
 
 		this.returnURLParam = returnURLParam;
 		this.loginOnSuccess = loginOnSuccess;
+		this.defaultReturnURL = defaultReturnURL;
 	}
 
 	@Override
@@ -61,14 +98,25 @@ public class FormRegistrationHandlerImpl implements FormRegistrationHandler {
 			return;
 		}
 
-		if (registrationHandler == null) {
-			context.fail(new NullPointerException("No registration handler available to invoke"));
+		if (hashInfo == null) {
+			context.fail(new NullPointerException("No hashing information available"));
 			return;
 		}
 
-		// Call the registration handler with the registration information
-		JsonObject registrationData = new JsonObject().put(usernameParam, username).put(emailParam, email).put(passwordParam, password);
-		registrationHandler.handle(registrationData);
+		org.hibernate.Session connectSession = HibernateUtil.getSessionFactory().openSession();
+		connectSession.beginTransaction();
+		JsonObject principal = null;
+		try {
+			User user = registerUser(hashInfo, username, email, password);
+			connectSession.save(user);
+
+			principal = user.toJson();
+		} finally {
+			connectSession.getTransaction().commit();
+
+			if (connectSession.isOpen())
+				connectSession.close();
+		}
 
 		Session session = context.session();
 		if (session == null) {
@@ -78,22 +126,22 @@ public class FormRegistrationHandlerImpl implements FormRegistrationHandler {
 
 		// Mark the registered user as logged in
 		if (loginOnSuccess) {
-			if (authProvider != null) {
+			if (authProvider != null && principal != null) {
 				log.debug("auto login after registration for principal " + username);
-				
-				JsonObject userData = new JsonObject().put(usernameParam, username).put(emailParam, email);
-				session.setPrincipal(userData);
+
+				session.setPrincipal(principal);
 				session.setAuthProvider(authProvider);
 			} else {
 				log.error("No valid auth-provider - skipping login");
 			}
 		}
 
-		// Redirecting if possible
-		String returnURL = session.remove(returnURLParam);
+		String returnURL = params.get(returnURLParam);
 		if (returnURL == null)
-			context.fail(new IllegalStateException("Logged in OK, but no return URL"));
-		else
-			req.response().putHeader("location", returnURL).setStatusCode(302).end();
+			returnURL = session.remove(returnURLParam);
+		if (returnURL == null)
+			returnURL = defaultReturnURL;
+
+		req.response().putHeader("location", returnURL).setStatusCode(302).end();
 	}
 }
