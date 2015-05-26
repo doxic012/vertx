@@ -3,11 +3,8 @@ package io.vertx.webchat.comm;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.json.JsonObject;
-import io.vertx.webchat.models.User;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 
 public class MessageHandlerImpl {
 	private static String WEBCHAT_USERS_ONLINE = "webchat.users.online";

@@ -12,7 +12,8 @@
 	<artifactId>webchat</artifactId>
 
 	<properties>
-		<vertx.version>3.0.0-milestone4</vertx.version>
+		<vertx.version.old>3.0.0-milestone4</vertx.version.old>
+		<vertx.version>3.0.0-milestone5</vertx.version>
 		<junit.version>4.11</junit.version>
 	</properties>
 	<version>1.0.0-SNAPSHOT</version>
@@ -57,7 +58,7 @@
 		<dependency>
 			<groupId>io.vertx</groupId>
 			<artifactId>vertx-jdbc-service</artifactId>
-			<version>${vertx.version}</version>
+			<version>${vertx.version.old}</version>
 		</dependency>
 
 		<dependency>

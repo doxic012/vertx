@@ -10,7 +10,7 @@ import io.vertx.ext.apex.RoutingContext;
 import io.vertx.ext.apex.Session;
 import io.vertx.ext.auth.AuthProvider;
 import io.vertx.webchat.auth.handler.FormLoginRememberHandler;
-import io.vertx.webchat.core.ValueHandler;
+import io.vertx.webchat.models.User;
 
 
 public class FormLoginRememberHandlerImpl implements FormLoginRememberHandler {
@@ -24,17 +24,13 @@ public class FormLoginRememberHandlerImpl implements FormLoginRememberHandler {
 	private final String rememberMeParam;
 	private final String defaultReturnURL;
 
-	private final ValueHandler<String, JsonObject> getPrincipalData;
-	
-	public FormLoginRememberHandlerImpl(AuthProvider authProvider, String usernameParam, String passwordParam, String returnURLParam, String rememberMeParam, String defaultReturnURL, ValueHandler<String, JsonObject> getPrincipalData) {
+	public FormLoginRememberHandlerImpl(AuthProvider authProvider, String usernameParam, String passwordParam, String returnURLParam, String rememberMeParam, String defaultReturnURL) {
 		this.authProvider = authProvider;
 		this.usernameParam = usernameParam;
 		this.passwordParam = passwordParam;
 		this.returnURLParam = returnURLParam;
 		this.rememberMeParam = rememberMeParam;
 		this.defaultReturnURL = defaultReturnURL;
-	
-		this.getPrincipalData = getPrincipalData;
 	}
 
 	@Override
@@ -52,11 +48,11 @@ public class FormLoginRememberHandlerImpl implements FormLoginRememberHandler {
 		}
 
 		MultiMap params = req.formAttributes();
-		String user = params.get(usernameParam); // may be email or username
+		String userData = params.get(usernameParam); // may be email or username
 		String password = params.get(passwordParam);
 		boolean rememberMe = Boolean.parseBoolean(params.get(rememberMeParam));
 
-		if (user == null || password == null) {
+		if (userData == null || password == null) {
 			context.fail(400);
 			return;
 		}
@@ -67,23 +63,21 @@ public class FormLoginRememberHandlerImpl implements FormLoginRememberHandler {
 			return;
 		}
 
-		JsonObject principal = new JsonObject().put("username", user);
+		JsonObject principal = new JsonObject().put("username", userData);
 		JsonObject credentials = new JsonObject().put("password", password).put("rememberMe", rememberMe);
 
 		// Authentication-process
 		authProvider.login(principal, credentials, res -> {
-			log.debug("login invoked, success: " + res.succeeded() + ", principal: " + user + ", rememberMe: " + rememberMe);
+			log.debug("login invoked, success: " + res.succeeded() + ", principal: " + userData + ", rememberMe: " + rememberMe);
 
 			if (res.failed()) {
 				context.fail(403);
 				return;
 			}
 			
-			JsonObject principleData = null;
 			
 			// Get principle-data to save in the session
-			if(getPrincipalData != null)
-			principleData = getPrincipalData.handle(user);
+			 JsonObject principleData = User.getUser(userData).toJson();
 			
 			// Mark the user as logged in
 			session.setPrincipal(principleData != null ? principleData : principal);

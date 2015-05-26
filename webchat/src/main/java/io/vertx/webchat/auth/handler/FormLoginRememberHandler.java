@@ -1,10 +1,8 @@
 package io.vertx.webchat.auth.handler;
 
-import io.vertx.core.json.JsonObject;
 import io.vertx.ext.apex.handler.FormLoginHandler;
 import io.vertx.ext.auth.AuthProvider;
 import io.vertx.webchat.auth.handler.impl.FormLoginRememberHandlerImpl;
-import io.vertx.webchat.core.ValueHandler;
 
 public interface FormLoginRememberHandler extends FormLoginHandler {
 	/**
@@ -20,8 +18,8 @@ public interface FormLoginRememberHandler extends FormLoginHandler {
 	 * @param authProvider the auth service to use
 	 * @return the handler
 	 */
-	static FormLoginRememberHandler create(AuthProvider authProvider, ValueHandler<String, JsonObject> getPrincipleData) {
-		return new FormLoginRememberHandlerImpl(authProvider, DEFAULT_USERNAME_PARAM, DEFAULT_PASSWORD_PARAM, DEFAULT_RETURN_URL_PARAM, DEFAULT_REMEMBERME_PARAM, DEFAULT_REDIRECT_URL,getPrincipleData);
+	static FormLoginRememberHandler create(AuthProvider authProvider) {
+		return new FormLoginRememberHandlerImpl(authProvider, DEFAULT_USERNAME_PARAM, DEFAULT_PASSWORD_PARAM, DEFAULT_RETURN_URL_PARAM, DEFAULT_REMEMBERME_PARAM, DEFAULT_REDIRECT_URL);
 	}
 
 	/**
@@ -39,7 +37,7 @@ public interface FormLoginRememberHandler extends FormLoginHandler {
 	 * @param defaultRedirectURL a URL that will be used as default return-url, when there is none available in the form
 	 * @return the handler
 	 */
-	static FormLoginRememberHandler create(AuthProvider authProvider, String usernameParam, String passwordParam, String returnURLParam, String rememberMeParam, String defaultRedirectURL, ValueHandler<String, JsonObject> getPrincipleData) {
-		return new FormLoginRememberHandlerImpl(authProvider, usernameParam, passwordParam, returnURLParam, rememberMeParam, defaultRedirectURL, getPrincipleData);
+	static FormLoginRememberHandler create(AuthProvider authProvider, String usernameParam, String passwordParam, String returnURLParam, String rememberMeParam, String defaultRedirectURL) {
+		return new FormLoginRememberHandlerImpl(authProvider, usernameParam, passwordParam, returnURLParam, rememberMeParam, defaultRedirectURL);
 	}
 }

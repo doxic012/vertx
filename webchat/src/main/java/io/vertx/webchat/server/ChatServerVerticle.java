@@ -1,20 +1,18 @@
 package io.vertx.webchat.server;
 
 import io.vertx.core.AbstractVerticle;
-import io.vertx.core.Handler;
+import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.http.HttpServerOptions;
-import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.http.HttpServerResponse;
-import io.vertx.core.http.ServerWebSocket;
-import io.vertx.core.json.JsonObject;
 import io.vertx.ext.apex.Router;
-import io.vertx.ext.apex.RoutingContext;
-import io.vertx.ext.apex.Session;
 import io.vertx.ext.apex.handler.BodyHandler;
 import io.vertx.ext.apex.handler.CookieHandler;
 import io.vertx.ext.apex.handler.RedirectAuthHandler;
 import io.vertx.ext.apex.handler.SessionHandler;
 import io.vertx.ext.apex.handler.StaticHandler;
+import io.vertx.ext.apex.handler.sockjs.BridgeOptions;
+import io.vertx.ext.apex.handler.sockjs.PermittedOptions;
+import io.vertx.ext.apex.handler.sockjs.SockJSHandler;
 import io.vertx.ext.apex.sstore.LocalSessionStore;
 import io.vertx.ext.auth.AuthProvider;
 import io.vertx.ext.auth.shiro.ShiroAuthProvider;
@@ -23,13 +21,10 @@ import io.vertx.webchat.auth.handler.FormRegistrationHandler;
 import io.vertx.webchat.auth.hash.HashInfo;
 import io.vertx.webchat.auth.realm.ChatAuthRealm;
 import io.vertx.webchat.hibernate.HibernateUtil;
-import io.vertx.webchat.models.User;
-import io.vertx.webchat.websocket.WebSocketVerticle;
 
-import org.apache.shiro.crypto.SecureRandomNumberGenerator;
+import java.time.LocalDate;
+
 import org.apache.shiro.crypto.hash.Sha256Hash;
-import org.apache.shiro.crypto.hash.SimpleHash;
-import org.apache.shiro.util.ByteSource;
 
 public class ChatServerVerticle extends AbstractVerticle {
 
@@ -45,56 +40,58 @@ public class ChatServerVerticle extends AbstractVerticle {
 		router.route().handler(SessionHandler.create(LocalSessionStore.create(vertx)));
 		router.route().handler(BodyHandler.create());
 
-		// Routing the upgrade-request for the websocket and initiating it with predefined frame- and closing-handlers.
-		// This route is necessary to check the current login status of each user and prevents websocket-connections
-		// from outside
-		router.route("/chat").handler(context -> {
-			HttpServerRequest request = context.request();
-			Session session = context.session();
 
-			// login required to establish websocket connection
-			if (session.isLoggedIn()) {
-				ServerWebSocket socket = request.upgrade();
-				vertx.deployVerticle(new WebSocketVerticle(session, socket), res -> {
-					System.out.println("verticle deployed, result: " + res.succeeded() + "; id: " + res.result());
-				});
+		// TODO: Authentication bzw. Benutzerrolle
+		BridgeOptions opts = new BridgeOptions()
+			.addInboundPermitted(new PermittedOptions().setAddress("chat.message.toServer"))
+			.addOutboundPermitted(new PermittedOptions().setAddress("chat.message.toClient"));
 
-				// try {
-				// WebSocketManager socketManager = WebSocketManager.create(vertx, socket, session);
-				// } catch (Exception ex) {
-				// ex.printStackTrace();
-				//
-				// if (socket != null)
-				// socket.reject();
-				// return;
-				// }
-			} else {
-				context.fail(403);
-			}
+		System.out.println("Adding eventbus route");
+		
+		SockJSHandler ebHandler = SockJSHandler.create(vertx).bridge(opts);
+		router.route("/eventbus/*").handler(ebHandler);
+//		router.route("/eventbus/info").handler(ebHandler);
+
+		EventBus eb = vertx.eventBus();
+
+		eb.consumer("chat.message.toServer").handler(message -> {
+			System.out.println("got message: "+message.body());
+			String timestamp = LocalDate.now().toString();
+			eb.publish("chat.message.toClient", timestamp + ": " + message.body());
 		});
+		
+		
+		// Handle WebSocket-requests to /chat using a WebSocket-Verticle for each connection
+		// router.route("/chat").handler(context -> {
+		// HttpServerRequest request = context.request();
+		// Session session = context.session();
+		//
+		// // login required to establish websocket connection
+		// if (session.isLoggedIn()) {
+		// ServerWebSocket socket = request.upgrade();
+		//
+		// // deploy websocket-verticle
+		// vertx.deployVerticle(new WebSocketVerticle(session, socket), res -> {
+		// System.out.println("verticle deployed, result: " + res.succeeded() + "; id: " + res.result());
+		// });
+		// } else {
+		// context.fail(403);
+		// }
+		// });
 
 		// Map all requests to /chat/* to a redirect-handler that sends the user
 		// to the loginpage
 		// Using the custom chat authentication realm with hibernate
 		AuthProvider authProvider = ShiroAuthProvider.create(vertx, new ChatAuthRealm(HibernateUtil.getSessionFactory(), hashInfo));
 		router.route("/chat/*").handler(RedirectAuthHandler.create(authProvider, "/"));
-		
-		// Handles the registration
-		router.route("/register").handler(FormRegistrationHandler.create(hashInfo, authProvider));
 
-		
-		router.route("/register").handler(new Handler<RoutingContext>() {
-			
-			@Override
-			public void handle(RoutingContext context) {
-				
-			}
-		});
+		// Handles the registration
+		router.route("/register").handler(FormRegistrationHandler.create(hashInfo, "user", authProvider));
+
 		// Handle login by html-form and pass principle-data to the session after a successful login
-		router.route("/login").handler(FormLoginRememberHandler.create(authProvider, credentials -> {
-			return User.getUser(credentials).toJson();
-		}));
-		
+		router.route("/login").handler(FormLoginRememberHandler.create(authProvider));
+
+		// Handle logout
 		router.route("/logout").handler(context -> {
 			System.out.println("logging out");
 			context.session().logout();

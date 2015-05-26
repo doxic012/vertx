@@ -15,7 +15,7 @@ import io.vertx.webchat.comm.MessageHandlerImpl;
  * It maps the sockets' frame-handler for messaging and information-exchange and
  * also the closing-handler, when a user disconnects.
  */
-public class WebSocketVerticle extends AbstractVerticle implements WebSocketManager {
+public class WebSocketVerticle extends AbstractVerticle {
 	private static final Logger log = LoggerFactory.getLogger(WebSocketVerticle.class);
 
 	private final String sessionId;

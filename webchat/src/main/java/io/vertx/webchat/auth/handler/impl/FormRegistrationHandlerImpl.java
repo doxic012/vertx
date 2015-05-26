@@ -26,43 +26,17 @@ public class FormRegistrationHandlerImpl implements FormRegistrationHandler {
 	private final String emailParam;
 	private final String returnURLParam;
 	private final String defaultReturnURL;
-
+	
 	private final boolean loginOnSuccess;
 
 	private final HashInfo hashInfo;
+	private final String roleNames;
 	private final AuthProvider authProvider;
 
-	/**
-	 * Register a new user with a username, email an password.
-	 * Optional: Admin role
-	 *
-	 * @param session
-	 * @param username
-	 * @param email
-	 * @param plainTextPassword
-	 * @param isAdmin
-	 */
-	private User registerUser(HashInfo hashingInfo, String username, String email, String plainTextPassword) {
 
-		ByteSource salt = new SecureRandomNumberGenerator().nextBytes();
-		SimpleHash hash = new SimpleHash(hashingInfo.getAlgorithmName(), plainTextPassword, salt, hashingInfo.getIterations());
-
-		User user = new User();
-		user.setUsername(username);
-		user.setEmail(email);
-		user.setRoleNames("user");
-
-		// Generate hashing-function and encode password
-		user.setPassword(hashingInfo.isHexEncoded() ? hash.toHex() : hash.toBase64());
-		user.setSalt(salt.toString());
-
-		System.out.println("User with email:" + user.getEmail() + " hashedPassword:" + user.getPassword() + " salt:" + user.getSalt());
-
-		return user;
-	}
-
-	public FormRegistrationHandlerImpl(HashInfo hashInfo, AuthProvider authProvider, String usernameParam, String emailParam, String passwordParam, String returnURLParam, boolean loginOnSuccess, String defaultReturnURL) {
+	public FormRegistrationHandlerImpl(HashInfo hashInfo, String roleNames, AuthProvider authProvider, String usernameParam, String emailParam, String passwordParam, String returnURLParam, boolean loginOnSuccess, String defaultReturnURL) {
 		this.hashInfo = hashInfo;
+		this.roleNames = roleNames;
 		this.authProvider = authProvider;
 
 		this.usernameParam = usernameParam;
@@ -93,43 +67,34 @@ public class FormRegistrationHandlerImpl implements FormRegistrationHandler {
 		String email = params.get(emailParam);
 		String password = params.get(passwordParam);
 
+		// check form params
 		if (username == null || email == null || password == null) {
 			context.fail(400);
 			return;
 		}
 
+		// check hashing information
 		if (hashInfo == null) {
 			context.fail(new NullPointerException("No hashing information available"));
 			return;
 		}
-
-		org.hibernate.Session connectSession = HibernateUtil.getSessionFactory().openSession();
-		connectSession.beginTransaction();
-		JsonObject principal = null;
-		try {
-			User user = registerUser(hashInfo, username, email, password);
-			connectSession.save(user);
-
-			principal = user.toJson();
-		} finally {
-			connectSession.getTransaction().commit();
-
-			if (connectSession.isOpen())
-				connectSession.close();
-		}
-
+		
+		// get session
 		Session session = context.session();
 		if (session == null) {
 			context.fail(new NullPointerException("No session - did you forget to include a SessionHandler?"));
 			return;
 		}
+		
+		// registration process
+		User registeredUser = User.registerUser(hashInfo, username, email, password, roleNames);	
 
 		// Mark the registered user as logged in
 		if (loginOnSuccess) {
-			if (authProvider != null && principal != null) {
+			if (authProvider != null && registeredUser != null) {
 				log.debug("auto login after registration for principal " + username);
 
-				session.setPrincipal(principal);
+				session.setPrincipal(registeredUser.toJson());
 				session.setAuthProvider(authProvider);
 			} else {
 				log.error("No valid auth-provider - skipping login");
