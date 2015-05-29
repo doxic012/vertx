@@ -1,21 +1,27 @@
-var WebSocketEvents = {
-	event : {},
-	unbind : function(eventName) {
-		delete this.event.eventName;
-	},
+function WebSocketEvents() {
+	var events = {};
+	var self = this;
 	
-	bind : function(eventName, callback) {
+	// unbind an event
+	self.unbind = function(eventName) {
+		delete events[eventName];
+	};
+	
+	// bind an event
+	self.bind = function(eventName, callback) {
 		if(callback != undefined && callback != null) {
-			this.event.eventName = callback;
+			console.log("binding event "+eventName);
+			events[eventName] = callback;
 		}
-	},
+	};
 	
-	trigger : function(eventName) {
-		this.event.eventName && this.event.eventName();
-	},
+	// trigger an event and pass some data
+	self.trigger = function(eventName, data) {
+		events[eventName] && events[eventName](data);
+	};
 };
 
-window.WebSocketEvents = WebSocketEvents;
+window.WebSocketEvents = new WebSocketEvents();
 
 (function() {
 	WebSocketEvents.bind("GetContactList", function(event) {

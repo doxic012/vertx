@@ -7,7 +7,6 @@ import io.netty.util.ReferenceCounted;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.impl.FrameType;
 import io.vertx.core.http.impl.ws.WebSocketFrameInternal;
-import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
 public class WebSocketMessage implements WebSocketFrameInternal, ReferenceCounted {
@@ -18,33 +17,34 @@ public class WebSocketMessage implements WebSocketFrameInternal, ReferenceCounte
 
 	private WebSocketMessageType messageType;
 
-	private String messageData;
+	private Object message;
 
 	private boolean isReply;
 
 	private ByteBuf binaryData;
 
-	public WebSocketMessage(String message, WebSocketMessageType messageType, boolean isReply) {
+	public WebSocketMessage(Object message, WebSocketMessageType messageType, boolean isReply) {
 		this.messageType = messageType;
-		this.messageData = message;
+		this.message = message;
 		this.isReply = isReply;
 		System.out.println(this.toString());
 		
 		this.binaryData = Unpooled.copiedBuffer(this.toString(), CharsetUtil.UTF_8);
 	}
 
-	public WebSocketMessage(JsonObject message, WebSocketMessageType messageType, boolean isReply) {
-		this(message.encode(), messageType, isReply);
-	}
-
-	public WebSocketMessage(JsonArray message, WebSocketMessageType messageType, boolean isReply) {
-		this(message.encode(), messageType, isReply);
-	}
+//	public WebSocketMessage(JsonObject message, WebSocketMessageType messageType, boolean isReply) {
+//		this(message, messageType, isReply);
+//	}
+//
+//	public WebSocketMessage(JsonArray message, WebSocketMessageType messageType, boolean isReply) {
+//		this(message), messageType, isReply);
+//	}
 
 	public JsonObject toJson() {
-		JsonObject message = new JsonObject().put("messageEvent", messageType).put("messageData", messageData).put("isReply", isReply);
-
-		return message;
+		return new JsonObject()
+			.put("messageType", messageType)
+			.put("message", message)
+			.put("isReply", isReply);
 	}
 
 	public void setMessageType(WebSocketMessageType messageEvent) {
@@ -105,7 +105,7 @@ public class WebSocketMessage implements WebSocketFrameInternal, ReferenceCounte
 		if (this.binaryData != null) {
 			this.binaryData.release();
 		}
-		this.messageData = messageData;
+		this.message = messageData;
 		this.binaryData = Unpooled.copiedBuffer(this.toString(), CharsetUtil.UTF_8);
 	}
 
