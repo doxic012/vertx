@@ -1,6 +1,7 @@
 package io.vertx.webchat.models;
 
 import java.io.Serializable;
+import java.sql.Timestamp;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -30,7 +31,7 @@ public class Contact implements Serializable {
 	private int uidForeign;
 	
 	@Column
-	private int timestamp;
+	private Timestamp timestamp;
 	
 	@Column
 	private boolean notified;
@@ -51,11 +52,11 @@ public class Contact implements Serializable {
 		this.uidForeign = uidForeign;
 	}
 
-	public int getTimestamp() {
+	public Timestamp getTimestamp() {
 		return timestamp;
 	}
 
-	public void setTimestamp(int timestamp) {
+	public void setTimestamp(Timestamp timestamp) {
 		this.timestamp = timestamp;
 	}
 

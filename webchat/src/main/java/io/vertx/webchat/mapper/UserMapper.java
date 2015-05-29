@@ -16,9 +16,9 @@ import org.hibernate.Session;
 
 public class UserMapper {
 	public static User getUserCredentials(String email) {
-		Session session = HibernateUtil.getSession();
+		Session connectSession = HibernateUtil.getSession();
 		System.out.println("getting user by email: " + email);
-		return (User) session.createQuery("from User where email=:email").setParameter("email", email).uniqueResult();
+		return (User) connectSession.createQuery("from User where email=:email").setParameter("email", email).uniqueResult();
 	}
 
 	public static JsonObject getUserByEmail(String email) {
