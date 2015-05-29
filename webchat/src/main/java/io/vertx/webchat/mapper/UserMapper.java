@@ -6,7 +6,8 @@ import io.vertx.webchat.models.User;
 import io.vertx.webchat.util.HibernateUtil;
 import io.vertx.webchat.util.auth.HashInfo;
 
-import java.time.LocalDate;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.apache.shiro.crypto.SecureRandomNumberGenerator;
@@ -30,15 +31,15 @@ public class UserMapper {
 
 	public static JsonArray getUsers() {
 		Session session = HibernateUtil.getSession();
-		
+
 		List<User> userList = (List<User>) session.createQuery("from User").list();
 		return new JsonArray(userList);
 	}
-	
+
 	public static boolean userExistsByEmail(String email) {
 		return getUserByEmail(email) != null;
 	}
-	
+
 	/**
 	 * Register a new user with a username, email an password.
 	 * Optional: Admin role
@@ -51,8 +52,8 @@ public class UserMapper {
 	 */
 	public static JsonObject addUser(HashInfo hashingInfo, String username, String email, String plainTextPassword) {
 		JsonObject userObject;
-		Session connectSession = HibernateUtil.getSession();
-		connectSession.beginTransaction();
+		Session session = HibernateUtil.getSession();
+		session.beginTransaction();
 
 		try {
 			ByteSource salt = new SecureRandomNumberGenerator().nextBytes();
@@ -64,15 +65,15 @@ public class UserMapper {
 			user.setEmail(email);
 			user.setPassword(hashingInfo.isHexEncoded() ? hash.toHex() : hash.toBase64());
 			user.setSalt(salt.toString());
-			user.setTimestamp(LocalDate.now());
+			user.setTimestamp(Timestamp.valueOf(LocalDateTime.now()));
 
 			System.out.println("User with email:" + user.getEmail() + " hashedPassword:" + user.getPassword() + " salt:" + user.getSalt());
 
-			connectSession.save(user);
+			session.save(user);
 
 			userObject = user.toJson();
 		} finally {
-			connectSession.getTransaction().commit();
+			session.getTransaction().commit();
 		}
 
 		return userObject;

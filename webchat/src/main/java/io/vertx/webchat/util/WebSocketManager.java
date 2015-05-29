@@ -4,10 +4,12 @@ import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.ServerWebSocket;
 import io.vertx.core.http.WebSocketFrame;
+import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.impl.LoggerFactory;
 import io.vertx.ext.apex.Session;
-import io.vertx.webchat.comm.MessageHandlerImpl;
+
+import java.util.HashMap;
 
 /**
  * This class handles the actual ServerWebSocket with a vertx-context.
@@ -21,7 +23,8 @@ public class WebSocketManager {
 	private final Session session;
 	private Vertx vertx = null;
 	private ServerWebSocket socket = null;
-	private MessageHandlerImpl messageHandler = null;
+	
+	private static HashMap<String, JsonObject> userMap = new HashMap<String, JsonObject>();
 
 	/**
 	 * The frame-handler
@@ -36,17 +39,20 @@ public class WebSocketManager {
 			}
 
 			System.out.println("got message from id: " + sessionId);
-			messageHandler.broadcastMessage(sessionId, handler.textData());
+//			messageHandler.broadcastMessage(sessionId, handler.textData());
 		};
 	}
 
 	/**
-	 * The closing handler
+	 * The closing handler for the websocket.
+	 * This handler removes the current user from the list of online users
 	 * @return
 	 */
 	private Handler<Void> getCloseHandler() {
 		return handler -> {
 			log.debug("un-registering connection with id: " + sessionId);
+			
+			userMap.remove(sessionId, session.getPrincipal());
 		};
 	}
 
@@ -63,11 +69,11 @@ public class WebSocketManager {
 		this.session = session;
 		this.socket = ws;
 		this.sessionId = ws.textHandlerID();
-		this.messageHandler = new MessageHandlerImpl(vertx);
 	
 		// User user = new User("user", "email");
-		messageHandler.addActiveUser(session.getPrincipal(), sessionId);
+		userMap.put(sessionId, session.getPrincipal());
 
+		//TODO: send user 
 		socket.closeHandler(getCloseHandler());
 
 		socket.frameHandler(getFrameHandler());

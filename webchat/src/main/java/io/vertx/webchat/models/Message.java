@@ -1,8 +1,7 @@
 package io.vertx.webchat.models;
 
 import java.io.Serializable;
-import java.sql.Date;
-import java.time.LocalDate;
+import java.sql.Timestamp;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -16,7 +15,7 @@ create TABLE webchat.message (
 		  `uid` int(11) NOT NULL,
 		  `uidForeign` int(11) NOT NULL,
 		  `message` text DEFAULT NULL,
-		  `timestamp` date,
+		  `timestamp` timestamp,
 		  PRIMARY KEY (`id`),
 		  FOREIGN KEY (`uid`) REFERENCES user (`uid`),
 		  FOREIGN KEY (`uidForeign`) REFERENCES user (`uid`),
@@ -45,7 +44,7 @@ public class Message implements Serializable {
 	private int uidForeign;
 
 	@Column
-	private Date timestamp;
+	private Timestamp timestamp;
 
 	@Column
 	private String message;
@@ -74,12 +73,12 @@ public class Message implements Serializable {
 		this.uidForeign = uidForeign;
 	}
 
-	public Date getTimestamp() {
+	public Timestamp getTimestamp() {
 		return timestamp;
 	}
 
-	public void setTimestamp(LocalDate timestamp) {
-		this.timestamp =  Date.valueOf(timestamp);
+	public void setTimestamp(Timestamp timestamp) {
+		this.timestamp = timestamp;
 	}
 
 	public String getMessage() {

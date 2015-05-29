@@ -3,8 +3,8 @@ package io.vertx.webchat.models;
 import io.vertx.core.json.JsonObject;
 
 import java.io.Serializable;
-import java.sql.Date;
-import java.time.LocalDate;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -19,7 +19,7 @@ import javax.persistence.Table;
   `email` varchar(128) NOT NULL,
   `password` varchar(128) DEFAULT NULL,
   `salt` varchar(128) DEFAULT NULL,
-  `timestamp` date,
+  `timestamp` timestamp,
   PRIMARY KEY (`uid`),
   UNIQUE KEY `email_UNIQUE` (`email`)
 ) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8;
@@ -48,7 +48,7 @@ public class User implements Serializable {
 	private String salt;
 
 	@Column
-	private Date timestamp;
+	private Timestamp timestamp;
 	
 	public User() {
 	}
@@ -107,11 +107,11 @@ public class User implements Serializable {
 		return "id: " + getUid() + ", nick: " + getName() + ", email: " + getEmail();
 	}
 
-	public Date getTimestamp() {
+	public Timestamp getTimestamp() {
 		return timestamp;
 	}
 
-	public void setTimestamp(LocalDate timestamp) {
-		this.timestamp = Date.valueOf(timestamp);
+	public void setTimestamp(Timestamp timestamp) {
+		this.timestamp = timestamp;
 	}
 }

@@ -4,7 +4,6 @@ import java.io.Serializable;
 import java.sql.Timestamp;
 
 import javax.persistence.Column;
-import javax.persistence.Entity;
 import javax.persistence.Table;
 
 /*
@@ -12,7 +11,7 @@ create TABLE webchat.contact (
 		  `uid` int(11) NOT NULL,
 		  `uidForeign` int(11) NOT NULL,
 		  `notified` boolean DEFAULT NULL,
-		  `timestamp` date,
+		  `timestamp` timestamp,
 		  PRIMARY KEY (`uid`, `uidForeign`),
 		  FOREIGN KEY (`uid`) REFERENCES user (`uid`),
 		  FOREIGN KEY (`uidForeign`) REFERENCES user (`uid`)
