@@ -6,7 +6,7 @@ $(document).ready(function() {
 		socket.onmessage = function(event) {
 			console.log("Received data from websocket: ");
 			console.log(event.data);
-			$('.websocket-test-output').append(event.data + "\n");
+			$('.message-box-container').append(event.data + "\n");
 		}
 		
 		socket.onopen = function(event) {
@@ -31,15 +31,9 @@ $(document).ready(function() {
 		}
 	}
 
-	function send(message) {
-		var input = $(".websocket-test-input").val();
+	var btn = $("button[name=sendmessage]").click(function() {
+		var input = $("textarea[name=message]").val();
 		console.log("input value: " + input);
 		eb.send(message);
-	}
-
-	var btn = $(".websocket-test-send").click(function() {
-		var input = $(".websocket-test-input").val();
-		console.log("input value: " + input);
-		send(input);
 	});
 });
