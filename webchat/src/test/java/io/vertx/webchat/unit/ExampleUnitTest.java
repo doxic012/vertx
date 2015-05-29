@@ -1,6 +1,6 @@
 package io.vertx.webchat.unit;
 
-import io.vertx.webchat.verticles.ChatServerVerticle;
+import io.vertx.webchat.controller.ChatServerVerticle;
 
 import org.junit.Test;
 

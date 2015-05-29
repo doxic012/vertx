@@ -4,6 +4,7 @@ import io.vertx.core.json.JsonObject;
 
 import java.io.Serializable;
 import java.sql.Date;
+import java.time.LocalDate;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -97,7 +98,7 @@ public class User implements Serializable {
 			.put("uid", getUid())
 			.put("name", getName())
 			.put("email", getEmail())
-			.put("timestamp", getTimestamp());
+			.put("timestamp", getTimestamp().toString());
 		return user;
 	}
 
@@ -110,7 +111,7 @@ public class User implements Serializable {
 		return timestamp;
 	}
 
-	public void setTimestamp(Date timestamp) {
-		this.timestamp = timestamp;
+	public void setTimestamp(LocalDate timestamp) {
+		this.timestamp = Date.valueOf(timestamp);
 	}
 }

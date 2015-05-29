@@ -1,8 +1,8 @@
 package io.vertx.webchat.mapper;
 
 import io.vertx.core.json.JsonArray;
-import io.vertx.webchat.hibernate.HibernateUtil;
 import io.vertx.webchat.models.Contact;
+import io.vertx.webchat.util.HibernateUtil;
 
 import java.util.List;
 
@@ -10,7 +10,7 @@ import org.hibernate.Session;
 
 public class ContactMapper {
 	public static JsonArray getContacts(int uid) {
-		Session session = HibernateUtil.getSessionFactory().openSession();
+		Session session = HibernateUtil.getSession();
 		
 		List<Contact> userList = (List<Contact>) session.createQuery("from Contact where uid=:uid").setParameter("uid", uid).list();
 		return new JsonArray(userList);

@@ -10,7 +10,6 @@ import javax.persistence.Table;
 create TABLE webchat.contact (
 		  `uid` int(11) NOT NULL,
 		  `uidForeign` int(11) NOT NULL,
-		  `message` text DEFAULT NULL,
 		  `notified` boolean DEFAULT NULL,
 		  `timestamp` date,
 		  PRIMARY KEY (`uid`, `uidForeign`),
