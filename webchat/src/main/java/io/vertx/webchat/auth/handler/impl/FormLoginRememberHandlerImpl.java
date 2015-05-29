@@ -10,7 +10,7 @@ import io.vertx.ext.apex.RoutingContext;
 import io.vertx.ext.apex.Session;
 import io.vertx.ext.auth.AuthProvider;
 import io.vertx.webchat.auth.handler.FormLoginRememberHandler;
-import io.vertx.webchat.models.User;
+import io.vertx.webchat.mapper.UserMapper;
 
 
 public class FormLoginRememberHandlerImpl implements FormLoginRememberHandler {
@@ -18,15 +18,15 @@ public class FormLoginRememberHandlerImpl implements FormLoginRememberHandler {
 	private static final Logger log = LoggerFactory.getLogger(FormLoginRememberHandlerImpl.class);
 
 	private final AuthProvider authProvider;
-	private final String usernameParam;
+	private final String emailParam;
 	private final String passwordParam;
 	private final String returnURLParam;
 	private final String rememberMeParam;
 	private final String defaultReturnURL;
 
-	public FormLoginRememberHandlerImpl(AuthProvider authProvider, String usernameParam, String passwordParam, String returnURLParam, String rememberMeParam, String defaultReturnURL) {
+	public FormLoginRememberHandlerImpl(AuthProvider authProvider, String emailParam, String passwordParam, String returnURLParam, String rememberMeParam, String defaultReturnURL) {
 		this.authProvider = authProvider;
-		this.usernameParam = usernameParam;
+		this.emailParam = emailParam;
 		this.passwordParam = passwordParam;
 		this.returnURLParam = returnURLParam;
 		this.rememberMeParam = rememberMeParam;
@@ -48,11 +48,11 @@ public class FormLoginRememberHandlerImpl implements FormLoginRememberHandler {
 		}
 
 		MultiMap params = req.formAttributes();
-		String userData = params.get(usernameParam); // may be email or username
+		String userMail = params.get(emailParam); // email
 		String password = params.get(passwordParam);
 		boolean rememberMe = Boolean.parseBoolean(params.get(rememberMeParam));
 
-		if (userData == null || password == null) {
+		if (userMail == null || password == null) {
 			context.fail(400);
 			return;
 		}
@@ -63,12 +63,12 @@ public class FormLoginRememberHandlerImpl implements FormLoginRememberHandler {
 			return;
 		}
 
-		JsonObject principal = new JsonObject().put("username", userData);
+		JsonObject principal = new JsonObject().put("username", userMail);
 		JsonObject credentials = new JsonObject().put("password", password).put("rememberMe", rememberMe);
 
 		// Authentication-process
 		authProvider.login(principal, credentials, res -> {
-			log.debug("login invoked, success: " + res.succeeded() + ", principal: " + userData + ", rememberMe: " + rememberMe);
+			log.debug("login invoked, success: " + res.succeeded() + ", principal: " + userMail + ", rememberMe: " + rememberMe);
 
 			if (res.failed()) {
 				context.fail(403);
@@ -77,7 +77,7 @@ public class FormLoginRememberHandlerImpl implements FormLoginRememberHandler {
 			
 			
 			// Get principle-data to save in the session
-			 JsonObject principleData = User.getUser(userData).toJson();
+			 JsonObject principleData = UserMapper.getUserByEmail(userMail);
 			
 			// Mark the user as logged in
 			session.setPrincipal(principleData != null ? principleData : principal);

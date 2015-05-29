@@ -1,10 +1,9 @@
 package io.vertx.webchat.models;
 
 import io.vertx.core.json.JsonObject;
-import io.vertx.webchat.auth.hash.HashInfo;
-import io.vertx.webchat.hibernate.HibernateUtil;
 
 import java.io.Serializable;
+import java.sql.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -12,11 +11,19 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
-import org.apache.shiro.crypto.SecureRandomNumberGenerator;
-import org.apache.shiro.crypto.hash.SimpleHash;
-import org.apache.shiro.util.ByteSource;
-import org.hibernate.Session;
+/*
+  create TABLE webchat.user(
+  `uid` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(45) NOT NULL,
+  `email` varchar(128) NOT NULL,
+  `password` varchar(128) DEFAULT NULL,
+  `salt` varchar(128) DEFAULT NULL,
+  `timestamp` date,
+  PRIMARY KEY (`uid`),
+  UNIQUE KEY `email_UNIQUE` (`email`)
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8;
 
+ */
 @Entity
 @Table(name = "user")
 public class User implements Serializable {
@@ -25,16 +32,13 @@ public class User implements Serializable {
 
 	@Id
 	@GeneratedValue
-	private Integer id;
+	private Integer uid;
 
 	@Column
-	private String username;
+	private String name;
 
 	@Column
 	private String email;
-
-	@Column
-	private String roleNames;
 
 	@Column
 	private String password;
@@ -42,6 +46,9 @@ public class User implements Serializable {
 	@Column
 	private String salt;
 
+	@Column
+	private Date timestamp;
+	
 	public User() {
 	}
 
@@ -49,8 +56,8 @@ public class User implements Serializable {
 		return email;
 	}
 
-	public Integer getId() {
-		return id;
+	public Integer getUid() {
+		return uid;
 	}
 
 	public String getPassword() {
@@ -61,20 +68,16 @@ public class User implements Serializable {
 		return salt;
 	}
 
-	public String getUsername() {
-		return username;
-	}
-
-	public String getRoleName() {
-		return roleNames;
+	public String getName() {
+		return name;
 	}
 
 	public void setEmail(String email) {
 		this.email = email;
 	}
 
-	public void setId(Integer id) {
-		this.id = id;
+	public void setUid(Integer id) {
+		this.uid = id;
 	}
 
 	public void setPassword(String password) {
@@ -85,83 +88,29 @@ public class User implements Serializable {
 		this.salt = salt;
 	}
 
-	public void setUsername(String username) {
-		this.username = username;
-	}
-
-	public void setRoleNames(String roleNames) {
-		this.roleNames = roleNames;
+	public void setName(String name) {
+		this.name = name;
 	}
 
 	public JsonObject toJson() {
-		JsonObject user = new JsonObject().put("name", getUsername()).put("email", getEmail());
-
+		JsonObject user = new JsonObject()
+			.put("uid", getUid())
+			.put("name", getName())
+			.put("email", getEmail())
+			.put("timestamp", getTimestamp());
 		return user;
 	}
 
-	public static User getUserByEmail(Session session, String email) {
-		System.out.println("getting user by email: " + email);
-		return (User) session.createQuery("from User where email=:email").setParameter("email", email).uniqueResult();
-	}
-
-	public static User getUserByUsername(String username) {
-		Session session = HibernateUtil.getSessionFactory().openSession();
-
-		System.out.println("getting user by username: " + username);
-		return (User) session.createQuery("from User where username=:username").setParameter("username", username).uniqueResult();
-	}
-
-	public static User getUser(String param) {
-		Session session = HibernateUtil.getSessionFactory().openSession();
-		return (User) session.createQuery("from User where username=:param or email=:param").setParameter("param", param).uniqueResult();
-	}
-
-	public static boolean getUserExists(String param) {
-		return getUser(param) != null;
-	}
-
-	/**
-	 * Register a new user with a username, email an password.
-	 * Optional: Admin role
-	 *
-	 * @param session
-	 * @param username
-	 * @param email
-	 * @param plainTextPassword
-	 * @param isAdmin
-	 */
-	public static User registerUser(HashInfo hashingInfo, String username, String email, String plainTextPassword, String roleNames) {
-		User user = null;
-		Session connectSession = HibernateUtil.getSessionFactory().openSession();
-		connectSession.beginTransaction();
-
-		try {
-			ByteSource salt = new SecureRandomNumberGenerator().nextBytes();
-			SimpleHash hash = new SimpleHash(hashingInfo.getAlgorithmName(), plainTextPassword, salt, hashingInfo.getIterations());
-
-			// Generate hashing-function and encode password
-			user = new User();
-			user.setUsername(username);
-			user.setEmail(email);
-			user.setRoleNames(roleNames);
-			user.setPassword(hashingInfo.isHexEncoded() ? hash.toHex() : hash.toBase64());
-			user.setSalt(salt.toString());
-
-			System.out.println("User with email:" + user.getEmail() + " hashedPassword:" + user.getPassword() + " salt:" + user.getSalt());
-
-			connectSession.save(user);
-
-		} finally {
-			connectSession.getTransaction().commit();
-
-			if (connectSession.isOpen())
-				connectSession.close();
-		}
-
-		return user;
-	}
 
 	public String toString() {
-		return "id: " + getId() + ", nick: " + getUsername() + ", email: " + getEmail();
+		return "id: " + getUid() + ", nick: " + getName() + ", email: " + getEmail();
+	}
+
+	public Date getTimestamp() {
+		return timestamp;
+	}
+
+	public void setTimestamp(Date timestamp) {
+		this.timestamp = timestamp;
 	}
 }

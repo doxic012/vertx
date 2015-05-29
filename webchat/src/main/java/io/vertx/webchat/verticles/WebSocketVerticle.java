@@ -1,4 +1,4 @@
-package io.vertx.webchat.websocket;
+package io.vertx.webchat.verticles;
 
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Handler;
@@ -67,6 +67,7 @@ public class WebSocketVerticle extends AbstractVerticle {
 				return;
 			}
 
+			
 			System.out.println("got message from id: " + sessionId);
 //			messageHandler.broadcastMessage(sessionId, frame.textData());
 		};

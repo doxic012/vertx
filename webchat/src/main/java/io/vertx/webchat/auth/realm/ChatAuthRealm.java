@@ -6,6 +6,7 @@ import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.impl.LoggerFactory;
 import io.vertx.ext.auth.shiro.impl.ShiroAuthRealmBase;
 import io.vertx.webchat.auth.hash.HashInfo;
+import io.vertx.webchat.models.User;
 
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.AuthenticationToken;
@@ -81,5 +82,13 @@ public class ChatAuthRealm extends ShiroAuthRealmBase {
 		} catch (AuthenticationException e) {
 			throw new VertxException(e);
 		}
+	}
+	
+	@Override
+	public boolean hasRole(JsonObject principal, String role) {
+		if(principal == null || role.isEmpty())
+			return false;
+		
+		return principal.getString("roles").contains(role);
 	}
 }

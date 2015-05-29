@@ -12,6 +12,7 @@ public interface FormLoginRememberHandler extends FormLoginHandler {
 	
 	static final String DEFAULT_REDIRECT_URL = "/";
 
+	static final String DEFAULT_EMAIL_PARAM = "email";
 	/**
 	 * Create a handler
 	 *
@@ -19,15 +20,15 @@ public interface FormLoginRememberHandler extends FormLoginHandler {
 	 * @return the handler
 	 */
 	static FormLoginRememberHandler create(AuthProvider authProvider) {
-		return new FormLoginRememberHandlerImpl(authProvider, DEFAULT_USERNAME_PARAM, DEFAULT_PASSWORD_PARAM, DEFAULT_RETURN_URL_PARAM, DEFAULT_REMEMBERME_PARAM, DEFAULT_REDIRECT_URL);
+		return new FormLoginRememberHandlerImpl(authProvider, DEFAULT_EMAIL_PARAM, DEFAULT_PASSWORD_PARAM, DEFAULT_RETURN_URL_PARAM, DEFAULT_REMEMBERME_PARAM, DEFAULT_REDIRECT_URL);
 	}
 
 	/**
 	 * Create a handler
 	 * 
 	 * @param authProvider the auth service to use
-	 * @param usernameParam the value of the form attribute which will contain
-	 *            the username
+	 * @param emailParam the value of the form attribute which will contain
+	 *            the email
 	 * @param passwordParam the value of the form attribute which will contain
 	 *            the password
 	 * @param returnURLParam the value of the form attribute which will contain
@@ -37,7 +38,7 @@ public interface FormLoginRememberHandler extends FormLoginHandler {
 	 * @param defaultRedirectURL a URL that will be used as default return-url, when there is none available in the form
 	 * @return the handler
 	 */
-	static FormLoginRememberHandler create(AuthProvider authProvider, String usernameParam, String passwordParam, String returnURLParam, String rememberMeParam, String defaultRedirectURL) {
-		return new FormLoginRememberHandlerImpl(authProvider, usernameParam, passwordParam, returnURLParam, rememberMeParam, defaultRedirectURL);
+	static FormLoginRememberHandler create(AuthProvider authProvider, String emailParam, String passwordParam, String returnURLParam, String rememberMeParam, String defaultRedirectURL) {
+		return new FormLoginRememberHandlerImpl(authProvider, emailParam, passwordParam, returnURLParam, rememberMeParam, defaultRedirectURL);
 	}
 }

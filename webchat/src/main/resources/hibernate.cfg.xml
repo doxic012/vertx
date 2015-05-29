@@ -23,6 +23,7 @@
 
 		<!-- Mappings -->
 		<mapping class="io.vertx.webchat.models.User"></mapping>
-		<!-- <mapping class="io.vertx.webchat.models.UserRole"></mapping> -->
+		<mapping class="io.vertx.webchat.models.Message"></mapping>
+		<mapping class="io.vertx.webchat.models.Contact"></mapping>
 	</session-factory>
 </hibernate-configuration>

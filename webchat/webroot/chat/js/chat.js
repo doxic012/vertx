@@ -1,13 +1,27 @@
 $(document).ready(function() {
 
 	var eb = new vertx.EventBus("/eventbus/");
-	
+	var eb = new SockJS("/eventbus/");
 	// Messages to client
 	eb.onopen = function() {
-		eb.registerHandler("chat.message.toClient", function(msg) {
-			$('.websocket-test-output').append(msg + "\n");
-		});
+		console.log("open");
+		
+//		eb.publish("chat.connection.open", {"connectionId" : 'testId'});
+//		eb.registerHandler("chat.message.toClient", function(msg) {
+//			console.log(msg);
+//			$('.websocket-test-output').append(msg + "\n");
+//		});
 	};
+	
+	eb.onclose = function() {
+		console.log("close");
+//		eb.publish("chat.connection.close", {"connectionId" : 'testId'});
+	}
+	
+	eb.onmessage = function(msg) {
+		console.log("message");
+		console.log(msg);
+	}
 
 	// if (window.WebSocket) {
 	// socket = new WebSocket("ws://localhost:8080/chat");
@@ -40,7 +54,8 @@ $(document).ready(function() {
 	function send(message) {
 		var input = $(".websocket-test-input").val();
 		console.log("input value: " + input);
-		eb.publish("chat.message.toServer", message);
+//		eb.publish("chat.message.toServer", message);
+		eb.send(message);
 	}
 
 	var btn = $(".websocket-test-send").click(function() {

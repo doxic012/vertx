@@ -11,12 +11,7 @@ import io.vertx.ext.apex.Session;
 import io.vertx.ext.auth.AuthProvider;
 import io.vertx.webchat.auth.handler.FormRegistrationHandler;
 import io.vertx.webchat.auth.hash.HashInfo;
-import io.vertx.webchat.hibernate.HibernateUtil;
-import io.vertx.webchat.models.User;
-
-import org.apache.shiro.crypto.SecureRandomNumberGenerator;
-import org.apache.shiro.crypto.hash.SimpleHash;
-import org.apache.shiro.util.ByteSource;
+import io.vertx.webchat.mapper.UserMapper;
 
 public class FormRegistrationHandlerImpl implements FormRegistrationHandler {
 	private static final Logger log = LoggerFactory.getLogger(FormRegistrationHandlerImpl.class);
@@ -30,13 +25,11 @@ public class FormRegistrationHandlerImpl implements FormRegistrationHandler {
 	private final boolean loginOnSuccess;
 
 	private final HashInfo hashInfo;
-	private final String roleNames;
 	private final AuthProvider authProvider;
 
 
-	public FormRegistrationHandlerImpl(HashInfo hashInfo, String roleNames, AuthProvider authProvider, String usernameParam, String emailParam, String passwordParam, String returnURLParam, boolean loginOnSuccess, String defaultReturnURL) {
+	public FormRegistrationHandlerImpl(HashInfo hashInfo, AuthProvider authProvider, String usernameParam, String emailParam, String passwordParam, String returnURLParam, boolean loginOnSuccess, String defaultReturnURL) {
 		this.hashInfo = hashInfo;
-		this.roleNames = roleNames;
 		this.authProvider = authProvider;
 
 		this.usernameParam = usernameParam;
@@ -87,14 +80,14 @@ public class FormRegistrationHandlerImpl implements FormRegistrationHandler {
 		}
 		
 		// registration process
-		User registeredUser = User.registerUser(hashInfo, username, email, password, roleNames);	
+		JsonObject registeredUser = UserMapper.addUser(hashInfo, username, email, password);	
 
 		// Mark the registered user as logged in
 		if (loginOnSuccess) {
 			if (authProvider != null && registeredUser != null) {
 				log.debug("auto login after registration for principal " + username);
 
-				session.setPrincipal(registeredUser.toJson());
+				session.setPrincipal(registeredUser);
 				session.setAuthProvider(authProvider);
 			} else {
 				log.error("No valid auth-provider - skipping login");

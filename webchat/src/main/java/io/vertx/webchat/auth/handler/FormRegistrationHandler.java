@@ -20,8 +20,8 @@ public interface FormRegistrationHandler extends FormLoginHandler {
 	 *            JSON-object containing all information about the user passed in the registration-form.
 	 * @return the handler
 	 */
-	static FormRegistrationHandler create(HashInfo hashInfo, String roleNames) {
-		return new FormRegistrationHandlerImpl(hashInfo, roleNames, null, DEFAULT_USERNAME_PARAM, DEFAULT_EMAIL_PARAM, DEFAULT_PASSWORD_PARAM, DEFAULT_RETURN_URL_PARAM, false, DEFAULT_REDIRECT_URL);
+	static FormRegistrationHandler create(HashInfo hashInfo) {
+		return new FormRegistrationHandlerImpl(hashInfo, null, DEFAULT_USERNAME_PARAM, DEFAULT_EMAIL_PARAM, DEFAULT_PASSWORD_PARAM, DEFAULT_RETURN_URL_PARAM, false, DEFAULT_REDIRECT_URL);
 	}
 
 	/**
@@ -32,8 +32,8 @@ public interface FormRegistrationHandler extends FormLoginHandler {
 	 *            information are mapped to a JsonObject.
 	 * @return the handler
 	 */
-	static FormRegistrationHandler create(HashInfo hashInfo, String roleNames, AuthProvider authProvider) {
-		return new FormRegistrationHandlerImpl(hashInfo, roleNames, authProvider, DEFAULT_USERNAME_PARAM, DEFAULT_EMAIL_PARAM, DEFAULT_PASSWORD_PARAM, DEFAULT_RETURN_URL_PARAM, DEFAULT_LOGIN_BEHAVIOUR, DEFAULT_REDIRECT_URL);
+	static FormRegistrationHandler create(HashInfo hashInfo, AuthProvider authProvider) {
+		return new FormRegistrationHandlerImpl(hashInfo, authProvider, DEFAULT_USERNAME_PARAM, DEFAULT_EMAIL_PARAM, DEFAULT_PASSWORD_PARAM, DEFAULT_RETURN_URL_PARAM, DEFAULT_LOGIN_BEHAVIOUR, DEFAULT_REDIRECT_URL);
 	}
 
 	/**
@@ -47,8 +47,8 @@ public interface FormRegistrationHandler extends FormLoginHandler {
 	 * @return the handler
 	 */
 
-	static FormRegistrationHandler create(HashInfo hashInfo, String roleNames, AuthProvider authProvider, boolean loginOnSuccess, String redirectUrl) {
-		return new FormRegistrationHandlerImpl(hashInfo, roleNames, authProvider, DEFAULT_USERNAME_PARAM, DEFAULT_EMAIL_PARAM, DEFAULT_PASSWORD_PARAM, DEFAULT_RETURN_URL_PARAM, loginOnSuccess, redirectUrl);
+	static FormRegistrationHandler create(HashInfo hashInfo, AuthProvider authProvider, boolean loginOnSuccess, String redirectUrl) {
+		return new FormRegistrationHandlerImpl(hashInfo, authProvider, DEFAULT_USERNAME_PARAM, DEFAULT_EMAIL_PARAM, DEFAULT_PASSWORD_PARAM, DEFAULT_RETURN_URL_PARAM, loginOnSuccess, redirectUrl);
 	}
 
 	/**
@@ -65,7 +65,7 @@ public interface FormRegistrationHandler extends FormLoginHandler {
 	 * @param loginOnSuccess Do a login after a successful registration.
 	 * @return the handler
 	 */
-	static FormRegistrationHandler create(HashInfo hashInfo, String usernameParam, String emailParam, String passwordParam, String returnURLParam, String roleNames, AuthProvider authProvider, boolean loginOnSuccess, String redirectUrl) {
-		return new FormRegistrationHandlerImpl(hashInfo, roleNames, authProvider, usernameParam, passwordParam, emailParam, returnURLParam, loginOnSuccess, redirectUrl);
+	static FormRegistrationHandler create(HashInfo hashInfo, String usernameParam, String emailParam, String passwordParam, String returnURLParam, AuthProvider authProvider, boolean loginOnSuccess, String redirectUrl) {
+		return new FormRegistrationHandlerImpl(hashInfo, authProvider, usernameParam, passwordParam, emailParam, returnURLParam, loginOnSuccess, redirectUrl);
 	}
 }
