@@ -34,26 +34,30 @@ window.WebSocketEvents = new WebSocketEvents();
 		console.log(event);
 	});
 
-	WebSocketEvents.bind("SendMessageToUser", function(event) {
+	WebSocketEvents.bind("SendMessageToUser", function(message) {
 		
 	});
-	WebSocketEvents.bind("MessageRetrieved", function(event) {
+	WebSocketEvents.bind("MessageRetrieved", function(status) {
 		
 	});
-	WebSocketEvents.bind("GetMessageHistory", function(event) {
+	WebSocketEvents.bind("GetMessageHistory", function(history) {
 		
 	});
-	WebSocketEvents.bind("AddContact", function(event) {
+	WebSocketEvents.bind("AddContact", function(status) {
 		
 	});
-	WebSocketEvents.bind("RemoveContact", function(event) {
+	WebSocketEvents.bind("RemoveContact", function(status) {
 		
 	});
-	WebSocketEvents.bind("NotifyContact", function(event) {
+	WebSocketEvents.bind("NotifyContact", function(status) {
 		
 	});
-	WebSocketEvents.bind("UserOnlineStatus", function(event) {
-		
+	WebSocketEvents.bind("UserOnline", function(user) {
+		console.log("user online");
+		console.log(user);
 	});
-
+	WebSocketEvents.bind("UserOffline", function(user) {
+		console.log("user offline");
+		console.log(user);
+	});
 })();

@@ -26,7 +26,7 @@ public class WebSocketManager {
 	private Vertx vertx = null;
 	private ServerWebSocket socket = null;
 	
-	private static HashMap<String, JsonObject> userMap = new HashMap<String, JsonObject>();
+	private static HashMap<ServerWebSocket, JsonObject> userMap = new HashMap<ServerWebSocket, JsonObject>();
 
 	/**
 	 * The frame-handler
@@ -36,6 +36,8 @@ public class WebSocketManager {
 		return frame -> {
 			if (session.isDestroyed()) {
 				log.error("session destroyed, rejecting socket");
+
+				userMap.remove(socket, session.getPrincipal());
 				socket.reject();
 				return;
 			}
@@ -54,7 +56,7 @@ public class WebSocketManager {
 		return handler -> {
 			log.debug("un-registering connection with id: " + sessionId);
 			
-			userMap.remove(sessionId, session.getPrincipal());
+			userMap.remove(socket, session.getPrincipal());
 		};
 	}
 
@@ -73,7 +75,7 @@ public class WebSocketManager {
 		this.sessionId = ws.textHandlerID();
 	
 		// User user = new User("user", "email");
-		userMap.put(sessionId, session.getPrincipal());
+		userMap.put(socket, session.getPrincipal());
 
 		socket.closeHandler(getCloseHandler());
 		socket.frameHandler(getFrameHandler());
@@ -82,14 +84,19 @@ public class WebSocketManager {
 		socket.writeFrame(new WebSocketMessage(currentUser, WebSocketMessageType.GetUserData,false));
 		socket.writeFrame(new WebSocketMessage(ContactMapper.getContacts(currentUser.getInteger("uid")), WebSocketMessageType.GetContactList, false));
 
-//		socket.writeFrame(WebSocketFrame.textFrame(new WebSocketMessage(currentUser, WebSocketMessageType.GetUserData,false).toString(), true));
-//		Buffer data = Buffer.buffer().appendString(currentUser.encode());
-//		socket.writeMessage(data);
-//		EventBus bus = this.vertx.eventBus();
-		
-//		bus.publish(this.sessionId, new WebSocketMessage(currentUser, WebSocketMessageType.GetUserData,false).toString());
-//		bus.publish(this.sessionId, new WebSocketMessage(ContactMapper.getContacts(currentUser.getInteger("uid")), WebSocketMessageType.GetContactList, false).toString());
 		// TODO: Broadcast Message with new registered Id + online status
 		log.debug("registering new connection with id: " + sessionId);
+		
+		
+		// broadcast online status to everyone except us
+		//TODO: Weitermachen
+		WebSocketMessage onlineMsg = new WebSocketMessage(currentUser, WebSocketMessageType.UserOnline, false);
+		userMap.forEach((socket, user) -> {
+			
+			if(!user.getString("email").equals(currentUser.getString("email"))){
+			System.out.println("sending status to user: "+user.getString("email"));
+				socket.writeFrame(onlineMsg);
+			}
+		});
 	}
 }

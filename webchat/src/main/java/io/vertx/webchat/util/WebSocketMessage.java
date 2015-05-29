@@ -12,7 +12,7 @@ import io.vertx.core.json.JsonObject;
 public class WebSocketMessage implements WebSocketFrameInternal, ReferenceCounted {
 
 	public enum WebSocketMessageType {
-		GetUserData, SendMessageToUser, MessageRetrieved, GetMessageHistory, GetContactList, AddContact, RemoveContact, NotifyContact, UserOnlineStatus
+		GetUserData, SendMessageToUser, MessageRetrieved, GetMessageHistory, GetContactList, AddContact, RemoveContact, NotifyContact, UserOnline, UserOffline
 	}
 
 	private WebSocketMessageType messageType;
@@ -31,14 +31,6 @@ public class WebSocketMessage implements WebSocketFrameInternal, ReferenceCounte
 		
 		this.binaryData = Unpooled.copiedBuffer(this.toString(), CharsetUtil.UTF_8);
 	}
-
-//	public WebSocketMessage(JsonObject message, WebSocketMessageType messageType, boolean isReply) {
-//		this(message, messageType, isReply);
-//	}
-//
-//	public WebSocketMessage(JsonArray message, WebSocketMessageType messageType, boolean isReply) {
-//		this(message), messageType, isReply);
-//	}
 
 	public JsonObject toJson() {
 		return new JsonObject()

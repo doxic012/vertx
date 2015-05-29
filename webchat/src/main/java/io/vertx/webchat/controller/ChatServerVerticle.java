@@ -44,20 +44,6 @@ public class ChatServerVerticle extends AbstractVerticle {
 		router.route().handler(CookieHandler.create());
 		router.route().handler(SessionHandler.create(LocalSessionStore.create(vertx)));
 		router.route().handler(BodyHandler.create());
-		//
-		// // TODO: Authentication bzw. Benutzerrolle
-		// BridgeOptions opts = new BridgeOptions()
-		// .addInboundPermitted(new PermittedOptions().setAddress("chat.message.toServer"))
-		// .addInboundPermitted(new PermittedOptions().setAddress("chat.connection.open"))
-		// .addInboundPermitted(new PermittedOptions().setAddress("chat.connection.close"))
-		// .addOutboundPermitted(new PermittedOptions().setAddress("chat.message.toClient"));
-		//
-		// System.out.println("Adding eventbus route");
-		//
-		//
-		// SockJSHandler ebHandler = SockJSHandler.create(vertx).bridge(opts);
-
-		// router.route("/eventbus/*").handler(ebHandler);
 
 		EventBus eb = vertx.eventBus();
 		eb.consumer("chat.message.toServer", message -> {
@@ -119,31 +105,5 @@ public class ChatServerVerticle extends AbstractVerticle {
 
 //		HttpServerOptions serverOptions = new HttpServerOptions().setMaxWebsocketFrameSize(100000);
 		vertx.createHttpServer().requestHandler(router::accept).listen(8080);
-
-//		User tim1 = UserMapper.getUserCredentials("tim@test.de");
-//		User tim2 = UserMapper.getUserCredentials("tim2@test.de");
-//		User tim3 = UserMapper.getUserCredentials("tim3@web.de");
-//
-//		JsonArray contacts1 = ContactMapper.getContacts(tim1.getUid());
-//		JsonArray contacts2 = ContactMapper.getContacts(tim2.getUid());
-//		
-//		System.out.println(contacts1.encode());
-//		System.out.println(contacts2.encode());
-		// JsonArray messages1 = MessageMapper.getMessages(tim1.getUid(), tim2.getUid(), 100);
-		// JsonArray messages2 = MessageMapper.getMessages(tim2.getUid(), tim1.getUid(), 100);
-		// JsonArray messages3 = MessageMapper.getMessages(tim3.getUid(), tim1.getUid(), 100);
-		//
-		// System.out.println(messages1);
-		// System.out.println(messages2);
-		// System.out.println(messages3);
-		// ContactMapper.addContact(tim1.getUid(), tim2.getUid());
-		// ContactMapper.addContact(tim1.getUid(), tim3.getUid());
-		// ContactMapper.addContact(tim2.getUid(), tim1.getUid());
-		// ContactMapper.addContact(tim3.getUid(), tim1.getUid());
-		//
-		// MessageMapper.addMessage(tim1.getUid(), tim2.getUid(), "deine Mudda stinkt");
-		// MessageMapper.addMessage(tim2.getUid(), tim1.getUid(), "meine mudda stinkt nicht");
-		// MessageMapper.addMessage(tim1.getUid(), tim2.getUid(), "deine Mudda stinkt sehr stark");
-		// MessageMapper.addMessage(tim1.getUid(), tim3.getUid(), "deine Mudda stinkt auch");
 	}
 }
