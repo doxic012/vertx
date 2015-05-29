@@ -3,9 +3,10 @@ package io.vertx.webchat.mapper;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.webchat.auth.hash.HashInfo;
-import io.vertx.webchat.hibernate.HibernateUtil;
 import io.vertx.webchat.models.User;
+import io.vertx.webchat.util.HibernateUtil;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import org.apache.shiro.crypto.SecureRandomNumberGenerator;
@@ -15,7 +16,7 @@ import org.hibernate.Session;
 
 public class UserMapper {
 	public static JsonObject getUserByEmail(String email) {
-		Session session = HibernateUtil.getSessionFactory().openSession();
+		Session session = HibernateUtil.getSession();
 		System.out.println("getting user by email: " + email);
 		User user = (User) session.createQuery("from User where email=:email").setParameter("email", email).uniqueResult();
 		
@@ -23,7 +24,7 @@ public class UserMapper {
 	}
 
 	public static JsonArray getUsers() {
-		Session session = HibernateUtil.getSessionFactory().openSession();
+		Session session = HibernateUtil.getSession();
 		
 		List<User> userList = (List<User>) session.createQuery("from User").list();
 		return new JsonArray(userList);
@@ -45,7 +46,7 @@ public class UserMapper {
 	 */
 	public static JsonObject addUser(HashInfo hashingInfo, String username, String email, String plainTextPassword) {
 		JsonObject userObject;
-		Session connectSession = HibernateUtil.getSessionFactory().openSession();
+		Session connectSession = HibernateUtil.getSession();
 		connectSession.beginTransaction();
 
 		try {
@@ -58,6 +59,7 @@ public class UserMapper {
 			user.setEmail(email);
 			user.setPassword(hashingInfo.isHexEncoded() ? hash.toHex() : hash.toBase64());
 			user.setSalt(salt.toString());
+			user.setTimestamp(LocalDate.now());
 
 			System.out.println("User with email:" + user.getEmail() + " hashedPassword:" + user.getPassword() + " salt:" + user.getSalt());
 
@@ -66,9 +68,6 @@ public class UserMapper {
 			userObject = user.toJson();
 		} finally {
 			connectSession.getTransaction().commit();
-
-			if (connectSession.isOpen())
-				connectSession.close();
 		}
 
 		return userObject;

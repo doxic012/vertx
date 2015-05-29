@@ -1,4 +1,4 @@
-package io.vertx.webchat.verticles;
+package io.vertx.webchat.controller;
 
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.eventbus.EventBus;
@@ -6,7 +6,6 @@ import io.vertx.core.http.HttpServerOptions;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.http.ServerWebSocket;
-import io.vertx.core.json.JsonArray;
 import io.vertx.ext.apex.Router;
 import io.vertx.ext.apex.Session;
 import io.vertx.ext.apex.handler.BodyHandler;
@@ -14,9 +13,6 @@ import io.vertx.ext.apex.handler.CookieHandler;
 import io.vertx.ext.apex.handler.RedirectAuthHandler;
 import io.vertx.ext.apex.handler.SessionHandler;
 import io.vertx.ext.apex.handler.StaticHandler;
-import io.vertx.ext.apex.handler.sockjs.BridgeOptions;
-import io.vertx.ext.apex.handler.sockjs.PermittedOptions;
-import io.vertx.ext.apex.handler.sockjs.SockJSHandler;
 import io.vertx.ext.apex.sstore.LocalSessionStore;
 import io.vertx.ext.auth.AuthProvider;
 import io.vertx.ext.auth.shiro.ShiroAuthProvider;
@@ -24,7 +20,7 @@ import io.vertx.webchat.auth.handler.FormLoginRememberHandler;
 import io.vertx.webchat.auth.handler.FormRegistrationHandler;
 import io.vertx.webchat.auth.hash.HashInfo;
 import io.vertx.webchat.auth.realm.ChatAuthRealm;
-import io.vertx.webchat.hibernate.HibernateUtil;
+import io.vertx.webchat.util.HibernateUtil;
 
 import java.time.LocalDate;
 
@@ -36,6 +32,8 @@ public class ChatServerVerticle extends AbstractVerticle {
 
 	@Override
 	public void start() {
+		
+//		org.hibernate.Session s = HibernateUtil.getSession();
 		// create http-server on port 8080
 		Router router = Router.router(vertx);
 
@@ -43,20 +41,20 @@ public class ChatServerVerticle extends AbstractVerticle {
 		router.route().handler(CookieHandler.create());
 		router.route().handler(SessionHandler.create(LocalSessionStore.create(vertx)));
 		router.route().handler(BodyHandler.create());
+//
+//		// TODO: Authentication bzw. Benutzerrolle
+//		BridgeOptions opts = new BridgeOptions()
+//			.addInboundPermitted(new PermittedOptions().setAddress("chat.message.toServer"))
+//			.addInboundPermitted(new PermittedOptions().setAddress("chat.connection.open"))
+//			.addInboundPermitted(new PermittedOptions().setAddress("chat.connection.close"))
+//			.addOutboundPermitted(new PermittedOptions().setAddress("chat.message.toClient"));
+//
+//		System.out.println("Adding eventbus route");
+//				
+//		
+//		SockJSHandler ebHandler = SockJSHandler.create(vertx).bridge(opts);
 
-		// TODO: Authentication bzw. Benutzerrolle
-		BridgeOptions opts = new BridgeOptions()
-			.addInboundPermitted(new PermittedOptions().setAddress("chat.message.toServer"))
-			.addInboundPermitted(new PermittedOptions().setAddress("chat.connection.open"))
-			.addInboundPermitted(new PermittedOptions().setAddress("chat.connection.close"))
-			.addOutboundPermitted(new PermittedOptions().setAddress("chat.message.toClient"));
-
-		System.out.println("Adding eventbus route");
-				
-		
-		SockJSHandler ebHandler = SockJSHandler.create(vertx).bridge(opts);
-
-		router.route("/eventbus/*").handler(ebHandler);
+//		router.route("/eventbus/*").handler(ebHandler);
 
 		EventBus eb = vertx.eventBus();
 		eb.consumer("chat.message.toServer", message -> {
@@ -86,7 +84,7 @@ public class ChatServerVerticle extends AbstractVerticle {
 		// Map all requests to /chat/* to a redirect-handler that sends the user
 		// to the loginpage
 		// Using the custom chat authentication realm with hibernate
-		AuthProvider authProvider = ShiroAuthProvider.create(vertx, new ChatAuthRealm(HibernateUtil.getSessionFactory(), hashInfo));
+		AuthProvider authProvider = ShiroAuthProvider.create(vertx, new ChatAuthRealm(hashInfo));
 		router.route("/chat/*").handler(RedirectAuthHandler.create(authProvider, "/"));
 
 		// Handles the registration

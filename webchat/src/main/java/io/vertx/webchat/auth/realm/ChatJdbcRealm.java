@@ -17,13 +17,11 @@ import org.apache.shiro.codec.Hex;
 import org.apache.shiro.realm.jdbc.JdbcRealm;
 import org.apache.shiro.util.ByteSource;
 import org.apache.shiro.util.SimpleByteSource;
-import org.hibernate.SessionFactory;
 
 public class ChatJdbcRealm extends JdbcRealm {
 
 	private static final Logger log = LoggerFactory.getLogger(ChatJdbcRealm.class);
 
-	private SessionFactory sessionFactory = null;
 	private HashInfo hashingInfo = null;
 
 	/**
@@ -34,26 +32,14 @@ public class ChatJdbcRealm extends JdbcRealm {
 	 * @param factory The hibernate session-factory
 	 * @param hashingInfo The hashing information
 	 */
-	public ChatJdbcRealm(SessionFactory factory, HashInfo hashingInfo) {
+	public ChatJdbcRealm(HashInfo hashingInfo) {
 		HashedCredentialsMatcher match = new HashedCredentialsMatcher();
 		match.setHashAlgorithmName(hashingInfo.getAlgorithmName());
 		match.setHashIterations(hashingInfo.getIterations());
 		match.setStoredCredentialsHexEncoded(hashingInfo.isHexEncoded());
 
 		this.setCredentialsMatcher(match);
-		this.sessionFactory = factory;
 		this.hashingInfo = hashingInfo;
-	}
-
-	/**
-	 * This constructor uses a simpleCredentialMatcher that does not implement
-	 * any salted password
-	 * comparison
-	 * 
-	 * @param factory The hibernate session-factory
-	 */
-	public ChatJdbcRealm(SessionFactory factory) {
-		this.sessionFactory = factory;
 	}
 
 	private ByteSource getHashedSalt(String salt) {

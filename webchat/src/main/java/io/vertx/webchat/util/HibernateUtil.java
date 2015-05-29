@@ -1,5 +1,6 @@
-package io.vertx.webchat.hibernate;
+package io.vertx.webchat.util;
 
+import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import org.hibernate.cfg.Configuration;
@@ -8,6 +9,7 @@ import org.hibernate.service.ServiceRegistry;
 public final class HibernateUtil {
 
 	private static SessionFactory sessionFactory = null;
+	private static Session currentSession = null;
 
 	static {
 		try {
@@ -15,6 +17,7 @@ public final class HibernateUtil {
 			Configuration config = new Configuration().configure("hibernate.cfg.xml");
 			ServiceRegistry serviceRegistry = new StandardServiceRegistryBuilder().applySettings(config.getProperties()).build();
 			sessionFactory = config.buildSessionFactory(serviceRegistry);
+			currentSession = sessionFactory.openSession();
 
 		} catch (Throwable ex) {
 			// Make sure you log the exception, as it might be swallowed
@@ -24,10 +27,16 @@ public final class HibernateUtil {
 	}
 
 	/**
-	 * Get a new SessionFactory for hibernate-sessions
-	 * @return a SessionFactory
+	 * Get an existing hibernate Session
+	 * 
+	 * @return a Session
 	 */
-	public static SessionFactory getSessionFactory() {
-		return sessionFactory;
+	public static Session getSession() {
+		
+		// TODO: fall: dirty überprüfen
+		if (currentSession == null || !currentSession.isConnected())
+			currentSession = sessionFactory.openSession();
+
+		return currentSession;
 	}
 }

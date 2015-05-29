@@ -1,4 +1,4 @@
-package io.vertx.webchat.verticles;
+package io.vertx.webchat.controller;
 
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Handler;
@@ -36,8 +36,8 @@ public class WebSocketVerticle extends AbstractVerticle {
 		System.out.println("socketId: " + sessionId);
 
 		// TODO: correct exception type
-		if (vertx == null || socket == null || session == null) {
-			System.out.println("Missing or invalid arguments for WebSocketManager");
+		if (vertx == null || session == null) {
+			log.debug("Missing or invalid arguments for WebSocketManager - rejecting socket");
 			socket.reject();
 			return;
 		}
@@ -66,7 +66,6 @@ public class WebSocketVerticle extends AbstractVerticle {
 				socket.reject();
 				return;
 			}
-
 			
 			System.out.println("got message from id: " + sessionId);
 //			messageHandler.broadcastMessage(sessionId, frame.textData());
