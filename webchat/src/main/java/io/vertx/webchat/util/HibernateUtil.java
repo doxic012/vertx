@@ -34,9 +34,9 @@ public final class HibernateUtil {
 	public static Session getSession() {
 		
 		// TODO: fall: dirty überprüfen
-		if (currentSession == null || !currentSession.isConnected())
+		if (currentSession == null || !currentSession.isOpen())
 			currentSession = sessionFactory.openSession();
-
+			
 		return currentSession;
 	}
 }

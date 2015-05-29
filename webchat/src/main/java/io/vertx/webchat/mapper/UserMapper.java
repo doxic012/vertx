@@ -2,9 +2,9 @@ package io.vertx.webchat.mapper;
 
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import io.vertx.webchat.auth.hash.HashInfo;
 import io.vertx.webchat.models.User;
 import io.vertx.webchat.util.HibernateUtil;
+import io.vertx.webchat.util.auth.HashInfo;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -15,11 +15,16 @@ import org.apache.shiro.util.ByteSource;
 import org.hibernate.Session;
 
 public class UserMapper {
+	public static User getUserCredentials(String email) {
+		Session session = HibernateUtil.getSession();
+		System.out.println("getting user by email: " + email);
+		return (User) session.createQuery("from User where email=:email").setParameter("email", email).uniqueResult();
+	}
+
 	public static JsonObject getUserByEmail(String email) {
 		Session session = HibernateUtil.getSession();
 		System.out.println("getting user by email: " + email);
 		User user = (User) session.createQuery("from User where email=:email").setParameter("email", email).uniqueResult();
-		
 		return user.toJson();
 	}
 

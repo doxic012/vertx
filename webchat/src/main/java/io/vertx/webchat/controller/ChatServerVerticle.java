@@ -16,11 +16,11 @@ import io.vertx.ext.apex.handler.StaticHandler;
 import io.vertx.ext.apex.sstore.LocalSessionStore;
 import io.vertx.ext.auth.AuthProvider;
 import io.vertx.ext.auth.shiro.ShiroAuthProvider;
-import io.vertx.webchat.auth.handler.FormLoginRememberHandler;
-import io.vertx.webchat.auth.handler.FormRegistrationHandler;
-import io.vertx.webchat.auth.hash.HashInfo;
-import io.vertx.webchat.auth.realm.ChatAuthRealm;
 import io.vertx.webchat.util.HibernateUtil;
+import io.vertx.webchat.util.auth.FormLoginRememberHandler;
+import io.vertx.webchat.util.auth.FormRegistrationHandler;
+import io.vertx.webchat.util.auth.HashInfo;
+import io.vertx.webchat.util.auth.realm.ChatAuthRealm;
 
 import java.time.LocalDate;
 

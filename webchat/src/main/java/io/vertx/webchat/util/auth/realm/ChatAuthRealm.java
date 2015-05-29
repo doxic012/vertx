@@ -1,11 +1,11 @@
-package io.vertx.webchat.auth.realm;
+package io.vertx.webchat.util.auth.realm;
 
 import io.vertx.core.VertxException;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.impl.LoggerFactory;
 import io.vertx.ext.auth.shiro.impl.ShiroAuthRealmBase;
-import io.vertx.webchat.auth.hash.HashInfo;
+import io.vertx.webchat.util.auth.HashInfo;
 
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.AuthenticationToken;
@@ -49,14 +49,14 @@ public class ChatAuthRealm extends ShiroAuthRealmBase {
 	public void login(JsonObject principal, JsonObject credentials) {
 		SubjectContext subjectContext = new DefaultSubjectContext();
 		Subject subject = securityManager.createSubject(subjectContext);
-		String username = principal.getString("username");
+		String email = principal.getString("email");
 		String password = credentials.getString("password");
 		boolean rememberMe = credentials.getBoolean("rememberMe");
 
-		AuthenticationToken token = new UsernamePasswordToken(username, password, rememberMe);
+		AuthenticationToken token = new UsernamePasswordToken(email, password, rememberMe);
 
 		try {
-			log.debug(String.format("Trying to login (username: %s, password: %s, rememberMe: %s", username, password, rememberMe));
+			log.debug(String.format("Trying to login (email: %s, password: %s, rememberMe: %s", email, password, rememberMe));
 			subject.login(token);
 		} catch (AuthenticationException e) {
 			throw new VertxException(e);
