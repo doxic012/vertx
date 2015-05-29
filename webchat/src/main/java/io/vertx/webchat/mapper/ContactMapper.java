@@ -13,9 +13,16 @@ import org.hibernate.Session;
 public class ContactMapper {
 	public static JsonArray getContacts(int uid) {
 		Session connectSession = HibernateUtil.getSession();
+		List<Contact> contactList = null;
 
 		System.out.println("getting contacts for uid: "+uid);
-		List<Contact> contactList = (List<Contact>) connectSession.createQuery("FROM Contact WHERE uid=:uid").setParameter("uid", uid).list();
+		try {
+			contactList = (List<Contact>) connectSession.createQuery("FROM Contact WHERE uid=:uid").setParameter("uid", uid).list();
+		} catch(NullPointerException e) {
+			System.out.println("keine Daten auf dem Kackserver, SO EINE SCHEIßE ALTER!");
+			return new JsonArray();
+		}
+		
 		return new JsonArray(contactList);
 	}
 
