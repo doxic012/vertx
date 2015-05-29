@@ -1,12 +1,16 @@
-$(document).ready(function() {
 
+
+$(document).ready(function() {
 	if (window.WebSocket) {
 		socket = new WebSocket("ws://localhost:8080/chat");
-		
+
 		socket.onmessage = function(event) {
 			console.log("Received data from websocket: ");
 			console.log(event.data);
 			$('.message-box-container').append(event.data + "\n");
+			
+			if(window.WebSocketEvents)
+			WebSocketEvents.trigger(event.messageEvent);
 		}
 		
 		socket.onopen = function(event) {
