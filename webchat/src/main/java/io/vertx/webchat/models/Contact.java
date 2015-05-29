@@ -1,10 +1,39 @@
 package io.vertx.webchat.models;
 
-public class Contact {
+import java.io.Serializable;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Table;
+
+/*
+create TABLE webchat.contact (
+		  `uid` int(11) NOT NULL,
+		  `uidForeign` int(11) NOT NULL,
+		  `message` text DEFAULT NULL,
+		  `notified` boolean DEFAULT NULL,
+		  `timestamp` date,
+		  PRIMARY KEY (`uid`, `uidForeign`),
+		  FOREIGN KEY (`uid`) REFERENCES user (`uid`),
+		  FOREIGN KEY (`uidForeign`) REFERENCES user (`uid`)
+		) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8;
+*/
+
+@Table(name="contact")
+public class Contact implements Serializable {
+
+	private static final long serialVersionUID = -178828679162640733L;
+
+	@Column
 	private int uid;
+	
+	@Column
 	private int uidForeign;
+	
+	@Column
 	private int timestamp;
 	
+	@Column
 	private boolean notified;
 
 	public int getUid() {
