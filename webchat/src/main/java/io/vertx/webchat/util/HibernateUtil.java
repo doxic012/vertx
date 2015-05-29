@@ -27,16 +27,16 @@ public final class HibernateUtil {
 	}
 
 	/**
-	 * Get an existing hibernate Session
+	 * Get an existing hibernate Session and immediately begin a transaction if there is none yet
 	 * 
 	 * @return a Session
 	 */
 	public static Session getSession() {
-		
+
 		// TODO: fall: dirty überprüfen
-		if (currentSession == null || !currentSession.isOpen())
+		if (currentSession == null || !currentSession.isOpen()) {
 			currentSession = sessionFactory.openSession();
-			
+		}
 		return currentSession;
 	}
 }

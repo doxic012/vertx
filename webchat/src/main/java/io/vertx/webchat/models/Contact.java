@@ -4,10 +4,15 @@ import java.io.Serializable;
 import java.sql.Timestamp;
 
 import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
 import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 
 /*
-create TABLE webchat.contact (
+create TABLE contact (
 		  `uid` int(11) NOT NULL,
 		  `uidForeign` int(11) NOT NULL,
 		  `notified` boolean DEFAULT NULL,
@@ -18,15 +23,16 @@ create TABLE webchat.contact (
 		) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8;
 */
 
+@Entity
 @Table(name="contact")
 public class Contact implements Serializable {
 
 	private static final long serialVersionUID = -178828679162640733L;
 
-	@Column
+	@Id
 	private int uid;
-	
-	@Column
+
+	@Id
 	private int uidForeign;
 	
 	@Column

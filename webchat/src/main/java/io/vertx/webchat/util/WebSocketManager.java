@@ -2,12 +2,15 @@ package io.vertx.webchat.util;
 
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
+import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.http.ServerWebSocket;
 import io.vertx.core.http.WebSocketFrame;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.impl.LoggerFactory;
 import io.vertx.ext.apex.Session;
+import io.vertx.webchat.mapper.ContactMapper;
+import io.vertx.webchat.util.WebSocketMessage.WebSocketMessageType;
 
 import java.util.HashMap;
 
@@ -31,7 +34,7 @@ public class WebSocketManager {
 	 * @return
 	 */
 	private Handler<WebSocketFrame> getFrameHandler() {
-		return handler -> {
+		return frame -> {
 			if (session.isDestroyed()) {
 				log.error("session destroyed, rejecting socket");
 				socket.reject();
@@ -39,7 +42,7 @@ public class WebSocketManager {
 			}
 
 			System.out.println("got message from id: " + sessionId);
-//			messageHandler.broadcastMessage(sessionId, handler.textData());
+
 		};
 	}
 
@@ -58,9 +61,9 @@ public class WebSocketManager {
 
 	public WebSocketManager(Vertx vertx, ServerWebSocket ws, Session session) throws Exception {
 		// TODO: correct exception type
-		if (vertx == null || session == null || socket == null) {
-			if(socket != null)
-			socket.reject();
+		if (vertx == null || session == null || ws == null) {
+			if(ws != null)
+			ws.reject();
 			
 			throw new Exception("Missing or invalid arguments for WebSocketManager");
 		}
@@ -73,12 +76,18 @@ public class WebSocketManager {
 		// User user = new User("user", "email");
 		userMap.put(sessionId, session.getPrincipal());
 
-		//TODO: send user 
 		socket.closeHandler(getCloseHandler());
-
 		socket.frameHandler(getFrameHandler());
 		
+		JsonObject currentUser = session.getPrincipal();
+//		socket.writeFrame(new WebSocketMessage(currentUser, WebSocketMessageType.GetUserData,false));
+//		socket.writeFrame(new WebSocketMessage(ContactMapper.getContacts(currentUser.getInteger("uid")), WebSocketMessageType.GetContactList, false));
+
+		EventBus bus = this.vertx.eventBus();
+		
+		bus.publish(this.sessionId, new WebSocketMessage(currentUser, WebSocketMessageType.GetUserData,false).toString());
+		bus.publish(this.sessionId, new WebSocketMessage(ContactMapper.getContacts(currentUser.getInteger("uid")), WebSocketMessageType.GetContactList, false).toString());
 		// TODO: Broadcast Message with new registered Id + online status
-		System.out.println("registering new connection with id: " + sessionId);
+		log.debug("registering new connection with id: " + sessionId);
 	}
 }

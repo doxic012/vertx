@@ -13,15 +13,16 @@ import org.hibernate.Session;
 public class ContactMapper {
 	public static JsonArray getContacts(int uid) {
 		Session connectSession = HibernateUtil.getSession();
-		
-		List<Contact> contactList = (List<Contact>) connectSession.createQuery("FROM contact WHERE uid=:uid").setParameter("uid", uid).list();
+
+		System.out.println("getting contacts for uid: "+uid);
+		List<Contact> contactList = (List<Contact>) connectSession.createQuery("FROM Contact WHERE uid=:uid").setParameter("uid", uid).list();
 		return new JsonArray(contactList);
 	}
-	
+
 	public static boolean addContact(int uid, int uidForeign) {
-		Session connectSession = HibernateUtil.getSession();
-		connectSession.beginTransaction();
-		
+		Session session = HibernateUtil.getSession();
+		session.beginTransaction();
+
 		try {
 			Contact contact = new Contact();
 			contact.setUid(uid);
@@ -29,55 +30,67 @@ public class ContactMapper {
 			contact.setTimestamp(Timestamp.valueOf(LocalDateTime.now()));
 			contact.setNotified(false);
 
-			connectSession.save(contact);
-			
+			session.save(contact);
+
 		} catch (Exception e) {
+			e.printStackTrace();
 			System.out.println("Wasn't able to add contact to database");
 			return false;
+		} finally {
+			session.getTransaction().commit();
+
+			if (session.isOpen())
+				session.close();
 		}
-		
-		connectSession.getTransaction().commit();
-		
 		return true;
 	}
-	
+
 	public static boolean removeContact(int uid, int uidForeign) {
-		Session connectSession = HibernateUtil.getSession();
-		connectSession.beginTransaction();
-		
+		Session session = HibernateUtil.getSession();
+		session.beginTransaction();
+
 		try {
-			connectSession.createSQLQuery("DELETE FROM contact WHERE uid = "+uid+" AND uidForeign = "+uidForeign).executeUpdate();
-			connectSession.getTransaction().commit();
+			session.createSQLQuery("DELETE FROM Contact WHERE uid = " + uid + " AND uidForeign = " + uidForeign).executeUpdate();
 		} catch (Exception e) {
+
+			e.printStackTrace();
 			System.out.println("Wasn't able to delete contact from database");
 			return false;
+		} finally {
+			session.getTransaction().commit();
+
+			if (session.isOpen())
+				session.close();
 		}
-		
+
 		return true;
 	}
-	
+
 	public static boolean hasNotification(int uid, int uidForeign) {
 		Session session = HibernateUtil.getSession();
-		
 		Contact contact = (Contact) session.createQuery("FROM Contact WHERE uid=:uid").setParameter("uid", uid).uniqueResult();
-		if(contact.notified()) return true;
-		return false;
+
+		return contact.notified();
 	}
-	
+
 	public static boolean setNotification(int uid, int uidForeign) {
-		Session connectSession = HibernateUtil.getSession();
-		connectSession.beginTransaction();
-		
+		Session session = HibernateUtil.getSession();
+		session.beginTransaction();
+
 		try {
-			connectSession.createSQLQuery("UPDATE Contact SET notification = true WHERE uid = "+uid+" AND uidForeign = "+uidForeign);
-			
+			session.createSQLQuery("UPDATE Contact SET notification = true WHERE uid = " + uid + " AND uidForeign = " + uidForeign);
+
 		} catch (Exception e) {
+
+			e.printStackTrace();
 			System.out.println("Wasn't able to set notification into database");
 			return false;
+		} finally {
+			session.getTransaction().commit();
+
+			if (session.isOpen())
+				session.close();
 		}
-		
-		connectSession.getTransaction().commit();
-		
 		return true;
 	}
 }

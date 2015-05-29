@@ -8,9 +8,10 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 
 /*
-create TABLE webchat.message (
+create TABLE message (
 		  `id` int(11) NOT NULL AUTO_INCREMENT,
 		  `uid` int(11) NOT NULL,
 		  `uidForeign` int(11) NOT NULL,
@@ -24,7 +25,7 @@ create TABLE webchat.message (
 */
 
 @Entity
-@Table(name = "message")
+@Table(name = "message", uniqueConstraints=@UniqueConstraint(columnNames="id"))
 public class Message implements Serializable {
 
 	private static final long serialVersionUID = 7886652396955817504L;
@@ -33,13 +34,9 @@ public class Message implements Serializable {
 	@GeneratedValue
 	private int id;
 
-//	@ManyToOne
-//	@JoinTable(name = "user", joinColumns = @JoinColumn(name = "uid"))
 	@Column
 	private int uid;
 
-//	@ManyToOne
-//	@JoinTable(name = "user", joinColumns = @JoinColumn(name = "uid"))
 	@Column
 	private int uidForeign;
 

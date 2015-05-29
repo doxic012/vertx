@@ -11,9 +11,10 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 
 /*
-  create TABLE webchat.user(
+  create TABLE user(
   `uid` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(45) NOT NULL,
   `email` varchar(128) NOT NULL,
@@ -26,7 +27,7 @@ import javax.persistence.Table;
 
  */
 @Entity
-@Table(name = "user")
+@Table(name = "user", uniqueConstraints=@UniqueConstraint(columnNames="uid"))
 public class User implements Serializable {
 
 	private static final long serialVersionUID = 5370050875839204057L;

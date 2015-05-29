@@ -12,16 +12,17 @@ import org.hibernate.Session;
 
 public class MessageMapper {
 	public static JsonArray getMessages(int uid, int uidForeign, int countMessages) {
-		Session connectSession = HibernateUtil.getSession();
+		Session session = HibernateUtil.getSession();
 		System.out.println("getting messages by uid: " + uid + " and uid_foreign: " + uidForeign);
-		List<Message> messages = (List<Message>) connectSession.createQuery("FROM Message WHERE uid=:uid AND uidForeign=:uidForeign ORDER BY id DESC LIMIT " + countMessages).setParameter("uid", uid).setParameter("uidForeign", uidForeign).list();
+
+		List<Message> messages = (List<Message>) session.createQuery("FROM Message WHERE (uid=:uid AND uidForeign=:uidForeign) or (uid=:uidForeign AND uidForeign=:uid) ORDER BY id DESC").setMaxResults(countMessages).setParameter("uid", uid).setParameter("uidForeign", uidForeign).list();
 
 		return new JsonArray(messages);
 	}
 
 	public static boolean addMessage(int uid, int uidForeign, String content) {
-		Session connectSession = HibernateUtil.getSession();
-		connectSession.beginTransaction();
+		Session session = HibernateUtil.getSession();
+		session.beginTransaction();
 
 		try {
 			Message message = new Message();
@@ -30,13 +31,17 @@ public class MessageMapper {
 			message.setUidForeign(uidForeign);
 			message.setTimestamp(Timestamp.valueOf(LocalDateTime.now()));
 
-			connectSession.save(message);
+			session.save(message);
 		} catch (Exception e) {
 			System.out.println("Wasn't able to add Message to database");
 			return false;
 		} finally {
-			connectSession.getTransaction().commit();
+			session.getTransaction().commit();
+			
+			if(session.isOpen())
+				session.close();
 		}
+
 		return true;
 	}
 }

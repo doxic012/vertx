@@ -6,6 +6,7 @@ import io.vertx.core.http.HttpServerOptions;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.http.ServerWebSocket;
+import io.vertx.core.json.JsonArray;
 import io.vertx.ext.apex.Router;
 import io.vertx.ext.apex.Session;
 import io.vertx.ext.apex.handler.BodyHandler;
@@ -16,7 +17,10 @@ import io.vertx.ext.apex.handler.StaticHandler;
 import io.vertx.ext.apex.sstore.LocalSessionStore;
 import io.vertx.ext.auth.AuthProvider;
 import io.vertx.ext.auth.shiro.ShiroAuthProvider;
-import io.vertx.webchat.util.HibernateUtil;
+import io.vertx.webchat.mapper.ContactMapper;
+import io.vertx.webchat.mapper.UserMapper;
+import io.vertx.webchat.models.User;
+import io.vertx.webchat.util.WebSocketManager;
 import io.vertx.webchat.util.auth.FormLoginRememberHandler;
 import io.vertx.webchat.util.auth.FormRegistrationHandler;
 import io.vertx.webchat.util.auth.HashInfo;
@@ -32,8 +36,7 @@ public class ChatServerVerticle extends AbstractVerticle {
 
 	@Override
 	public void start() {
-		
-//		org.hibernate.Session s = HibernateUtil.getSession();
+
 		// create http-server on port 8080
 		Router router = Router.router(vertx);
 
@@ -41,28 +44,28 @@ public class ChatServerVerticle extends AbstractVerticle {
 		router.route().handler(CookieHandler.create());
 		router.route().handler(SessionHandler.create(LocalSessionStore.create(vertx)));
 		router.route().handler(BodyHandler.create());
-//
-//		// TODO: Authentication bzw. Benutzerrolle
-//		BridgeOptions opts = new BridgeOptions()
-//			.addInboundPermitted(new PermittedOptions().setAddress("chat.message.toServer"))
-//			.addInboundPermitted(new PermittedOptions().setAddress("chat.connection.open"))
-//			.addInboundPermitted(new PermittedOptions().setAddress("chat.connection.close"))
-//			.addOutboundPermitted(new PermittedOptions().setAddress("chat.message.toClient"));
-//
-//		System.out.println("Adding eventbus route");
-//				
-//		
-//		SockJSHandler ebHandler = SockJSHandler.create(vertx).bridge(opts);
+		//
+		// // TODO: Authentication bzw. Benutzerrolle
+		// BridgeOptions opts = new BridgeOptions()
+		// .addInboundPermitted(new PermittedOptions().setAddress("chat.message.toServer"))
+		// .addInboundPermitted(new PermittedOptions().setAddress("chat.connection.open"))
+		// .addInboundPermitted(new PermittedOptions().setAddress("chat.connection.close"))
+		// .addOutboundPermitted(new PermittedOptions().setAddress("chat.message.toClient"));
+		//
+		// System.out.println("Adding eventbus route");
+		//
+		//
+		// SockJSHandler ebHandler = SockJSHandler.create(vertx).bridge(opts);
 
-//		router.route("/eventbus/*").handler(ebHandler);
+		// router.route("/eventbus/*").handler(ebHandler);
 
 		EventBus eb = vertx.eventBus();
 		eb.consumer("chat.message.toServer", message -> {
-			System.out.println("got message: "+message.body());
+			System.out.println("got message: " + message.body());
 			String timestamp = LocalDate.now().toString();
 			eb.publish("chat.message.toClient", timestamp + ": " + message.body());
 		});
-		
+
 		// Handle WebSocket-requests to /chat using a WebSocket-Verticle for each connection
 		router.route("/chat").handler(context -> {
 			HttpServerRequest request = context.request();
@@ -71,11 +74,12 @@ public class ChatServerVerticle extends AbstractVerticle {
 			// login required to establish websocket connection
 			if (session.isLoggedIn()) {
 				ServerWebSocket socket = request.upgrade();
-				
-				// deploy websocket-verticle
-				vertx.deployVerticle(new WebSocketVerticle(session, socket), res -> {
-					System.out.println("verticle deployed, result: " + res.succeeded() + "; id: " + res.result());
-				});
+
+				try {
+					WebSocketManager manager = new WebSocketManager(vertx, socket, session);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
 			} else {
 				context.fail(403);
 			}
@@ -115,5 +119,31 @@ public class ChatServerVerticle extends AbstractVerticle {
 
 		HttpServerOptions serverOptions = new HttpServerOptions().setMaxWebsocketFrameSize(100000);
 		vertx.createHttpServer(serverOptions).requestHandler(router::accept).listen(8080);
+
+		User tim1 = UserMapper.getUserCredentials("tim@test.de");
+		User tim2 = UserMapper.getUserCredentials("tim2@test.de");
+		User tim3 = UserMapper.getUserCredentials("tim3@web.de");
+
+		JsonArray contacts1 = ContactMapper.getContacts(tim1.getUid());
+		JsonArray contacts2 = ContactMapper.getContacts(tim2.getUid());
+		
+		System.out.println(contacts1.encode());
+		System.out.println(contacts2.encode());
+		// JsonArray messages1 = MessageMapper.getMessages(tim1.getUid(), tim2.getUid(), 100);
+		// JsonArray messages2 = MessageMapper.getMessages(tim2.getUid(), tim1.getUid(), 100);
+		// JsonArray messages3 = MessageMapper.getMessages(tim3.getUid(), tim1.getUid(), 100);
+		//
+		// System.out.println(messages1);
+		// System.out.println(messages2);
+		// System.out.println(messages3);
+		// ContactMapper.addContact(tim1.getUid(), tim2.getUid());
+		// ContactMapper.addContact(tim1.getUid(), tim3.getUid());
+		// ContactMapper.addContact(tim2.getUid(), tim1.getUid());
+		// ContactMapper.addContact(tim3.getUid(), tim1.getUid());
+		//
+		// MessageMapper.addMessage(tim1.getUid(), tim2.getUid(), "deine Mudda stinkt");
+		// MessageMapper.addMessage(tim2.getUid(), tim1.getUid(), "meine mudda stinkt nicht");
+		// MessageMapper.addMessage(tim1.getUid(), tim2.getUid(), "deine Mudda stinkt sehr stark");
+		// MessageMapper.addMessage(tim1.getUid(), tim3.getUid(), "deine Mudda stinkt auch");
 	}
 }

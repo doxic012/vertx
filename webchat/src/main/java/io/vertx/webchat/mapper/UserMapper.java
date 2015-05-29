@@ -74,6 +74,9 @@ public class UserMapper {
 			userObject = user.toJson();
 		} finally {
 			session.getTransaction().commit();
+			
+			if(session.isOpen())
+				session.close();
 		}
 
 		return userObject;

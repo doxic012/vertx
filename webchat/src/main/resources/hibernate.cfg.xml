@@ -10,6 +10,8 @@
 		<property name="hibernate.connection.password">uhrensohn</property>
 		<property name="hibernate.connection.autoReconnect">true</property>
 
+<!--         <property name="hibernate.hbm2ddl.auto">create</property> -->
+        
 		<!-- Connection Pool Size -->
 		<!-- <property name="hibernate.connection.pool_size">1</property> -->
 		<property name="hibernate.cache.provider_class">org.cache.HashtableCacheProvider</property>
