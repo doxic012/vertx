@@ -117,18 +117,18 @@ public class ChatServerVerticle extends AbstractVerticle {
 		// router.route("/chat/*").handler(StaticHandler.create().setCachingEnabled(false));//.setWebRoot("chat"));
 		router.route().handler(StaticHandler.create());
 
-		HttpServerOptions serverOptions = new HttpServerOptions().setMaxWebsocketFrameSize(100000);
-		vertx.createHttpServer(serverOptions).requestHandler(router::accept).listen(8080);
+//		HttpServerOptions serverOptions = new HttpServerOptions().setMaxWebsocketFrameSize(100000);
+		vertx.createHttpServer().requestHandler(router::accept).listen(8080);
 
-		User tim1 = UserMapper.getUserCredentials("tim@test.de");
-		User tim2 = UserMapper.getUserCredentials("tim2@test.de");
-		User tim3 = UserMapper.getUserCredentials("tim3@web.de");
-
-		JsonArray contacts1 = ContactMapper.getContacts(tim1.getUid());
-		JsonArray contacts2 = ContactMapper.getContacts(tim2.getUid());
-		
-		System.out.println(contacts1.encode());
-		System.out.println(contacts2.encode());
+//		User tim1 = UserMapper.getUserCredentials("tim@test.de");
+//		User tim2 = UserMapper.getUserCredentials("tim2@test.de");
+//		User tim3 = UserMapper.getUserCredentials("tim3@web.de");
+//
+//		JsonArray contacts1 = ContactMapper.getContacts(tim1.getUid());
+//		JsonArray contacts2 = ContactMapper.getContacts(tim2.getUid());
+//		
+//		System.out.println(contacts1.encode());
+//		System.out.println(contacts2.encode());
 		// JsonArray messages1 = MessageMapper.getMessages(tim1.getUid(), tim2.getUid(), 100);
 		// JsonArray messages2 = MessageMapper.getMessages(tim2.getUid(), tim1.getUid(), 100);
 		// JsonArray messages3 = MessageMapper.getMessages(tim3.getUid(), tim1.getUid(), 100);

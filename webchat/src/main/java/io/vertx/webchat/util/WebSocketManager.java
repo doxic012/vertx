@@ -2,7 +2,6 @@ package io.vertx.webchat.util;
 
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
-import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.http.ServerWebSocket;
 import io.vertx.core.http.WebSocketFrame;
 import io.vertx.core.json.JsonObject;
@@ -80,13 +79,16 @@ public class WebSocketManager {
 		socket.frameHandler(getFrameHandler());
 		
 		JsonObject currentUser = session.getPrincipal();
-//		socket.writeFrame(new WebSocketMessage(currentUser, WebSocketMessageType.GetUserData,false));
-//		socket.writeFrame(new WebSocketMessage(ContactMapper.getContacts(currentUser.getInteger("uid")), WebSocketMessageType.GetContactList, false));
+		socket.writeFrame(new WebSocketMessage(currentUser, WebSocketMessageType.GetUserData,false));
+		socket.writeFrame(new WebSocketMessage(ContactMapper.getContacts(currentUser.getInteger("uid")), WebSocketMessageType.GetContactList, false));
 
-		EventBus bus = this.vertx.eventBus();
+//		socket.writeFrame(WebSocketFrame.textFrame(new WebSocketMessage(currentUser, WebSocketMessageType.GetUserData,false).toString(), true));
+//		Buffer data = Buffer.buffer().appendString(currentUser.encode());
+//		socket.writeMessage(data);
+//		EventBus bus = this.vertx.eventBus();
 		
-		bus.publish(this.sessionId, new WebSocketMessage(currentUser, WebSocketMessageType.GetUserData,false).toString());
-		bus.publish(this.sessionId, new WebSocketMessage(ContactMapper.getContacts(currentUser.getInteger("uid")), WebSocketMessageType.GetContactList, false).toString());
+//		bus.publish(this.sessionId, new WebSocketMessage(currentUser, WebSocketMessageType.GetUserData,false).toString());
+//		bus.publish(this.sessionId, new WebSocketMessage(ContactMapper.getContacts(currentUser.getInteger("uid")), WebSocketMessageType.GetContactList, false).toString());
 		// TODO: Broadcast Message with new registered Id + online status
 		log.debug("registering new connection with id: " + sessionId);
 	}
