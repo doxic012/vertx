@@ -1,4 +1,4 @@
-package io.vertx.webchat.auth.handler.impl;
+package io.vertx.webchat.util.auth;
 
 import io.vertx.core.MultiMap;
 import io.vertx.core.http.HttpMethod;
@@ -9,8 +9,6 @@ import io.vertx.core.logging.impl.LoggerFactory;
 import io.vertx.ext.apex.RoutingContext;
 import io.vertx.ext.apex.Session;
 import io.vertx.ext.auth.AuthProvider;
-import io.vertx.webchat.auth.handler.FormRegistrationHandler;
-import io.vertx.webchat.auth.hash.HashInfo;
 import io.vertx.webchat.mapper.UserMapper;
 
 public class FormRegistrationHandlerImpl implements FormRegistrationHandler {

@@ -1,10 +1,10 @@
-package io.vertx.webchat.auth.realm;
+package io.vertx.webchat.util.auth.realm;
 
-import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.impl.LoggerFactory;
-import io.vertx.webchat.auth.hash.HashInfo;
 import io.vertx.webchat.mapper.UserMapper;
+import io.vertx.webchat.models.User;
+import io.vertx.webchat.util.auth.HashInfo;
 
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.AuthenticationInfo;
@@ -57,12 +57,13 @@ public class ChatJdbcRealm extends JdbcRealm {
 
 		// Open hibernate session and read user credentials
 
-		JsonObject user = UserMapper.getUserByEmail(userPassToken.getUsername());
+		User user = UserMapper.getUserCredentials(userPassToken.getUsername());
 
+		System.out.println(user);
 		if (user == null)
 			throw new AuthenticationException("No account found for user '" + userPassToken.getUsername() + "'");
 
-		return new SimpleAuthenticationInfo(user.getString("username"), user.getString("password").toCharArray(), getHashedSalt(user.getString("salt")), user.getString("username"));
+		return new SimpleAuthenticationInfo(user.getName(), user.getPassword().toCharArray(), getHashedSalt(user.getSalt()), user.getName());
 
 	}
 }

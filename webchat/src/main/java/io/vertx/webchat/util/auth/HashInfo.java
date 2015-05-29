@@ -1,4 +1,4 @@
-package io.vertx.webchat.auth.hash;
+package io.vertx.webchat.util.auth;
 
 import org.apache.shiro.authc.credential.HashedCredentialsMatcher;
 

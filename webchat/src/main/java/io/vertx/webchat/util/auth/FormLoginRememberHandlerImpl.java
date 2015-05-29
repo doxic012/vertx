@@ -1,4 +1,4 @@
-package io.vertx.webchat.auth.handler.impl;
+package io.vertx.webchat.util.auth;
 
 import io.vertx.core.MultiMap;
 import io.vertx.core.http.HttpMethod;
@@ -9,7 +9,6 @@ import io.vertx.core.logging.impl.LoggerFactory;
 import io.vertx.ext.apex.RoutingContext;
 import io.vertx.ext.apex.Session;
 import io.vertx.ext.auth.AuthProvider;
-import io.vertx.webchat.auth.handler.FormLoginRememberHandler;
 import io.vertx.webchat.mapper.UserMapper;
 
 
@@ -63,7 +62,7 @@ public class FormLoginRememberHandlerImpl implements FormLoginRememberHandler {
 			return;
 		}
 
-		JsonObject principal = new JsonObject().put("username", userMail);
+		JsonObject principal = new JsonObject().put("email", userMail);
 		JsonObject credentials = new JsonObject().put("password", password).put("rememberMe", rememberMe);
 
 		// Authentication-process

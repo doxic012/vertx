@@ -1,8 +1,7 @@
-package io.vertx.webchat.auth.handler;
+package io.vertx.webchat.util.auth;
 
 import io.vertx.ext.apex.handler.FormLoginHandler;
 import io.vertx.ext.auth.AuthProvider;
-import io.vertx.webchat.auth.handler.impl.FormLoginRememberHandlerImpl;
 
 public interface FormLoginRememberHandler extends FormLoginHandler {
 	/**
