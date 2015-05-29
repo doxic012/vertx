@@ -6,8 +6,8 @@
 		<property name="hibernate.dialect">org.hibernate.dialect.MySQLDialect</property> <!-- MySQLInnoDBDialect -->
 		<property name="hibernate.connection.driver_class">com.mysql.jdbc.Driver</property>
 		<property name="hibernate.connection.url">jdbc:mysql://localhost:3306/webchat</property>
-		<property name="hibernate.connection.username">root</property>
-		<property name="hibernate.connection.password">root</property>
+		<property name="hibernate.connection.username">webchatuser</property>
+		<property name="hibernate.connection.password">uhrensohn</property>
 		<property name="hibernate.connection.autoReconnect">true</property>
 
 		<!-- Connection Pool Size -->
