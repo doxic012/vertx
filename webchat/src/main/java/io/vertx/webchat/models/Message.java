@@ -2,6 +2,7 @@ package io.vertx.webchat.models;
 
 import java.io.Serializable;
 import java.sql.Date;
+import java.time.LocalDate;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -77,8 +78,8 @@ public class Message implements Serializable {
 		return timestamp;
 	}
 
-	public void setTimestamp(Date timestamp) {
-		this.timestamp = timestamp;
+	public void setTimestamp(LocalDate timestamp) {
+		this.timestamp =  Date.valueOf(timestamp);
 	}
 
 	public String getMessage() {
