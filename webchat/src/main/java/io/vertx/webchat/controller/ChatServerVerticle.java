@@ -2,11 +2,11 @@ package io.vertx.webchat.controller;
 
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.eventbus.EventBus;
-import io.vertx.core.http.HttpServerOptions;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.http.ServerWebSocket;
-import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
+import io.vertx.core.json.impl.Json;
 import io.vertx.ext.apex.Router;
 import io.vertx.ext.apex.Session;
 import io.vertx.ext.apex.handler.BodyHandler;
@@ -17,10 +17,8 @@ import io.vertx.ext.apex.handler.StaticHandler;
 import io.vertx.ext.apex.sstore.LocalSessionStore;
 import io.vertx.ext.auth.AuthProvider;
 import io.vertx.ext.auth.shiro.ShiroAuthProvider;
-import io.vertx.webchat.mapper.ContactMapper;
-import io.vertx.webchat.mapper.UserMapper;
-import io.vertx.webchat.models.User;
 import io.vertx.webchat.util.WebSocketManager;
+import io.vertx.webchat.util.WebSocketMessage.WebSocketMessageType;
 import io.vertx.webchat.util.auth.FormLoginRememberHandler;
 import io.vertx.webchat.util.auth.FormRegistrationHandler;
 import io.vertx.webchat.util.auth.HashInfo;
@@ -29,6 +27,10 @@ import io.vertx.webchat.util.auth.realm.ChatAuthRealm;
 import java.time.LocalDate;
 
 import org.apache.shiro.crypto.hash.Sha256Hash;
+
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class ChatServerVerticle extends AbstractVerticle {
 
@@ -62,7 +64,12 @@ public class ChatServerVerticle extends AbstractVerticle {
 				ServerWebSocket socket = request.upgrade();
 
 				try {
-					WebSocketManager manager = new WebSocketManager(vertx, socket, session);
+					WebSocketManager manager = new WebSocketManager(socket, session);
+
+					manager.setMessageEvent(WebSocketMessageType.SendMessage, message -> {
+						JsonObject data = new JsonObject(message.getMessageData().toString());
+						System.out.println("send message event. data: " + data.encodePrettily());
+					});
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -103,7 +110,28 @@ public class ChatServerVerticle extends AbstractVerticle {
 		// router.route("/chat/*").handler(StaticHandler.create().setCachingEnabled(false));//.setWebRoot("chat"));
 		router.route().handler(StaticHandler.create());
 
-//		HttpServerOptions serverOptions = new HttpServerOptions().setMaxWebsocketFrameSize(100000);
+		// HttpServerOptions serverOptions = new HttpServerOptions().setMaxWebsocketFrameSize(100000);
 		vertx.createHttpServer().requestHandler(router::accept).listen(8080);
+		
+//		TestObject msg = new TestObject(1, 2);
+////		String encode = "{\"testobject\":{\"a\":\"test\",\"b\":\"data\"}}";
+//String encode = Json.encode(msg);
+//		System.out.println(encode);
+//		msg = Json.decodeValue(encode, TestObject.class);
 	}
+	
+//	@JsonIgnoreProperties(ignoreUnknown=true)
+//	class TestObject {
+//		@JsonProperty(value = "a")
+//		public int a;
+//		@JsonProperty(value = "b")
+//		public int b;
+//
+//		@JsonCreator
+//		public TestObject(@JsonProperty(value="a") int a, @JsonProperty(value="b") int b) {
+//			this.a = a;
+//			this.b = b;
+//		}
+//
+//	}
 }

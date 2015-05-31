@@ -9,7 +9,7 @@ $(document).ready(function() {
 //			$('.message-box-container').append(event.data + "\n");
 			
 			if(window.WebSocketEvents)
-			WebSocketEvents.trigger(data.messageType, data.message);
+			WebSocketEvents.trigger(data.messageType, data.messageData);
 		}
 		
 		socket.onopen = function(event) {
