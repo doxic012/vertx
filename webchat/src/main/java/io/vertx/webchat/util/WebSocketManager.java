@@ -13,6 +13,8 @@ import io.vertx.webchat.util.WebSocketMessage.WebSocketMessageType;
 
 import java.util.HashMap;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 /**
  * This class handles the actual ServerWebSocket with a vertx-context.
  * It maps the sockets' frame-handler for messaging and information-exchange and
@@ -45,8 +47,6 @@ public class WebSocketManager {
 
 			try {
 				System.out.println("got message from id: " + sessionId + ", message:" + frame.textData());
-				
-				//TODO: decoding
 				WebSocketMessage message = Json.decodeValue(frame.textData(), WebSocketMessage.class);
 
 				System.out.println("type: " + message.getMessageType().toString());

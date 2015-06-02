@@ -6,7 +6,6 @@ import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.http.ServerWebSocket;
 import io.vertx.core.json.JsonObject;
-import io.vertx.core.json.impl.Json;
 import io.vertx.ext.apex.Router;
 import io.vertx.ext.apex.Session;
 import io.vertx.ext.apex.handler.BodyHandler;
@@ -24,20 +23,17 @@ import io.vertx.webchat.util.auth.FormRegistrationHandler;
 import io.vertx.webchat.util.auth.HashInfo;
 import io.vertx.webchat.util.auth.realm.ChatAuthRealm;
 
+import java.io.IOException;
 import java.time.LocalDate;
 
 import org.apache.shiro.crypto.hash.Sha256Hash;
-
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class ChatServerVerticle extends AbstractVerticle {
 
 	private HashInfo hashInfo = new HashInfo(Sha256Hash.ALGORITHM_NAME, 1024, false);
 
 	@Override
-	public void start() {
+	public void start() throws IOException {
 
 		// create http-server on port 8080
 		Router router = Router.router(vertx);
@@ -67,8 +63,9 @@ public class ChatServerVerticle extends AbstractVerticle {
 					WebSocketManager manager = new WebSocketManager(socket, session);
 
 					manager.setMessageEvent(WebSocketMessageType.SendMessage, message -> {
-						JsonObject data = new JsonObject(message.getMessageData().toString());
-						System.out.println("send message event. data: " + data.encodePrettily());
+						String text = (String) message.getMessageData();
+						String target = message.getTarget();
+						System.out.println("send message event. data: " + text);
 					});
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -112,24 +109,45 @@ public class ChatServerVerticle extends AbstractVerticle {
 
 		// HttpServerOptions serverOptions = new HttpServerOptions().setMaxWebsocketFrameSize(100000);
 		vertx.createHttpServer().requestHandler(router::accept).listen(8080);
-		
-//		TestObject msg = new TestObject(1, 2);
-////		String encode = "{\"testobject\":{\"a\":\"test\",\"b\":\"data\"}}";
-//String encode = Json.encode(msg);
+
+		// Timestamp t = Json.decodeValue("2015-06-02T14:06:01.550Z", Timestamp.class);
+//		TestObject msg = new TestObject();
+//		msg.setA(1);
+//		msg.setB(4);
+//		ObjectMapper mapper = new ObjectMapper();
+//		mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+//		String encode = mapper.writeValueAsString(msg);
 //		System.out.println(encode);
-//		msg = Json.decodeValue(encode, TestObject.class);
+//		msg = mapper.readValue(encode, TestObject.class);
+		// msg = Json.decodeValue(encode, TestObject.class);
 	}
-	
-//	@JsonIgnoreProperties(ignoreUnknown=true)
-//	class TestObject {
-//		@JsonProperty(value = "a")
-//		public int a;
-//		@JsonProperty(value = "b")
-//		public int b;
+//
+//	public class TestObject implements Serializable {
+//		/**
+//		 * 
+//		 */
+//		private static final long serialVersionUID = -6685417772882996704L;
+//		private int a;
+//		private int b;
 //
 //		@JsonCreator
-//		public TestObject(@JsonProperty(value="a") int a, @JsonProperty(value="b") int b) {
+//		public TestObject() {
+//
+//		}
+//
+//		public int getA() {
+//			return a;
+//		}
+//
+//		public void setA(int a) {
 //			this.a = a;
+//		}
+//
+//		public int getB() {
+//			return b;
+//		}
+//
+//		public void setB(int b) {
 //			this.b = b;
 //		}
 //
