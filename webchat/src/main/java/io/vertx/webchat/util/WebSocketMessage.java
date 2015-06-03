@@ -1,141 +1,113 @@
 package io.vertx.webchat.util;
 
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
-import io.netty.util.CharsetUtil;
-import io.netty.util.ReferenceCounted;
-import io.vertx.core.buffer.Buffer;
-import io.vertx.core.http.impl.FrameType;
-import io.vertx.core.http.impl.ws.WebSocketFrameInternal;
-import io.vertx.core.json.JsonArray;
-import io.vertx.core.json.JsonObject;
+import io.vertx.core.http.WebSocketFrame;
+import io.vertx.core.json.impl.Json;
 
-public class WebSocketMessage implements WebSocketFrameInternal, ReferenceCounted {
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
+
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+public class WebSocketMessage {
 
 	public enum WebSocketMessageType {
-		GetUserData, SendMessageToUser, MessageRetrieved, GetMessageHistory, GetContactList, AddContact, RemoveContact, NotifyContact, UserOnlineStatus
+		GetUserData, SendMessage, MessageRetrieved, GetMessageHistory, GetContactList, AddContact, RemoveContact, NotifyContact, UserOnline, UserOffline
 	}
 
-	private WebSocketMessageType messageType;
+	private String messageType;
 
-	private String messageData;
+	private Object messageData;
 
-	private boolean isReply;
+	private String origin = "server";
 
-	private ByteBuf binaryData;
+	private String target;
 
-	public WebSocketMessage(String message, WebSocketMessageType messageType, boolean isReply) {
-		this.messageType = messageType;
-		this.messageData = message;
-		this.isReply = isReply;
+	private Timestamp timestamp;
+
+	private boolean reply;
+
+	@JsonCreator
+	public WebSocketMessage() {
+
+	}
+
+	@JsonIgnore
+	public WebSocketMessage(WebSocketMessageType messageType, Object messageData, String origin, String target, Timestamp timestamp, boolean isReply) {
+		this.setMessageType(messageType.toString());
+		this.setMessageData(messageData);
+		this.setOrigin(origin);
+		this.setTarget(target);
+		this.setTimestamp(timestamp);
+		this.setReply(isReply);
+
 		System.out.println(this.toString());
-		
-		this.binaryData = Unpooled.copiedBuffer(this.toString(), CharsetUtil.UTF_8);
 	}
 
-	public WebSocketMessage(JsonObject message, WebSocketMessageType messageType, boolean isReply) {
-		this(message.encode(), messageType, isReply);
+	@JsonIgnore
+	public WebSocketMessage(WebSocketMessageType messageType, Object messageData) {
+		this.setMessageType(messageType.toString());
+		this.setMessageData(messageData);
+		this.setTimestamp(Timestamp.valueOf(LocalDateTime.now()));
+		this.setReply(reply);
+
+		System.out.println(this.toString());
 	}
 
-	public WebSocketMessage(JsonArray message, WebSocketMessageType messageType, boolean isReply) {
-		this(message.encode(), messageType, isReply);
+	public WebSocketFrame toFrame() {
+		return WebSocketFrame.textFrame(this.toString(), true);
 	}
 
-	public JsonObject toJson() {
-		JsonObject message = new JsonObject().put("messageEvent", messageType).put("messageData", messageData).put("isReply", isReply);
-
-		return message;
+	public String getMessageType() {
+		return messageType;
 	}
 
-	public void setMessageType(WebSocketMessageType messageEvent) {
-		this.messageType = messageEvent;
+	public void setMessageType(String messageType) {
+		this.messageType = messageType;
 	}
 
-	public void setIsReply(boolean isReply) {
-		this.isReply = isReply;
+	public Object getMessageData() {
+		return messageData;
+	}
+
+	public void setMessageData(Object messageData) {
+		this.messageData = messageData;
+	}
+
+	public String getOrigin() {
+		return origin;
+	}
+
+	public void setOrigin(String origin) {
+		this.origin = origin;
+	}
+
+	public String getTarget() {
+		return target;
+	}
+
+	public void setTarget(String target) {
+		this.target = target;
+	}
+
+	public Timestamp getTimestamp() {
+		return timestamp;
+	}
+
+	public void setTimestamp(Timestamp timestamp) {
+		this.timestamp = timestamp;
+	}
+
+	public boolean getReply() {
+		return reply;
+	}
+
+	public void setReply(boolean isReply) {
+		this.reply = isReply;
 	}
 
 	@Override
 	public String toString() {
-		return this.toJson().encode();
-	}
-
-	@Override
-	public boolean isText() {
-		return true;
-	}
-
-	@Override
-	public boolean isBinary() {
-		return false;
-	}
-
-	@Override
-	public boolean isContinuation() {
-		return false;
-	}
-
-	@Override
-	public String textData() {
-		return getBinaryData().toString(CharsetUtil.UTF_8);
-	}
-
-	@Override
-	public Buffer binaryData() {
-		return Buffer.buffer(getBinaryData());
-	}
-
-	@Override
-	public boolean isFinal() {
-		return true;
-	}
-
-	@Override
-	public ByteBuf getBinaryData() {
-		return binaryData;
-	}
-
-	@Override
-	// not allowed since we parse the object itself to json
-	public void setBinaryData(ByteBuf binaryData) {
-	}
-
-	@Override
-	public void setTextData(String messageData) {
-		if (this.binaryData != null) {
-			this.binaryData.release();
-		}
-		this.messageData = messageData;
-		this.binaryData = Unpooled.copiedBuffer(this.toString(), CharsetUtil.UTF_8);
-	}
-
-	@Override
-	public FrameType type() {
-		return FrameType.TEXT;
-	}
-
-	@Override
-	public int refCnt() {
-		return binaryData.refCnt();
-	}
-
-	@Override
-	public ReferenceCounted retain() {
-		return binaryData.retain();
-	}
-
-	@Override
-	public ReferenceCounted retain(int increment) {
-		return binaryData.retain(increment);
-	}
-
-	@Override
-	public boolean release() {
-		return binaryData.release();
-	}
-
-	@Override
-	public boolean release(int decrement) {
-		return binaryData.release(decrement);
+		return Json.encode(this);
 	}
 }
