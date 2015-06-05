@@ -21,20 +21,6 @@ $(document).ready(
 		});
 
 angular.module('chatApp', []).controller('socketCtrl', function($scope) {
-	$scope.articles = [ {
-		id : 1,
-		name : "Pizza Vegetaria",
-		price : 5
-	}, {
-		id : 2,
-		name : "Pizza Salami",
-		price : 5.5
-	}, {
-		id : 3,
-		name : "Pizza Thunfisch",
-		price : 6
-	} ];
-
 	$scope.contacts=[];
 	if (window.WebSocket) {
 		console.log("creating websocket");
@@ -52,7 +38,7 @@ angular.module('chatApp', []).controller('socketCtrl', function($scope) {
 			$scope.$apply(function() {
 				console.log("get contact list");
 				console.log(message);
-				$scope.contacts = message.getMessageData();
+				$scope.contacts = message.messageData;
 			});
 		});
 
