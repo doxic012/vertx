@@ -190,19 +190,5 @@ public class ChatServerVerticle extends AbstractVerticle {
 
 		// HttpServerOptions serverOptions = new HttpServerOptions().setMaxWebsocketFrameSize(100000);
 		vertx.createHttpServer().requestHandler(router::accept).listen(8080);
-
-		
-		JsonArray a=ContactMapper.getContacts(7);
-		//		org.hibernate.Session connectSession = HibernateUtil.getSession();
-
-//		try {
-//			// contactList = (List<Contact>)
-//			// connectSession.createQuery("FROM Contact WHERE uid=:uid").setParameter("uid", uid).list();
-//			User user = (User) connectSession.createQuery("FROM User WHERE uid=:uid").setParameter("uid", 7).uniqueResult();
-//			
-//			System.out.println(user.getContacts().size());
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//		}
 	}
 }
