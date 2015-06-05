@@ -47,29 +47,32 @@ angular.module('chatApp', []).controller('socketCtrl', function($scope) {
 			console.log(message);
 		});
 
-		socket.bind(socket.messageType.MessageSend, function(message) {
+		socket.bind(socket.messageType.MESSAGE_SEND, function(message) {
 
 		});
-		socket.bind(socket.messageType.MessageRead, function(message) {
+		socket.bind(socket.messageType.MESSAGE_READ, function(message) {
 
 		});
-		socket.bind(socket.messageType.MessageHistory, function(message) {
+		socket.bind(socket.messageType.MESSAGE_HISTORY, function(message) {
 
 		});
-		socket.bind(socket.messageType.AddContact, function(message) {
+		socket.bind(socket.messageType.CONTACT_ALL, function(message) {
 
 		});
-		socket.bind(socket.messageType.RemoveContact, function(message) {
+		socket.bind(socket.messageType.CONTACT_ADD, function(message) {
+			
+		});
+		socket.bind(socket.messageType.CONTACT_REMOVE, function(message) {
 
 		});
-		socket.bind(socket.messageType.NotifyContact, function(message) {
+		socket.bind(socket.messageType.CONTACT_NOTIFY, function(message) {
 
 		});
-		socket.bind(socket.messageType.UserOnline, function(message) {
+		socket.bind(socket.messageType.USER_ONLINE, function(message) {
 			console.log("user online");
 			console.log(message.messageData);
 		});
-		socket.bind(socket.messageType.UserOffline, function(message) {
+		socket.bind(socket.messageType.USER_OFFLINE, function(message) {
 			console.log("user offline");
 			console.log(message.messageData);
 		});
