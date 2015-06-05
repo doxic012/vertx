@@ -49,15 +49,12 @@ public class User implements Serializable {
 	private String email;
 
 	@Column
-	@JsonIgnore
 	private String password;
 
 	@Column
-	@JsonIgnore
 	private String salt;
 
 	@Column
-	@JsonIgnore
 	private Timestamp timestamp;
 
 	@OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
