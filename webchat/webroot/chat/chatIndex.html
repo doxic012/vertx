@@ -37,7 +37,7 @@
 										</div>
 									</div>
 								</div>
-								<div class="contact-padding-container no-border contact-container" ng-repeat="contact in contacts" onclick="setActive(this)">
+								<div class="contact-padding-container no-border contact-container" ng-repeat="contact in contacts" onclick="setActive(this)" ng-click="getMessages({{contact.uid}})">
 									<div class="contact">
 										<span>{{contact.name}}<i class="glyphicon glyphicon-minus"></i></span>
 									</div>
