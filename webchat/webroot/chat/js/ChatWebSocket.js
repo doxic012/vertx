@@ -34,17 +34,16 @@ function ChatWebSocket(url) {
 
 	socket.onmessage = function(event) {
 		var data = JSON.parse(event.data);
-		console.log(data);
-		if (socket.trigger)
+ 		if (socket.trigger)
 			socket.trigger(data.messageType, data);
 	}
 
 	socket.messageType = {
-		GetUserData : "USER_DATA",
-		SendMessage : "SEND_MESSAGE",
-		MessageRetrieved : "MESSAGE_RETRIEVED",
-		GetMessageHistory : "MESSAGE_HISTORY",
-		GetContactList : "CONTACT_LIST",
+		UserData : "USER_DATA",
+		MessageSend : "MESSAGE_SEND",
+		MessageRead : "MESSAGE_READ",
+		MessageHistory : "MESSAGE_HISTORY",
+		ContactList : "CONTACT_LIST",
 		AddContact : "ADD_CONTACT",
 		RemoveContact : "CONTACT_REMOVE",
 		NotifyContact : "CONTACT_NOTIFY",

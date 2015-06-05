@@ -9,9 +9,12 @@ import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.impl.LoggerFactory;
 import io.vertx.ext.apex.Session;
 import io.vertx.webchat.mapper.ContactMapper;
+import io.vertx.webchat.models.User;
 import io.vertx.webchat.util.WebSocketMessage.MessageType;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * This class handles the actual ServerWebSocket with a vertx-context.
@@ -86,7 +89,7 @@ public class WebSocketManager {
 				// kann die Funktion Json.decodeValue die message in WebSocketMessage
 				// deserialisieren und integrieren
 				WebSocketMessage message = Json.decodeValue(frame.textData(), WebSocketMessage.class);
-				message.setOrigin(session.getPrincipal().getString("email"));
+				message.setOrigin(session.getPrincipal());
 
 				// handle the frame
 				if (socketEvents.containsKey(message.getMessageType().toString()))

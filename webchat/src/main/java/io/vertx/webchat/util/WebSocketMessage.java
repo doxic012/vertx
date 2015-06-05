@@ -1,6 +1,7 @@
 package io.vertx.webchat.util;
 
 import io.vertx.core.http.WebSocketFrame;
+import io.vertx.core.json.JsonObject;
 import io.vertx.core.json.impl.Json;
 
 import java.sql.Timestamp;
@@ -12,24 +13,27 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 public class WebSocketMessage {
 
 	public static enum MessageType {
-		USER_DATA, SEND_MESSAGE, MESSAGE_RETRIEVED, MESSAGE_HISTORY, CONTACT_LIST, ADD_CONTACT, CONTACT_REMOVE, CONTACT_NOTIFY, USER_STATUS_ONLINE, USER_STATUS_OFFLINE
+		USER_DATA, MESSAGE_SEND, MESSAGE_READ, MESSAGE_HISTORY, CONTACT_LIST, CONTACT_ADD, CONTACT_REMOVE, CONTACT_NOTIFY, USER_STATUS_ONLINE, USER_STATUS_OFFLINE
 	}
 
 	private MessageType messageType;
 
-	private Object messageData; //Inhalt
+	private Object messageData; // Inhalt
 
-	private String origin = "server"; //wer verschickt? server/client
+	private JsonObject origin = new JsonObject().put("name", "server"); // wer verschickt? server/client
 
-	private String target; //wohin geht die Nachricht? server/client
+	private JsonObject target; // wohin geht die Nachricht? server/client
 
 	private Timestamp timestamp;
 
-	private boolean reply; //Ist die Nachricht eine Rückmeldung auf eine andere Nachricht
-	
+	private boolean reply; // Ist die Nachricht eine Rückmeldung auf eine andere Nachricht
+
 	/**
-	 * Json.decodeValue braucht einen leeren Constructor, um die WebSocketMessage vom Client auf den Server ordentlich zu deserialisieren (verwendet setter)
-	 * @JsonIgnore und @JsonCreator (jackson annotation) wird verwendet, um Json.decodeValue mitzuteilen, welcher Constructor verwendet wird zum dekodieren
+	 * Json.decodeValue braucht einen leeren Constructor, um die WebSocketMessage vom Client auf den Server ordentlich
+	 * zu deserialisieren (verwendet setter)
+	 * 
+	 * @JsonIgnore und @JsonCreator (jackson annotation) wird verwendet, um Json.decodeValue mitzuteilen, welcher
+	 *             Constructor verwendet wird zum dekodieren
 	 */
 	@JsonCreator
 	public WebSocketMessage() {
@@ -37,7 +41,7 @@ public class WebSocketMessage {
 	}
 
 	@JsonIgnore
-	public WebSocketMessage(MessageType messageType, Object messageData, String origin, String target, Timestamp timestamp, boolean isReply) {
+	public WebSocketMessage(MessageType messageType, Object messageData, JsonObject origin, JsonObject target, Timestamp timestamp, boolean isReply) {
 		this.setMessageType(messageType);
 		this.setMessageData(messageData);
 		this.setOrigin(origin);
@@ -57,9 +61,10 @@ public class WebSocketMessage {
 
 		System.out.println(this.toString());
 	}
-	
+
 	/**
 	 * Baut einen Frame, der per Websocket verschickt werden kann
+	 * 
 	 * @return
 	 */
 	public WebSocketFrame toFrame() {
@@ -70,48 +75,54 @@ public class WebSocketMessage {
 		return messageType;
 	}
 
-	public void setMessageType(MessageType messageType) {
+	public WebSocketMessage setMessageType(MessageType messageType) {
 		this.messageType = messageType;
+		return this;
 	}
 
 	public Object getMessageData() {
 		return messageData;
 	}
 
-	public void setMessageData(Object messageData) {
+	public WebSocketMessage setMessageData(Object messageData) {
 		this.messageData = messageData;
+		return this;
 	}
 
-	public String getOrigin() {
+	public JsonObject getOrigin() {
 		return origin;
 	}
 
-	public void setOrigin(String origin) {
+	public WebSocketMessage setOrigin(JsonObject origin) {
 		this.origin = origin;
+		return this;
 	}
 
-	public String getTarget() {
+	public JsonObject getTarget() {
 		return target;
 	}
 
-	public void setTarget(String target) {
+	public WebSocketMessage setTarget(JsonObject target) {
 		this.target = target;
+		return this;
 	}
 
 	public Timestamp getTimestamp() {
 		return timestamp;
 	}
 
-	public void setTimestamp(Timestamp timestamp) {
+	public WebSocketMessage setTimestamp(Timestamp timestamp) {
 		this.timestamp = timestamp;
+		return this;
 	}
 
 	public boolean getReply() {
 		return reply;
 	}
 
-	public void setReply(boolean isReply) {
+	public WebSocketMessage setReply(boolean isReply) {
 		this.reply = isReply;
+		return this;
 	}
 
 	@Override
