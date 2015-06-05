@@ -8,6 +8,7 @@ import io.vertx.webchat.util.auth.HashInfo;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.shiro.crypto.SecureRandomNumberGenerator;
@@ -34,7 +35,11 @@ public class UserMapper {
 		Session session = HibernateUtil.getSession();
 
 		List<User> userList = (List<User>) session.createQuery("from User").list();
-		return new JsonArray(userList);
+		List<JsonObject> users = new ArrayList<JsonObject>();
+		userList.forEach(contact -> {
+			users.add(contact.toJson());
+		});
+		return new JsonArray(users);
 	}
 
 	public static boolean userExistsByEmail(String email) {
