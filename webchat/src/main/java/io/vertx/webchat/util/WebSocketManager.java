@@ -9,12 +9,10 @@ import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.impl.LoggerFactory;
 import io.vertx.ext.apex.Session;
 import io.vertx.webchat.mapper.ContactMapper;
-import io.vertx.webchat.models.User;
+import io.vertx.webchat.mapper.UserMapper;
 import io.vertx.webchat.util.WebSocketMessage.MessageType;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 
 /**
  * This class handles the actual ServerWebSocket with a vertx-context.
@@ -61,6 +59,7 @@ public class WebSocketManager {
 
 		// Verschicke Benutzerobjekt und Kontaktliste
 		writeMessage(new WebSocketMessage(MessageType.USER_DATA, currentUser));
+		writeMessage(new WebSocketMessage(MessageType.CONTACT_ALL, UserMapper.getUsers()));
 		writeMessage(new WebSocketMessage(MessageType.CONTACT_LIST, ContactMapper.getContacts(currentUser.getInteger("uid"))));
 	}
 	
