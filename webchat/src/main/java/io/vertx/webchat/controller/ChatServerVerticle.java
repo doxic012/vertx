@@ -16,6 +16,7 @@ import io.vertx.ext.apex.handler.StaticHandler;
 import io.vertx.ext.apex.sstore.LocalSessionStore;
 import io.vertx.ext.auth.AuthProvider;
 import io.vertx.ext.auth.shiro.ShiroAuthProvider;
+import io.vertx.webchat.mapper.UserMapper;
 import io.vertx.webchat.util.WebSocketManager;
 import io.vertx.webchat.util.WebSocketMessage.MessageType;
 import io.vertx.webchat.util.auth.FormLoginRememberHandler;
@@ -23,10 +24,14 @@ import io.vertx.webchat.util.auth.FormRegistrationHandler;
 import io.vertx.webchat.util.auth.HashInfo;
 import io.vertx.webchat.util.auth.realm.ChatAuthRealm;
 
+
 import java.io.IOException;
 import java.time.LocalDate;
 
+
 import org.apache.shiro.crypto.hash.Sha256Hash;
+
+
 
 public class ChatServerVerticle extends AbstractVerticle {
 
@@ -63,11 +68,11 @@ public class ChatServerVerticle extends AbstractVerticle {
 					WebSocketManager manager = new WebSocketManager(socket, session);
 
 					manager.addEvent(MessageType.SEND_MESSAGE, message -> {
-						String text = (String) message.getMessageData();
 						String target = message.getTarget();
-						System.out.println("send message event. data: " + text+", target: "+target);
+						JsonObject targetPrincipal = UserMapper.getUserByEmail(target);
+						System.out.println("send message event. data: " + message.getMessageData()+", target: "+target);
 						
-//						manager.write
+						manager.writeMessageToPrincipal(targetPrincipal, message);
 					});
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -111,47 +116,5 @@ public class ChatServerVerticle extends AbstractVerticle {
 
 		// HttpServerOptions serverOptions = new HttpServerOptions().setMaxWebsocketFrameSize(100000);
 		vertx.createHttpServer().requestHandler(router::accept).listen(8080);
-
-		// Timestamp t = Json.decodeValue("2015-06-02T14:06:01.550Z", Timestamp.class);
-//		TestObject msg = new TestObject();
-//		msg.setA(1);
-//		msg.setB(4);
-//		ObjectMapper mapper = new ObjectMapper();
-//		mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-//		String encode = mapper.writeValueAsString(msg);
-//		System.out.println(encode);
-//		msg = mapper.readValue(encode, TestObject.class);
-		// msg = Json.decodeValue(encode, TestObject.class);
 	}
-//
-//	public class TestObject implements Serializable {
-//		/**
-//		 * 
-//		 */
-//		private static final long serialVersionUID = -6685417772882996704L;
-//		private int a;
-//		private int b;
-//
-//		@JsonCreator
-//		public TestObject() {
-//
-//		}
-//
-//		public int getA() {
-//			return a;
-//		}
-//
-//		public void setA(int a) {
-//			this.a = a;
-//		}
-//
-//		public int getB() {
-//			return b;
-//		}
-//
-//		public void setB(int b) {
-//			this.b = b;
-//		}
-//
-//	}
 }
