@@ -27,29 +27,29 @@ function ChatWebSocket(url) {
 	// bind an event
 	socket.bind = function(eventName, callback) {
 		if (callback != undefined && callback != null) {
-			console.log("binding event " + eventName);
+			//console.log("binding event " + eventName);
 			events[eventName] = callback;
 		}
 	};
 
 	socket.onmessage = function(event) {
 		var data = JSON.parse(event.data);
-
+		console.log(data);
 		if (socket.trigger)
 			socket.trigger(data.messageType, data);
 	}
 
 	socket.messageType = {
-		GetUserData : "GetUserData",
-		SendMessage : "SendMessage",
-		MessageRetrieved : "MessageRetrieved",
-		GetMessageHistory : "GetMessageHistory",
-		GetContactList : "GetContactList",
-		AddContact : "AddContact",
-		RemoveContact : "RemoveContact",
-		NotifyContact : "NotifyContact",
-		UserOnline : "UserOnline",
-		UserOffline : "UserOffline"
+		GetUserData : "USER_DATA",
+		SendMessage : "SEND_MESSAGE",
+		MessageRetrieved : "MESSAGE_RETRIEVED",
+		GetMessageHistory : "MESSAGE_HISTORY",
+		GetContactList : "CONTACT_LIST",
+		AddContact : "ADD_CONTACT",
+		RemoveContact : "CONTACT_REMOVE",
+		NotifyContact : "CONTACT_NOTIFY",
+		UserOnline : "USER_STATUS_ONLINE",
+		UserOffline : "USER_STATUS_OFFLINE"
 	};
 
 	// var defaultSend = socket.send; // We wrap send, so we need the original//
