@@ -8,7 +8,7 @@
     <meta http-equiv="Expires" content="0"/>
     <title>Vert.x Webchat</title>
     <link rel="stylesheet" href="/css/bootstrap.css" type="text/css"/>
-    <link rel="stylesheet" href="css/chat_org.css" type="text/css"/>
+    <link rel="stylesheet" href="css/chat.css" type="text/css"/>
 </head>
 <body ng-controller="socketCtrl">
 <div class="container">
@@ -30,7 +30,7 @@
                             </div>
                             <!-- User search -->
                             <div class="contact-padding-container">
-                                <div class="input-group search-group">
+                                <div class="input-group search-group" >
                                     <input type="text" class="form-control searchform-input" placeholder="Kontakt hinzufügen" name="contact" ng-model="userFilter" ng-focus="filterFocused=true" ng-blur="filterFocused=false">
 
                                     <!--<div class="input-group-btn">-->
@@ -38,9 +38,10 @@
                                     <!--src="http://www.treppenlift-ratgeber.de/fileadmin/templates/inc/img/lupe.png"-->
                                     <!--title="Suche starten"></button>-->
                                     <!--</div>-->
+
                                 </div>
-                                <div class="user-dropdown" ng-class="{show : filterFocused}" >
-                                    <div class="form-control user-entry" ng-repeat="user in getAllUsers() | filter:userFilter"
+                                <div class="user-dropdown">
+                                    <div class="form-control user-entry" ng-class="{show : filterFocused}" ng-repeat="user in getAllUsers() | filter:userFilter"
                                          ng-click="addContact(user)">
                                         {{user.name}}
                                         <i class="glyphicon glyphicon-plus"></i>

@@ -33,6 +33,8 @@ angular.module('chatApp', []).
         };
 
         $scope.addContact = function (contact) {
+            console.log("adding contact");
+            console.log(contact);
             socket.sendMessage(socket.CONTACT_ADD, "", contact, false);
         };
 

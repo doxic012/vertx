@@ -134,13 +134,10 @@ div.contact-container.active {
     position: absolute;
     width: 75%;
     z-index: 1;
+}
+.user-entry {
     display: none;
 }
-
-.user-dropdown.show {
-    display: block;
-}
-
 .user-entry .glyphicon {
     float: right;
     clear: both;
