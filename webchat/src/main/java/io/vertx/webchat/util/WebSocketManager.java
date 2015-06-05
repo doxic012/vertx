@@ -96,8 +96,8 @@ public class WebSocketManager {
 				message.setOrigin(session.getPrincipal());
 
 				// handle the frame
-				if (socketEvents.containsKey(message.getMessageType().toString()))
-					socketEvents.get(message.getMessageType().toString()).handle(message);
+				if (socketEvents.containsKey(message.getMessageType()))
+					socketEvents.get(message.getMessageType()).handle(message);
 
 			} catch (Exception ex) {
 				ex.printStackTrace();
@@ -155,9 +155,7 @@ public class WebSocketManager {
 		JsonObject currentUser = session.getPrincipal();
 
 		userMap
-		.filter(json -> {
-			return !json.equals(currentUser);
-		})
+		.exceptUserSockets(currentUser)
 		.forEach(socket -> {
 			writeMessage(socket, message);
 		});

@@ -8,7 +8,7 @@
     <meta http-equiv="Expires" content="0"/>
     <title>Vert.x Webchat</title>
     <link rel="stylesheet" href="/css/bootstrap.css" type="text/css"/>
-    <link rel="stylesheet" href="css/chat.css" type="text/css"/>
+    <link rel="stylesheet" href="css/chat_org.css" type="text/css"/>
 </head>
 <body ng-controller="socketCtrl">
 <div class="container">
@@ -26,24 +26,22 @@
                     <div class="col-xs-3">
                         <div class="contact-bar">
                             <div class="contact-padding-container">
-                                <div class="owner">
-                                </div>
+                                <div class="owner">{{user.name}}</div>
                             </div>
                             <!-- User search -->
                             <div class="contact-padding-container">
                                 <div class="input-group search-group">
-                                    <input type="text" class="form-control searchform-input"
-                                           placeholder="Konakt hinzufügen" name="contact" ng-model="searchUser">
+                                    <input type="text" class="form-control searchform-input" placeholder="Kontakt hinzufügen" name="contact" ng-model="userFilter" ng-focus="filterFocused=true" ng-blur="filterFocused=false">
 
                                     <!--<div class="input-group-btn">-->
-                                        <!--<button class="btn btn-default btn-search" type="submit"><img-->
-                                                <!--src="http://www.treppenlift-ratgeber.de/fileadmin/templates/inc/img/lupe.png"-->
-                                                <!--title="Suche starten"></button>-->
+                                    <!--<button class="btn btn-default btn-search" type="submit"><img-->
+                                    <!--src="http://www.treppenlift-ratgeber.de/fileadmin/templates/inc/img/lupe.png"-->
+                                    <!--title="Suche starten"></button>-->
                                     <!--</div>-->
                                 </div>
-                                <div class="user-dropdown">
-                                    <div class="user-entry" ng-repeat="user in getAllUsers() | filter:searchText"
-                                          ng-click="addContact(user)">
+                                <div class="user-dropdown" ng-class="{show : filterFocused}" >
+                                    <div class="form-control user-entry" ng-repeat="user in getAllUsers() | filter:userFilter"
+                                         ng-click="addContact(user)">
                                         {{user.name}}
                                         <i class="glyphicon glyphicon-plus"></i>
                                     </div>
@@ -52,8 +50,8 @@
 
                             <!-- Contact-list -->
                             <div class="contact-padding-container no-border contact-container"
-                                 ng-repeat="contact in contacts"
-                                 ng-click="setActive(contact)" ng-class="{active : isActive(contact) }">
+                                 ng-repeat="contact in contacts" ng-click="setActive(contact)"
+                                 ng-class="{active : isActive(contact) }">
                                 <div class="contact">
                                     <span>{{contact.name}}<i class="glyphicon glyphicon-minus"></i></span>
                                 </div>
@@ -66,14 +64,16 @@
                             </div>
                             <div class="new-message-container">
                                 <div class="row">
-                                    <div class="col-xs-11">
+                                    <div class="col-xs-10">
                                         <div class="textarea-container">
-                                            <textarea placeholder="Deine Nachricht...." name="message" ng-model="textMessage"></textarea>
+                                            <textarea placeholder="Deine Nachricht...." name="message"
+                                                      ng-model="textMessage"></textarea>
                                         </div>
                                     </div>
-                                    <div class="col-xs-1">
+                                    <div class="col-xs-2">
                                         <div class="sendbutton-container">
-                                            <button class="btn-default btn-send-message" name="sendmessage" ng-click="sendMessage(textMessage)">Senden
+                                            <button class="btn btn-primary btn-send-message" name="sendmessage"
+                                                    ng-click="sendMessage(textMessage)" ng-disabled="activeContact == null">Senden
                                             </button>
                                         </div>
                                     </div>

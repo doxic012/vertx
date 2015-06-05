@@ -19,13 +19,11 @@ import org.hibernate.Session;
 public class UserMapper {
 	public static User getUserCredentials(String email) {
 		Session connectSession = HibernateUtil.getSession();
-		System.out.println("getting user by email: " + email);
 		return (User) connectSession.createQuery("from User where email=:email").setParameter("email", email).uniqueResult();
 	}
 
 	public static JsonObject getUserByEmail(String email) {
 		Session session = HibernateUtil.getSession();
-		System.out.println("getting user by email: " + email);
 		User user = (User) session.createQuery("from User where email=:email").setParameter("email", email).uniqueResult();
 		return user.toJson();
 	}
@@ -50,11 +48,10 @@ public class UserMapper {
 	 * Register a new user with a username, email an password.
 	 * Optional: Admin role
 	 *
-	 * @param session
+	 * @param hashingInfo
 	 * @param username
 	 * @param email
 	 * @param plainTextPassword
-	 * @param isAdmin
 	 */
 	public static JsonObject addUser(HashInfo hashingInfo, String username, String email, String plainTextPassword) {
 		JsonObject userObject;

@@ -38,19 +38,6 @@ function ChatWebSocket(url) {
 			socket.trigger(data.messageType, data);
 	}
 
-	socket.messageType = {
-		USER_DATA : "USER_DATA",
-		MESSAGE_SEND : "MESSAGE_SEND",
-		MESSAGE_READ : "MESSAGE_READ",
-		MESSAGE_HISTORY : "MESSAGE_HISTORY",
-		CONTACT_ALL: "CONTACT_ALL",
-		CONTACT_LIST : "CONTACT_LIST",
-		CONTACT_ADD : "CONTACT_ADD",
-		CONTACT_REMOVE : "CONTACT_REMOVE",
-		CONTACT_NOTIFY : "CONTACT_NOTIFY",
-		USER_ONLINE : "USER_STATUS_ONLINE",
-		USER_OFFLINE : "USER_STATUS_OFFLINE"
-	};
 
 	// var defaultSend = socket.send; // We wrap send, so we need the original//
 	// method
@@ -59,7 +46,7 @@ function ChatWebSocket(url) {
 			messageType : messageType,
 			messageData : data,
 //			origin : "", // applied at server-side
-			target : target,
+			target : JSON.stringify(target),
 			timestamp : new Date().toISOString(),
 			reply : isReply
 		}
