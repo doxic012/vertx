@@ -3,6 +3,7 @@ package io.vertx.webchat.util;
 import io.vertx.core.Handler;
 import io.vertx.core.http.ServerWebSocket;
 import io.vertx.core.http.WebSocketFrame;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.json.impl.Json;
 import io.vertx.core.logging.Logger;
@@ -13,6 +14,7 @@ import io.vertx.webchat.mapper.UserMapper;
 import io.vertx.webchat.util.WebSocketMessage.MessageType;
 
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * This class handles the actual ServerWebSocket with a vertx-context.
@@ -57,9 +59,12 @@ public class WebSocketManager {
 		socket.closeHandler(getCloseHandler());
 		socket.frameHandler(getFrameHandler());
 
+		JsonArray users = UserMapper.getUsers();
+		users.remove(currentUser);
+
 		// Verschicke Benutzerobjekt und Kontaktliste
 		writeMessage(new WebSocketMessage(MessageType.USER_DATA, currentUser));
-		writeMessage(new WebSocketMessage(MessageType.CONTACT_ALL, UserMapper.getUsers()));
+		writeMessage(new WebSocketMessage(MessageType.CONTACT_ALL, users));
 		writeMessage(new WebSocketMessage(MessageType.CONTACT_LIST, ContactMapper.getContacts(currentUser.getInteger("uid"))));
 	}
 	
@@ -182,7 +187,7 @@ public class WebSocketManager {
 	 * Verschicke WebsocketMessage an alle WebSockets eines Principals
 	 * (writeFrame informiert alle Observer über neue Daten)
 	 * 
-	 * @param socket
+	 * @param principal
 	 * @param message
 	 */
 	public void writeMessageToPrincipal(JsonObject principal, WebSocketMessage message) {

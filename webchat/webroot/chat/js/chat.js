@@ -1,93 +1,112 @@
 $(document).ready(
-function() {
-	// function send(message) {
-	// if (!window.WebSocket) {
-	// return;
-	// }
-	// if (socket.readyState == WebSocket.OPEN) {
-	// socket.send(message);
-	// } else {
-	// console.log("The socket is not open.");
-	// } 
-	// }
+    function () {
+        // function send(message) {
+        // if (!window.WebSocket) {
+        // return;
+        // }
+        // if (socket.readyState == WebSocket.OPEN) {
+        // socket.send(message);
+        // } else {
+        // console.log("The socket is not open.");
+        // }
+        // }
 
-	var btn = $("button[name=sendmessage]").click(
-	function() {
-		var input = $("textarea[name=message]").val();
-		console.log("input value: " + input);
-		socket.sendMessage(socket.messageType.SendMessage,
-				input, "target", false);
-	});
-});
- 
+        var btn = $("button[name=sendmessage]").click(
+            function () {
+                var input = $("textarea[name=message]").val();
+                console.log("input value: " + input);
+                socket.sendMessage(socket.messageType.SendMessage,
+                    input, "target", false);
+            });
+    });
+
 function setActive(activeContact) {
-	jQuery("div.contact-container").each(function() {
-		jQuery(this).removeClass("active");
-	});
-	
-	jQuery(activeContact).addClass("active");
+    jQuery("div.contact-container").each(function () {
+        jQuery(this).removeClass("active");
+    });
+
+    jQuery(activeContact).addClass("active");
 };
 
-angular.module('chatApp', []).controller('socketCtrl', function($scope) {
-	$scope.contacts=[];
+angular.module('chatApp', []).controller('socketCtrl', function ($scope) {
+        var allUsers = [];
+        $scope.contacts = [];
+        $scope.user = {};
+        $scope.getAllUsers = function () {
+            return allUsers.filter(function (user) {
+                var contains = false;
 
-	$scope.getMessages = function(uid) {
-		
-	};
-	
-	if (window.WebSocket) {
-		console.log("creating websocket");
-		var socket = new ChatWebSocket("ws://localhost:8080/chat");
+                $scope.contacts.forEach(function (contact) {
+                    if (user.uid === contact.uid) {
+                        contains = true;
+                        return;
+                    }
+                });
+                return !contains;
+            });
+        };
 
-		socket.onopen = function(event) {
-			console.log("Web Socket opened!");
-		};
+        $scope.getMessages = function (uid) {
 
-		socket.onclose = function(event) {
-			console.log("Web Socket closed.");
-		};
+        };
 
-		socket.bind(socket.messageType.CONTACT_LIST, function(message) {
-			$scope.$apply(function() {
-				console.log("get contact list");
-				console.log(message);
-				$scope.contacts = message.messageData;
-			});
-		});
+        $scope.addContact = function (contact) {
+            console.log(contact);
+        }
+        if (window.WebSocket) {
+            console.log("creating websocket");
+            var socket = new ChatWebSocket("ws://localhost:8080/chat");
 
-		socket.bind(socket.messageType.USER_DATA, function(message) {
-			console.log("get user data");
-			console.log(message);
-		});
+            socket.onopen = function (event) {
+                console.log("Web Socket opened!");
+            };
 
-		socket.bind(socket.messageType.MESSAGE_SEND, function(message) {
+            socket.onclose = function (event) {
+                console.log("Web Socket closed.");
+            };
 
-		});
-		socket.bind(socket.messageType.MESSAGE_READ, function(message) {
+            socket.bind(socket.messageType.CONTACT_LIST, function (message) {
+                $scope.$apply(function () {
+                    $scope.contacts = message.messageData;
+                });
+            });
 
-		});
-		socket.bind(socket.messageType.MESSAGE_HISTORY, function(message) {
+            socket.bind(socket.messageType.USER_DATA, function (message) {
+                $scope.user = message.messageData;
+            });
 
-		});
-		socket.bind(socket.messageType.CONTACT_ALL, function(message) {
+            socket.bind(socket.messageType.MESSAGE_SEND, function (message) {
 
-		});
-		socket.bind(socket.messageType.CONTACT_ADD, function(message) {
-			
-		});
-		socket.bind(socket.messageType.CONTACT_REMOVE, function(message) {
+            });
+            socket.bind(socket.messageType.MESSAGE_READ, function (message) {
 
-		});
-		socket.bind(socket.messageType.CONTACT_NOTIFY, function(message) {
+            });
+            socket.bind(socket.messageType.MESSAGE_HISTORY, function (message) {
 
-		});
-		socket.bind(socket.messageType.USER_ONLINE, function(message) {
-			console.log("user online");
-			console.log(message.messageData);
-		});
-		socket.bind(socket.messageType.USER_OFFLINE, function(message) {
-			console.log("user offline");
-			console.log(message.messageData);
-		});
-	}
-});
+            });
+            socket.bind(socket.messageType.CONTACT_ALL, function (message) {
+                $scope.$apply(function () {
+                    allUsers = message.messageData;
+                });
+            });
+            socket.bind(socket.messageType.CONTACT_ADD, function (message) {
+
+            });
+            socket.bind(socket.messageType.CONTACT_REMOVE, function (message) {
+
+            });
+            socket.bind(socket.messageType.CONTACT_NOTIFY, function (message) {
+
+            });
+            socket.bind(socket.messageType.USER_ONLINE, function (message) {
+                console.log("user online");
+                console.log(message.messageData);
+            });
+            socket.bind(socket.messageType.USER_OFFLINE, function (message) {
+                console.log("user offline");
+                console.log(message.messageData);
+            });
+        }
+    }
+)
+;
