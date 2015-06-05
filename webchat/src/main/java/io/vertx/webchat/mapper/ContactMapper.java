@@ -2,6 +2,7 @@ package io.vertx.webchat.mapper;
 
 import io.vertx.core.json.JsonArray;
 import io.vertx.webchat.models.Contact;
+import io.vertx.webchat.models.User;
 import io.vertx.webchat.util.HibernateUtil;
 
 import java.sql.Timestamp;
@@ -9,22 +10,20 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import org.hibernate.Session;
-
 public class ContactMapper {
 
 	@SuppressWarnings("unchecked")
 	public static JsonArray getContacts(int uid) {
 		Session connectSession = HibernateUtil.getSession();
-		List<Contact> contactList = null;
 
 		System.out.println("getting contacts for uid: "+uid);
 		try {
-			contactList = (List<Contact>) connectSession.createQuery("FROM Contact WHERE uid=:uid").setParameter("uid", uid).list();
+			List<User> contactList = (List<User>) connectSession.createSQLQuery("SELECT u.* FROM User u INNER JOIN Contact c ON u.uid = c.uidForeign WHERE c.uid=:userId").setParameter("userId", uid).list();		
+			return new JsonArray(contactList);
 		} catch(NullPointerException e) {
-			return new JsonArray();
 		}
-		
-		return new JsonArray(contactList);
+
+		return new JsonArray();
 	}
 
 	public static boolean addContact(int uid, int uidForeign) {

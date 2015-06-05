@@ -3,13 +3,15 @@ package io.vertx.webchat.models;
 import java.io.Serializable;
 import java.sql.Timestamp;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
-import javax.persistence.UniqueConstraint;
 
 /*
 create TABLE contact (
@@ -41,6 +43,15 @@ public class Contact implements Serializable {
 	@Column
 	private boolean notified;
 
+//	@OneToOne(cascade = CascadeType.ALL)
+//    @JoinTable (name = "user", joinColumns = {@JoinColumn(name = "uid")}, inverseJoinColumns = {@JoinColumn(name = "uid")})
+//	private User contactUser = new User();
+//	
+//	@OneToOne(cascade = CascadeType.ALL)
+//    @JoinTable (name = "user", joinColumns = {@JoinColumn(name = "uidforeign")}, inverseJoinColumns = {@JoinColumn(name = "uid")})
+//	private User contactForeign = new User();
+//	
+//	
 	public int getUid() {
 		return uid;
 	}

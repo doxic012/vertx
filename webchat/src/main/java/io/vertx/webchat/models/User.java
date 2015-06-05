@@ -4,30 +4,33 @@ import io.vertx.core.json.JsonObject;
 
 import java.io.Serializable;
 import java.sql.Timestamp;
-import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 /*
-  create TABLE user(
-  `uid` int(11) NOT NULL AUTO_INCREMENT,
-  `name` varchar(45) NOT NULL,
-  `email` varchar(128) NOT NULL,
-  `password` varchar(128) DEFAULT NULL,
-  `salt` varchar(128) DEFAULT NULL,
-  `timestamp` timestamp,
-  PRIMARY KEY (`uid`),
-  UNIQUE KEY `email_UNIQUE` (`email`)
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8;
-
+ * create TABLE user(
+ * `uid` int(11) NOT NULL AUTO_INCREMENT,
+ * `name` varchar(45) NOT NULL,
+ * `email` varchar(128) NOT NULL,
+ * `password` varchar(128) DEFAULT NULL,
+ * `salt` varchar(128) DEFAULT NULL,
+ * `timestamp` timestamp,
+ * PRIMARY KEY (`uid`),
+ * UNIQUE KEY `email_UNIQUE` (`email`)
+ * ) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8;
  */
 @Entity
-@Table(name = "user", uniqueConstraints=@UniqueConstraint(columnNames="uid"))
+@Table(name = "user", uniqueConstraints = @UniqueConstraint(columnNames = "uid"))
 public class User implements Serializable {
 
 	private static final long serialVersionUID = 5370050875839204057L;
@@ -50,7 +53,7 @@ public class User implements Serializable {
 
 	@Column
 	private Timestamp timestamp;
-	
+
 	public User() {
 	}
 
@@ -95,10 +98,7 @@ public class User implements Serializable {
 	}
 
 	public JsonObject toJson() {
-		JsonObject user = new JsonObject()
-			.put("uid", getUid())
-			.put("name", getName())
-			.put("email", getEmail());
+		JsonObject user = new JsonObject().put("uid", getUid()).put("name", getName()).put("email", getEmail());
 		return user;
 	}
 

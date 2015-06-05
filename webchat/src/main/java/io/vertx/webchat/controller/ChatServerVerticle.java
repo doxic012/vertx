@@ -19,6 +19,8 @@ import io.vertx.ext.auth.AuthProvider;
 import io.vertx.ext.auth.shiro.ShiroAuthProvider;
 import io.vertx.webchat.mapper.ContactMapper;
 import io.vertx.webchat.mapper.MessageMapper;
+import io.vertx.webchat.mapper.UserMapper;
+import io.vertx.webchat.models.User;
 import io.vertx.webchat.util.WebSocketManager;
 import io.vertx.webchat.util.WebSocketMessage;
 import io.vertx.webchat.util.WebSocketMessage.MessageType;
@@ -189,12 +191,17 @@ public class ChatServerVerticle extends AbstractVerticle {
 		// HttpServerOptions serverOptions = new HttpServerOptions().setMaxWebsocketFrameSize(100000);
 		vertx.createHttpServer().requestHandler(router::accept).listen(8080);
 
-//		org.hibernate.Session connectSession = HibernateUtil.getSession();
-//
+		
+		JsonArray a=ContactMapper.getContacts(7);
+		System.out.println(a);
+		//		org.hibernate.Session connectSession = HibernateUtil.getSession();
+
 //		try {
 //			// contactList = (List<Contact>)
 //			// connectSession.createQuery("FROM Contact WHERE uid=:uid").setParameter("uid", uid).list();
-//			User user = (User) connectSession.createQuery("FROM User WHERE uid=:uid").setParameter("uid", 7);
+//			User user = (User) connectSession.createQuery("FROM User WHERE uid=:uid").setParameter("uid", 7).uniqueResult();
+//			
+//			System.out.println(user.getContacts().size());
 //		} catch (Exception e) {
 //			e.printStackTrace();
 //		}
