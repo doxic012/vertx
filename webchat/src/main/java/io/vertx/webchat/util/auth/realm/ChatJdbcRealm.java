@@ -1,7 +1,5 @@
 package io.vertx.webchat.util.auth.realm;
 
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.impl.LoggerFactory;
 import io.vertx.webchat.mapper.UserMapper;
 import io.vertx.webchat.models.User;
 import io.vertx.webchat.util.auth.HashInfo;
@@ -19,8 +17,6 @@ import org.apache.shiro.util.ByteSource;
 import org.apache.shiro.util.SimpleByteSource;
 
 public class ChatJdbcRealm extends JdbcRealm {
-
-	private static final Logger log = LoggerFactory.getLogger(ChatJdbcRealm.class);
 
 	private HashInfo hashingInfo = null;
 

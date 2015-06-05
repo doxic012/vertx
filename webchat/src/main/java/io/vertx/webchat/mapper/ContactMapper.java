@@ -11,6 +11,8 @@ import java.util.List;
 import org.hibernate.Session;
 
 public class ContactMapper {
+
+	@SuppressWarnings("unchecked")
 	public static JsonArray getContacts(int uid) {
 		Session connectSession = HibernateUtil.getSession();
 

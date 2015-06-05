@@ -9,11 +9,9 @@ import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.impl.LoggerFactory;
 import io.vertx.ext.apex.Session;
 import io.vertx.webchat.mapper.ContactMapper;
-import io.vertx.webchat.util.WebSocketMessage.WebSocketMessageType;
+import io.vertx.webchat.util.WebSocketMessage.MessageType;
 
 import java.util.HashMap;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * This class handles the actual ServerWebSocket with a vertx-context.
@@ -23,8 +21,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class WebSocketManager {
 	private static final Logger log = LoggerFactory.getLogger(WebSocketManager.class);
 
-	private final String sessionId;
-	private final Session session;
+	private Session session;
 	private ServerWebSocket socket = null;
 
 	private static HashMap<ServerWebSocket, String> userMap = new HashMap<ServerWebSocket, String>();
@@ -33,26 +30,23 @@ public class WebSocketManager {
 
 	/**
 	 * The frame-handler
+	 * 
 	 * @return
 	 */
 	private Handler<WebSocketFrame> getFrameHandler() {
 		return frame -> {
-			if (session.isDestroyed()) {
+			if (session.isDestroyed() || !session.isLoggedIn()) {
 				log.error("session destroyed, rejecting socket");
-
-				userMap.remove(socket, session.getPrincipal());
-				socket.reject();
+				socket.close();
 				return;
 			}
 
 			try {
-				System.out.println("got message from id: " + sessionId + ", message:" + frame.textData());
 				WebSocketMessage message = Json.decodeValue(frame.textData(), WebSocketMessage.class);
+				message.setOrigin(session.getPrincipal().getString("email"));
 
-				System.out.println("type: " + message.getMessageType().toString());
-				
 				// handle the frame
-				if(socketEvents.containsKey(message.getMessageType().toString()))
+				if (socketEvents.containsKey(message.getMessageType().toString()))
 					socketEvents.get(message.getMessageType().toString()).handle(message);
 
 			} catch (Exception ex) {
@@ -63,30 +57,31 @@ public class WebSocketManager {
 	}
 
 	/**
-	 * The closing handler for the websocket. 	
+	 * The closing handler for the websocket.
 	 * This handler removes the current user from the list of online users
+	 * 
 	 * @return
 	 */
 	private Handler<Void> getCloseHandler() {
 		return handler -> {
-			userMap.remove(socket, session.getPrincipal());
-			broadcastMessage(new WebSocketMessage(WebSocketMessageType.UserOffline, session.getPrincipal()));
+			userMap.remove(socket);
+			broadcastMessage(new WebSocketMessage(MessageType.USER_STATUS_OFFLINE, session.getPrincipal()));
 
-			log.debug("un-registering new connection with id: " + sessionId + ", users online: " + userMap.size());
+			log.debug("un-registering new connection with id: " + socket.textHandlerID() + " for user: " + session.getPrincipal().getString("email") + ", users online:" + userMap.size());
 		};
 	}
 
-	public void setMessageEvent(WebSocketMessageType type, Handler<WebSocketMessage> handler) {
-		setMessageEvent(type.toString(), handler);
+	public void addEvent(MessageType type, Handler<WebSocketMessage> handler) {
+		addEvent(type.toString(), handler);
 	}
 
-	public void setMessageEvent(String type, Handler<WebSocketMessage> handler) {
+	public void addEvent(String type, Handler<WebSocketMessage> handler) {
 		if (!socketEvents.containsKey(type))
 			socketEvents.put(type, handler);
 		else
 			socketEvents.replace(type, handler);
 	}
-	
+
 	public void broadcastMessage(WebSocketMessage message) {
 		JsonObject currentUser = session.getPrincipal();
 
@@ -100,12 +95,13 @@ public class WebSocketManager {
 	public void writeMessage(WebSocketMessage msg) {
 		this.socket.writeFrame(msg.toFrame());
 	}
-	
+
 	public void writeMessage(ServerWebSocket socket, WebSocketMessage msg) {
 		socket.writeFrame(msg.toFrame());
 	}
+
 	public WebSocketManager(ServerWebSocket ws, Session session) throws Exception {
-		
+
 		// TODO: correct exception type
 		if (session == null || ws == null) {
 			if (ws != null)
@@ -116,23 +112,22 @@ public class WebSocketManager {
 
 		this.session = session;
 		this.socket = ws;
-		this.sessionId = ws.textHandlerID();
 		JsonObject currentUser = session.getPrincipal();
 
-		// User user = new User("user", "email");
+		// add user to current online users
 		userMap.put(socket, currentUser.getString("email"));
 
 		// TODO: Broadcast Message with new registered Id + online status
-		log.debug("registering new connection with id: " + sessionId + ", users online: " + userMap.size());
+		log.debug("registering new connection with id: " + socket.textHandlerID() + " for user: " + session.getPrincipal().getString("email") + ", users online: " + userMap.size());
 
 		socket.closeHandler(getCloseHandler());
 		socket.frameHandler(getFrameHandler());
 
-		writeMessage(new WebSocketMessage(WebSocketMessageType.GetUserData, currentUser));
-		writeMessage(new WebSocketMessage(WebSocketMessageType.GetContactList, ContactMapper.getContacts(currentUser.getInteger("uid"))));
+		writeMessage(new WebSocketMessage(MessageType.USER_DATA, currentUser));
+		writeMessage(new WebSocketMessage(MessageType.CONTACT_LIST, ContactMapper.getContacts(currentUser.getInteger("uid"))));
 
 		// broadcast online status to everyone except us
-		broadcastMessage(new WebSocketMessage(WebSocketMessageType.UserOnline, currentUser));
+		broadcastMessage(new WebSocketMessage(MessageType.USER_STATUS_ONLINE, currentUser));
 	}
 
 }

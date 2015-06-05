@@ -11,6 +11,8 @@ import java.util.List;
 import org.hibernate.Session;
 
 public class MessageMapper {
+
+	@SuppressWarnings("unchecked")
 	public static JsonArray getMessages(int uid, int uidForeign, int countMessages) {
 		Session session = HibernateUtil.getSession();
 		System.out.println("getting messages by uid: " + uid + " and uid_foreign: " + uidForeign);
