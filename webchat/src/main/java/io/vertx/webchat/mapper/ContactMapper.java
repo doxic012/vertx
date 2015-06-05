@@ -21,7 +21,6 @@ public class ContactMapper {
 		try {
 			contactList = (List<Contact>) connectSession.createQuery("FROM Contact WHERE uid=:uid").setParameter("uid", uid).list();
 		} catch(NullPointerException e) {
-			System.out.println("keine Daten auf dem Kackserver, SO EINE SCHEIßE ALTER!");
 			return new JsonArray();
 		}
 		

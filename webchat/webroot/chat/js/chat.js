@@ -1,8 +1,33 @@
 
-$(document).ready(function() {
-	if (window.WebSocket) {
+$(document).ready(function() { 
+//	function send(message) {
+//		if (!window.WebSocket) {
+//			return;
+//		}
+//		if (socket.readyState == WebSocket.OPEN) {
+//			socket.send(message);
+//		} else {
+//			console.log("The socket is not open.");
+//		}
+//	}
 
-		socket = new ChatWebSocket("ws://localhost:8080/chat");
+	var btn = $("button[name=sendmessage]").click(function() {
+		var input = $("textarea[name=message]").val();
+		console.log("input value: " + input);
+		socket.sendMessage(socket.messageType.SendMessage, input, "target", false);
+	});
+});
+
+angular.module('chatApp', [])
+.controller('socketCtrl', function($scope){
+	$scope.articles = [
+	  { id: 1, name: "Pizza Vegetaria", price: 5 },
+	  { id: 2, name: "Pizza Salami",    price: 5.5 },
+	  { id: 3, name: "Pizza Thunfisch", price: 6 }
+	];
+	
+	if (window.WebSocket) {
+		var socket = new ChatWebSocket("ws://localhost:8080/chat");
 
 		socket.onopen = function(event) {
 			console.log("Web Socket opened!");
@@ -49,20 +74,4 @@ $(document).ready(function() {
 			console.log(message.messageData);
 		});
 	} 
-//	function send(message) {
-//		if (!window.WebSocket) {
-//			return;
-//		}
-//		if (socket.readyState == WebSocket.OPEN) {
-//			socket.send(message);
-//		} else {
-//			console.log("The socket is not open.");
-//		}
-//	}
-
-	var btn = $("button[name=sendmessage]").click(function() {
-		var input = $("textarea[name=message]").val();
-		console.log("input value: " + input);
-		socket.sendMessage(socket.messageType.SendMessage, input, "target", false);
-	});
 });
