@@ -21,7 +21,7 @@ $(document).ready(
 		});
 
 angular.module('chatApp', []).controller('socketCtrl', function($scope) {
-	$scope.contacts=[];
+	$scope.contacts=[]; 
 	if (window.WebSocket) {
 		console.log("creating websocket");
 		var socket = new ChatWebSocket("ws://localhost:8080/chat");
