@@ -17,16 +17,20 @@ public class WebSocketMessage {
 
 	private MessageType messageType;
 
-	private Object messageData;
+	private Object messageData; //Inhalt
 
-	private String origin = "server";
+	private String origin = "server"; //wer verschickt? server/client
 
-	private String target;
+	private String target; //wohin geht die Nachricht? server/client
 
 	private Timestamp timestamp;
 
-	private boolean reply;
-
+	private boolean reply; //Ist die Nachricht eine Rückmeldung auf eine andere Nachricht
+	
+	/**
+	 * Json.decodeValue braucht einen leeren Constructor, um die WebSocketMessage vom Client auf den Server ordentlich zu deserialisieren (verwendet setter)
+	 * @JsonIgnore und @JsonCreator (jackson annotation) wird verwendet, um Json.decodeValue mitzuteilen, welcher Constructor verwendet wird zum dekodieren
+	 */
 	@JsonCreator
 	public WebSocketMessage() {
 
@@ -53,7 +57,11 @@ public class WebSocketMessage {
 
 		System.out.println(this.toString());
 	}
-
+	
+	/**
+	 * Baut einen Frame, der per Websocket verschickt werden kann
+	 * @return
+	 */
 	public WebSocketFrame toFrame() {
 		return WebSocketFrame.textFrame(this.toString(), true);
 	}

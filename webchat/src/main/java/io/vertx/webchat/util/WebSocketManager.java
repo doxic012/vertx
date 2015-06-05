@@ -26,22 +26,25 @@ public class WebSocketManager {
 
 	private static HashMap<ServerWebSocket, String> userMap = new HashMap<ServerWebSocket, String>();
 
-	private static HashMap<String, Handler<WebSocketMessage>> socketEvents = new HashMap<String, Handler<WebSocketMessage>>();
+	private static HashMap<MessageType, Handler<WebSocketMessage>> socketEvents = new HashMap<MessageType, Handler<WebSocketMessage>>();
 
 	/**
-	 * The frame-handler
+	 * Nachrichten vom Client abhandeln (socket.send)
 	 * 
 	 * @return
 	 */
 	private Handler<WebSocketFrame> getFrameHandler() {
 		return frame -> {
-			if (session.isDestroyed() || !session.isLoggedIn()) {
+			//TODO Alle Sockets des Benutzers schließen
+			if (session.isDestroyed() || !session.isLoggedIn()) { //Wenn Session ausgelaufen oder Benutzer ausgeloggt, socket schließen
 				log.error("session destroyed, rejecting socket");
 				socket.close();
 				return;
 			}
 
 			try {
+				//frame.textData = message, Java und Javascript haben dasselbe Klassenobjekt WebSocketMessage, dadurch kann die Funktion Json.decodeValue die message in WebSocketMessage 
+				//deserialisieren und integrieren
 				WebSocketMessage message = Json.decodeValue(frame.textData(), WebSocketMessage.class);
 				message.setOrigin(session.getPrincipal().getString("email"));
 
@@ -65,23 +68,30 @@ public class WebSocketManager {
 	private Handler<Void> getCloseHandler() {
 		return handler -> {
 			userMap.remove(socket);
+			//TODO Wenn Benutzer 2 Browserfenster verwendet, ist Status evtl. nicht "offline"
 			broadcastMessage(new WebSocketMessage(MessageType.USER_STATUS_OFFLINE, session.getPrincipal()));
 
 			log.debug("un-registering new connection with id: " + socket.textHandlerID() + " for user: " + session.getPrincipal().getString("email") + ", users online:" + userMap.size());
 		};
 	}
-
+	
+	/**
+	 * Füge Event zur Hashmap socketEvents hinzu, damit FrameHandler damit arbeiten kann
+	 * Pro MessageType nur 1 Event (deswegen replace)
+	 * @param type
+	 * @param handler
+	 */
 	public void addEvent(MessageType type, Handler<WebSocketMessage> handler) {
-		addEvent(type.toString(), handler);
-	}
-
-	public void addEvent(String type, Handler<WebSocketMessage> handler) {
 		if (!socketEvents.containsKey(type))
 			socketEvents.put(type, handler);
 		else
 			socketEvents.replace(type, handler);
 	}
-
+	
+	/**
+	 * Schickt Message an alle Benutzer/Websockets außer dem Aktuellen
+	 * @param message
+	 */
 	public void broadcastMessage(WebSocketMessage message) {
 		JsonObject currentUser = session.getPrincipal();
 
@@ -91,11 +101,20 @@ public class WebSocketManager {
 			}
 		});
 	}
-
+	
+	/**
+	 * Verschicke WebsocketMessage an aktuellen Websocket
+	 * @param msg
+	 */
 	public void writeMessage(WebSocketMessage msg) {
 		this.socket.writeFrame(msg.toFrame());
 	}
-
+	
+	/**
+	 * Verschicke WebsocketMessage an übergebenen Websocket (writeFrame informiert Observer über neue Daten)
+	 * @param socket
+	 * @param msg
+	 */
 	public void writeMessage(ServerWebSocket socket, WebSocketMessage msg) {
 		socket.writeFrame(msg.toFrame());
 	}
@@ -112,12 +131,12 @@ public class WebSocketManager {
 
 		this.session = session;
 		this.socket = ws;
+		//Principal enthält JsonObject aus User-Model (uid, email, username)
 		JsonObject currentUser = session.getPrincipal();
 
-		// add user to current online users
-		userMap.put(socket, currentUser.getString("email"));
+		// Verknüpfe Benutzer mit Websocket (welche E-Mail gehört zu welchem Websocket) als Hashmap
+		userMap.put(socket, currentUser.getString("email")); 
 
-		// TODO: Broadcast Message with new registered Id + online status
 		log.debug("registering new connection with id: " + socket.textHandlerID() + " for user: " + session.getPrincipal().getString("email") + ", users online: " + userMap.size());
 
 		socket.closeHandler(getCloseHandler());

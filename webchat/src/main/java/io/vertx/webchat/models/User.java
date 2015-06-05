@@ -98,14 +98,8 @@ public class User implements Serializable {
 		JsonObject user = new JsonObject()
 			.put("uid", getUid())
 			.put("name", getName())
-			.put("email", getEmail())
-			.put("timestamp", getTimestamp().toString());
+			.put("email", getEmail());
 		return user;
-	}
-
-
-	public String toString() {
-		return "id: " + getUid() + ", nick: " + getName() + ", email: " + getEmail();
 	}
 
 	public Timestamp getTimestamp() {
