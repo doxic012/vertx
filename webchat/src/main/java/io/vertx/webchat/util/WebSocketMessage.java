@@ -11,11 +11,11 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 public class WebSocketMessage {
 
-	public enum WebSocketMessageType {
-		GetUserData, SendMessage, MessageRetrieved, GetMessageHistory, GetContactList, AddContact, RemoveContact, NotifyContact, UserOnline, UserOffline
+	public static enum MessageType {
+		USER_DATA, SEND_MESSAGE, MESSAGE_RETRIEVED, MESSAGE_HISTORY, CONTACT_LIST, ADD_CONTACT, CONTACT_REMOVE, CONTACT_NOTIFY, USER_STATUS_ONLINE, USER_STATUS_OFFLINE
 	}
 
-	private String messageType;
+	private MessageType messageType;
 
 	private Object messageData;
 
@@ -33,8 +33,8 @@ public class WebSocketMessage {
 	}
 
 	@JsonIgnore
-	public WebSocketMessage(WebSocketMessageType messageType, Object messageData, String origin, String target, Timestamp timestamp, boolean isReply) {
-		this.setMessageType(messageType.toString());
+	public WebSocketMessage(MessageType messageType, Object messageData, String origin, String target, Timestamp timestamp, boolean isReply) {
+		this.setMessageType(messageType);
 		this.setMessageData(messageData);
 		this.setOrigin(origin);
 		this.setTarget(target);
@@ -45,8 +45,8 @@ public class WebSocketMessage {
 	}
 
 	@JsonIgnore
-	public WebSocketMessage(WebSocketMessageType messageType, Object messageData) {
-		this.setMessageType(messageType.toString());
+	public WebSocketMessage(MessageType messageType, Object messageData) {
+		this.setMessageType(messageType);
 		this.setMessageData(messageData);
 		this.setTimestamp(Timestamp.valueOf(LocalDateTime.now()));
 		this.setReply(reply);
@@ -58,11 +58,11 @@ public class WebSocketMessage {
 		return WebSocketFrame.textFrame(this.toString(), true);
 	}
 
-	public String getMessageType() {
+	public MessageType getMessageType() {
 		return messageType;
 	}
 
-	public void setMessageType(String messageType) {
+	public void setMessageType(MessageType messageType) {
 		this.messageType = messageType;
 	}
 

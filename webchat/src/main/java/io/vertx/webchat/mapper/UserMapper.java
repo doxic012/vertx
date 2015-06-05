@@ -29,6 +29,7 @@ public class UserMapper {
 		return user.toJson();
 	}
 
+	@SuppressWarnings("unchecked")
 	public static JsonArray getUsers() {
 		Session session = HibernateUtil.getSession();
 

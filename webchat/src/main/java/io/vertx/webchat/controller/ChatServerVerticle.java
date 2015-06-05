@@ -17,7 +17,7 @@ import io.vertx.ext.apex.sstore.LocalSessionStore;
 import io.vertx.ext.auth.AuthProvider;
 import io.vertx.ext.auth.shiro.ShiroAuthProvider;
 import io.vertx.webchat.util.WebSocketManager;
-import io.vertx.webchat.util.WebSocketMessage.WebSocketMessageType;
+import io.vertx.webchat.util.WebSocketMessage.MessageType;
 import io.vertx.webchat.util.auth.FormLoginRememberHandler;
 import io.vertx.webchat.util.auth.FormRegistrationHandler;
 import io.vertx.webchat.util.auth.HashInfo;
@@ -62,10 +62,12 @@ public class ChatServerVerticle extends AbstractVerticle {
 				try {
 					WebSocketManager manager = new WebSocketManager(socket, session);
 
-					manager.setMessageEvent(WebSocketMessageType.SendMessage, message -> {
+					manager.addEvent(MessageType.SEND_MESSAGE, message -> {
 						String text = (String) message.getMessageData();
 						String target = message.getTarget();
-						System.out.println("send message event. data: " + text);
+						System.out.println("send message event. data: " + text+", target: "+target);
+						
+//						manager.write
 					});
 				} catch (Exception e) {
 					e.printStackTrace();
