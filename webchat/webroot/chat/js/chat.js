@@ -8,7 +8,7 @@ $(document).ready(
 			// socket.send(message);
 			// } else {
 			// console.log("The socket is not open.");
-			// }
+			// } 
 			// }
 
 			var btn = $("button[name=sendmessage]").click(
