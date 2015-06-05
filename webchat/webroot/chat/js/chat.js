@@ -10,23 +10,23 @@ $(document).ready(
         // console.log("The socket is not open.");
         // }
         // }
-
-        var btn = $("button[name=sendmessage]").click(
-            function () {
-                var input = $("textarea[name=message]").val();
-                console.log("input value: " + input);
-                socket.sendMessage(socket.messageType.SendMessage,
-                    input, "target", false);
-            });
+        //
+        //var btn = $("button[name=sendmessage]").click(
+        //    function () {
+        //        var input = $("textarea[name=message]").val();
+        //        console.log("input value: " + input);
+        //        socket.sendMessage(socket.messageType.SendMessage,
+        //            input, "target", false);
+        //    });
     });
 
-function setActive(activeContact) {
-    jQuery("div.contact-container").each(function () {
-        jQuery(this).removeClass("active");
-    });
-
-    jQuery(activeContact).addClass("active");
-};
+//function setActive(activeContact) {
+//    jQuery("div.contact-container").each(function () {
+//        jQuery(this).removeClass("active");
+//    });
+//
+//    jQuery(activeContact).addClass("active");
+//};
 
 angular.module('chatApp', []).controller('socketCtrl', function ($scope) {
         var allUsers = [];
@@ -46,13 +46,29 @@ angular.module('chatApp', []).controller('socketCtrl', function ($scope) {
             });
         };
 
-        $scope.getMessages = function (uid) {
+        $scope.setActive = function(contact) {
+            $scope.activeContact = contact;
 
+            socket.sendMessage(socket.messageType.MESSAGE_HISTORY, "", $scope.activeContact, false);
+        };
+
+        $scope.isActive = function(contact) {
+            return $scope.activeContact.equals(contact);
         };
 
         $scope.addContact = function (contact) {
             console.log(contact);
-        }
+
+            socket.sendMessage(socket.messageType.CONTACT_ADD, "", contact, false);
+        };
+
+        $scope.sendMessage = function(message) {
+            console.log(message);
+
+            if(message.length > 0) {
+                socket.sendMessage(socket.messageType.MESSAGE_SEND, message, $scope.activeContact, false);
+            }
+        };
         if (window.WebSocket) {
             console.log("creating websocket");
             var socket = new ChatWebSocket("ws://localhost:8080/chat");

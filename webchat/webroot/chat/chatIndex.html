@@ -33,7 +33,7 @@
                             <div class="contact-padding-container">
                                 <div class="input-group search-group">
                                     <input type="text" class="form-control searchform-input"
-                                           placeholder="add new contact" name="contact" ng-model="searchUser">
+                                           placeholder="Konakt hinzufügen" name="contact" ng-model="searchUser">
 
                                     <!--<div class="input-group-btn">-->
                                         <!--<button class="btn btn-default btn-search" type="submit"><img-->
@@ -52,8 +52,8 @@
 
                             <!-- Contact-list -->
                             <div class="contact-padding-container no-border contact-container"
-                                 ng-repeat="contact in contacts" onclick="setActive(this)"
-                                 ng-click="getMessages(contact)">
+                                 ng-repeat="contact in contacts"
+                                 ng-click="setActive(contact)" ng-class="{active : isActive(contact) }">
                                 <div class="contact">
                                     <span>{{contact.name}}<i class="glyphicon glyphicon-minus"></i></span>
                                 </div>
@@ -68,12 +68,12 @@
                                 <div class="row">
                                     <div class="col-xs-11">
                                         <div class="textarea-container">
-                                            <textarea placeholder="your answer..." name="message"></textarea>
+                                            <textarea placeholder="Deine Nachricht...." name="message" ng-model="textMessage"></textarea>
                                         </div>
                                     </div>
                                     <div class="col-xs-1">
                                         <div class="sendbutton-container">
-                                            <button class="btn-default btn-send-message" name="sendmessage">send
+                                            <button class="btn-default btn-send-message" name="sendmessage" ng-click="sendMessage(textMessage)">Senden
                                             </button>
                                         </div>
                                     </div>
