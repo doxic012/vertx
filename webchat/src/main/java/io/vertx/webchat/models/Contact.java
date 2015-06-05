@@ -42,7 +42,7 @@ public class Contact implements Serializable {
 	
 	@Column
 	private boolean notified;
-
+//
 //	@OneToOne(cascade = CascadeType.ALL)
 //    @JoinTable (name = "user", joinColumns = {@JoinColumn(name = "uid")}, inverseJoinColumns = {@JoinColumn(name = "uid")})
 //	private User contactUser = new User();

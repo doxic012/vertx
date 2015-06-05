@@ -1,26 +1,36 @@
 package io.vertx.webchat.mapper;
 
 import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
 import io.vertx.webchat.models.Contact;
 import io.vertx.webchat.models.User;
 import io.vertx.webchat.util.HibernateUtil;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.hibernate.Session;
+
 public class ContactMapper {
 
 	@SuppressWarnings("unchecked")
 	public static JsonArray getContacts(int uid) {
 		Session connectSession = HibernateUtil.getSession();
 
-		System.out.println("getting contacts for uid: "+uid);
 		try {
-			List<User> contactList = (List<User>) connectSession.createSQLQuery("SELECT u.* FROM User u INNER JOIN Contact c ON u.uid = c.uidForeign WHERE c.uid=:userId").setParameter("userId", uid).list();		
+			User user = (User) connectSession.createQuery("FROM User u INNER JOIN FETCH u.contacts where u.uid=:uid").setParameter("uid", uid).uniqueResult();
+
+			List<JsonObject> contactList = new ArrayList<JsonObject>();
+			user.getContacts().forEach(contact -> {
+				contactList.add(contact.toJson());
+			});
+			
 			return new JsonArray(contactList);
-		} catch(NullPointerException e) {
+
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 
 		return new JsonArray();

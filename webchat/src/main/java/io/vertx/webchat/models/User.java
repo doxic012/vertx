@@ -4,11 +4,13 @@ import io.vertx.core.json.JsonObject;
 
 import java.io.Serializable;
 import java.sql.Timestamp;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
@@ -53,6 +55,18 @@ public class User implements Serializable {
 
 	@Column
 	private Timestamp timestamp;
+
+	@OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+	@JoinTable(name = "contact", joinColumns = @JoinColumn(name = "uid"), inverseJoinColumns = @JoinColumn(name = "uidForeign"))
+	private List<User> contacts;
+	
+	public List<User> getContacts() {
+		return contacts;
+	}
+
+	public void setContacts(List<User> contacts) {
+		this.contacts = contacts;
+	}
 
 	public User() {
 	}

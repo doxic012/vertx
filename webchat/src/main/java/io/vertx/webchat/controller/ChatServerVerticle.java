@@ -193,7 +193,6 @@ public class ChatServerVerticle extends AbstractVerticle {
 
 		
 		JsonArray a=ContactMapper.getContacts(7);
-		System.out.println(a);
 		//		org.hibernate.Session connectSession = HibernateUtil.getSession();
 
 //		try {
