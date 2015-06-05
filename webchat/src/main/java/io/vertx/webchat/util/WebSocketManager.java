@@ -11,9 +11,7 @@ import io.vertx.ext.apex.Session;
 import io.vertx.webchat.mapper.ContactMapper;
 import io.vertx.webchat.util.WebSocketMessage.MessageType;
 
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 
 /**
  * This class handles the actual ServerWebSocket with a vertx-context.
@@ -28,7 +26,7 @@ public class WebSocketManager {
 
 	private static SessionSocketMap userMap = new SessionSocketMap();
 
-	private static HashMap<MessageType, Handler<WebSocketMessage>> socketEvents = new HashMap<MessageType, Handler<WebSocketMessage>>();
+	private static HashMap<MessageType, Handler<WebSocketMessage>> socketEvents = new  HashMap<MessageType, Handler<WebSocketMessage>>();
 
 	public WebSocketManager(ServerWebSocket ws, Session session) throws Exception {
 

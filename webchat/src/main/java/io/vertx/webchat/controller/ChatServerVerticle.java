@@ -24,10 +24,8 @@ import io.vertx.webchat.util.auth.FormRegistrationHandler;
 import io.vertx.webchat.util.auth.HashInfo;
 import io.vertx.webchat.util.auth.realm.ChatAuthRealm;
 
-
 import java.io.IOException;
 import java.time.LocalDate;
-
 
 import org.apache.shiro.crypto.hash.Sha256Hash;
 
@@ -70,6 +68,7 @@ public class ChatServerVerticle extends AbstractVerticle {
 					manager.addEvent(MessageType.SEND_MESSAGE, message -> {
 						String target = message.getTarget();
 						JsonObject targetPrincipal = UserMapper.getUserByEmail(target);
+						
 						System.out.println("send message event. data: " + message.getMessageData()+", target: "+target);
 						
 						manager.writeMessageToPrincipal(targetPrincipal, message);
