@@ -19,7 +19,7 @@ function() {
 				input, "target", false);
 	});
 });
-
+ 
 function setActive(activeContact) {
 	jQuery("div.contact-container").each(function() {
 		jQuery(this).removeClass("active");
