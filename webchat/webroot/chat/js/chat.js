@@ -1,24 +1,32 @@
 $(document).ready(
-		function() {
-			// function send(message) {
-			// if (!window.WebSocket) {
-			// return;
-			// }
-			// if (socket.readyState == WebSocket.OPEN) {
-			// socket.send(message);
-			// } else {
-			// console.log("The socket is not open.");
-			// } 
-			// }
+function() {
+	// function send(message) {
+	// if (!window.WebSocket) {
+	// return;
+	// }
+	// if (socket.readyState == WebSocket.OPEN) {
+	// socket.send(message);
+	// } else {
+	// console.log("The socket is not open.");
+	// } 
+	// }
 
-			var btn = $("button[name=sendmessage]").click(
-					function() {
-						var input = $("textarea[name=message]").val();
-						console.log("input value: " + input);
-						socket.sendMessage(socket.messageType.SendMessage,
-								input, "target", false);
-					});
-		});
+	var btn = $("button[name=sendmessage]").click(
+	function() {
+		var input = $("textarea[name=message]").val();
+		console.log("input value: " + input);
+		socket.sendMessage(socket.messageType.SendMessage,
+				input, "target", false);
+	});
+});
+
+function setActive(activeContact) {
+	jQuery("div.contact-container").each(function() {
+		jQuery(this).removeClass("active");
+	});
+	
+	jQuery(activeContact).addClass("active");
+};
 
 angular.module('chatApp', []).controller('socketCtrl', function($scope) {
 	$scope.contacts=[]; 
@@ -34,7 +42,7 @@ angular.module('chatApp', []).controller('socketCtrl', function($scope) {
 			console.log("Web Socket closed.");
 		};
 
-		socket.bind(socket.messageType.ContactList, function(message) {
+		socket.bind(socket.messageType.CONTACT_LIST, function(message) {
 			$scope.$apply(function() {
 				console.log("get contact list");
 				console.log(message);
@@ -42,7 +50,7 @@ angular.module('chatApp', []).controller('socketCtrl', function($scope) {
 			});
 		});
 
-		socket.bind(socket.messageType.UserData, function(message) {
+		socket.bind(socket.messageType.USER_DATA, function(message) {
 			console.log("get user data");
 			console.log(message);
 		});

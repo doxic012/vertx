@@ -122,5 +122,9 @@ div.contact-container i {
 	color: #f00;
 }
 
+div.contact-container.active {
+	background: #aaa;
+}
+
  
 
