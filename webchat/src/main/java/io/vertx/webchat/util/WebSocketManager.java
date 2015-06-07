@@ -15,6 +15,7 @@ import io.vertx.webchat.util.WebSocketMessage.MessageType;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.function.BiConsumer;
 
 /**
  * This class handles the actual ServerWebSocket with a vertx-context.
@@ -29,7 +30,7 @@ public class WebSocketManager {
 
 	private static SessionSocketMap userMap = new SessionSocketMap();
 
-	private static HashMap<MessageType, Handler<WebSocketMessage>> socketEvents = new  HashMap<MessageType, Handler<WebSocketMessage>>();
+	private static HashMap<MessageType, BiConsumer<ServerWebSocket, WebSocketMessage>> socketEvents = new  HashMap<MessageType, BiConsumer<ServerWebSocket, WebSocketMessage>>();
 
 	public WebSocketManager(ServerWebSocket ws, Session session) throws Exception {
 
@@ -63,9 +64,9 @@ public class WebSocketManager {
 		users.remove(currentUser);
 
 		// Verschicke Benutzerobjekt und Kontaktliste
-		writeMessage(new WebSocketMessage(MessageType.USER_DATA, currentUser));
-		writeMessage(new WebSocketMessage(MessageType.CONTACT_ALL, users));
-		writeMessage(new WebSocketMessage(MessageType.CONTACT_LIST, ContactMapper.getContacts(currentUser.getInteger("uid"))));
+		writeMessage(socket, new WebSocketMessage(MessageType.USER_DATA, currentUser));
+		writeMessage(socket, new WebSocketMessage(MessageType.CONTACT_ALL, users));
+		writeMessage(socket, new WebSocketMessage(MessageType.CONTACT_LIST, ContactMapper.getContacts(currentUser.getInteger("uid"))));
 	}
 	
 	
@@ -97,7 +98,7 @@ public class WebSocketManager {
 
 				// handle the frame
 				if (socketEvents.containsKey(message.getMessageType()))
-					socketEvents.get(message.getMessageType()).handle(message);
+					socketEvents.get(message.getMessageType()).accept(socket, message);
 
 			} catch (Exception ex) {
 				ex.printStackTrace();
@@ -139,7 +140,7 @@ public class WebSocketManager {
 	 * @param type
 	 * @param handler
 	 */
-	public void addEvent(MessageType type, Handler<WebSocketMessage> handler) {
+	public void addEvent(MessageType type, BiConsumer<ServerWebSocket, WebSocketMessage> handler) {
 		if (!socketEvents.containsKey(type))
 			socketEvents.put(type, handler);
 		else
@@ -170,15 +171,6 @@ public class WebSocketManager {
 	 */
 	public void writeMessage(ServerWebSocket socket, WebSocketMessage message) {
 		socket.writeFrame(message.toFrame());
-	}
-
-	/**
-	 * Verschicke WebsocketMessage an aktuellen Websocket
-	 * 
-	 * @param message
-	 */
-	public void writeMessage(WebSocketMessage message) {
-		writeMessage(socket, message);
 	}
 
 	/**

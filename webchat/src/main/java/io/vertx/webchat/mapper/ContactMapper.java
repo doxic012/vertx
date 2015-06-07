@@ -15,101 +15,104 @@ import org.hibernate.Session;
 
 public class ContactMapper {
 
-	@SuppressWarnings("unchecked")
-	public static JsonArray getContacts(int uid) {
-		Session connectSession = HibernateUtil.getSession();
+    @SuppressWarnings("unchecked")
+    public static JsonArray getContacts(int uid) {
+        Session connectSession = HibernateUtil.getSession();
 
-		try {
-			User user = (User) connectSession.createQuery("FROM User u INNER JOIN FETCH u.contacts where u.uid=:uid").setParameter("uid", uid).uniqueResult();
+        try {
+            User user = (User) connectSession.createQuery("FROM User u INNER JOIN FETCH u.contacts where u.uid=:uid").setParameter("uid", uid).uniqueResult();
 
-			List<JsonObject> contactList = new ArrayList<JsonObject>();
-			if(user.getContacts() != null) {
-				user.getContacts().forEach(contact -> {
-					contactList.add(contact.toJson());
-				});
-			}
+            List<JsonObject> contactList = new ArrayList<JsonObject>();
+            if (user.getContacts() != null) {
+                user.getContacts().forEach(contact -> {
+                    contactList.add(contact.toJson());
+                });
+            }
 
-			return new JsonArray(contactList);
+            return new JsonArray(contactList);
 
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
-		return new JsonArray();
-	}
+        return new JsonArray();
+    }
 
-	public static boolean addContact(int uid, int uidForeign) {
-		Session session = HibernateUtil.getSession();
-		session.beginTransaction();
+    public static boolean addContact(int uid, int uidForeign) {
+        Session session = HibernateUtil.getSession();
+        session.beginTransaction();
 
-		try {
-			Contact contact = new Contact();
-			contact.setUid(uid);
-			contact.setUidForeign(uidForeign);
-			contact.setTimestamp(Timestamp.valueOf(LocalDateTime.now()));
-			contact.setNotified(false);
+        try {
+            Contact contact = new Contact();
+            contact.setUid(uid);
+            contact.setUidForeign(uidForeign);
+            contact.setTimestamp(Timestamp.valueOf(LocalDateTime.now()));
+            contact.setNotified(false);
 
-			session.save(contact);
+            session.save(contact);
 
-		} catch (Exception e) {
-			e.printStackTrace();
-			System.out.println("Wasn't able to add contact to database");
-			return false;
-		} finally {
-			session.getTransaction().commit();
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("Wasn't able to add contact to database");
+            return false;
+        } finally {
+            session.getTransaction().commit();
 
-			if (session.isOpen())
-				session.close();
-		}
-		return true;
-	}
+            if (session.isOpen())
+                session.close();
+        }
+        return true;
+    }
 
-	public static boolean removeContact(int uid, int uidForeign) {
-		Session session = HibernateUtil.getSession();
-		session.beginTransaction();
+    public static boolean removeContact(int uid, int uidForeign) {
+        Session session = HibernateUtil.getSession();
+        session.beginTransaction();
 
-		try {
-			session.createSQLQuery("DELETE FROM Contact WHERE uid = " + uid + " AND uidForeign = " + uidForeign).executeUpdate();
-		} catch (Exception e) {
+        try {
+            session.createSQLQuery("DELETE FROM Contact WHERE uid = " + uid + " AND uidForeign = " + uidForeign).executeUpdate();
+        } catch (Exception e) {
 
-			e.printStackTrace();
-			System.out.println("Wasn't able to delete contact from database");
-			return false;
-		} finally {
-			session.getTransaction().commit();
+            e.printStackTrace();
+            System.out.println("Wasn't able to delete contact from database");
+            return false;
+        } finally {
+            session.getTransaction().commit();
 
-			if (session.isOpen())
-				session.close();
-		}
+            if (session.isOpen())
+                session.close();
+        }
 
-		return true;
-	}
+        return true;
+    }
 
-	public static boolean hasNotification(int uid, int uidForeign) {
-		Session session = HibernateUtil.getSession();
-		Contact contact = (Contact) session.createQuery("FROM Contact WHERE uid=:uid").setParameter("uid", uid).uniqueResult();
+    public static boolean hasNotification(int uid, int uidForeign) {
+        Session session = HibernateUtil.getSession();
+        Contact contact = (Contact) session.createQuery("FROM Contact WHERE uid=:uid").setParameter("uid", uid).uniqueResult();
 
-		return contact.notified();
-	}
+        return contact.notified();
+    }
 
-	public static boolean setNotification(int uid, int uidForeign) {
-		Session session = HibernateUtil.getSession();
-		session.beginTransaction();
+    public static boolean setNotification(int uid, int uidForeign, boolean status) {
+        Session session = HibernateUtil.getSession();
+        session.beginTransaction();
 
-		try {
-			session.createSQLQuery("UPDATE Contact SET notification = true WHERE uid = " + uid + " AND uidForeign = " + uidForeign);
+        try {
+//			session.createSQLQuery("UPDATE Contact SET notification = :status WHERE uid = :uid AND uidForeign = :uidForeign").setParameter("status", status).setParameter("uid", uid).setParameter("uidForeign", uidForeign);
 
-		} catch (Exception e) {
+            Contact contact = (Contact) session.createQuery("FROM Contact WHERE uid = :uid AND uidForeign = :uidForeign").setParameter("uid", uid).setParameter("uidForeign", uidForeign).uniqueResult();
+            contact.setNotified(status);
+            session.update(contact);
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("Wasn't able to set notification into database");
 
-			e.printStackTrace();
-			System.out.println("Wasn't able to set notification into database");
-			return false;
-		} finally {
-			session.getTransaction().commit();
+            return false;
+        } finally {
+            session.getTransaction().commit();
 
-			if (session.isOpen())
-				session.close();
-		}
-		return true;
-	}
+            if (session.isOpen())
+                session.close();
+        }
+        return true;
+    }
 }

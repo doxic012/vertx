@@ -9,6 +9,7 @@ angular.module('chatApp', []).
         $scope.hasContact = function() {
             return $scope.activeContact != null;
         }
+
         $scope.getAllUsers = function () {
             return allUsers.filter(function (user) {
                 var contains = false;
@@ -74,10 +75,14 @@ angular.module('chatApp', []).
             });
         });
         socket.bind(socket.CONTACT_ADD, function (message) {
-
+            $scope.$apply(function () {
+                $scope.contacts = message.messageData;
+            });
         });
         socket.bind(socket.CONTACT_REMOVE, function (message) {
-
+            $scope.$apply(function () {
+                $scope.contacts = message.messageData;
+            });
         });
         socket.bind(socket.CONTACT_NOTIFY, function (message) {
 

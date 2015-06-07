@@ -1,3 +1,12 @@
+@width-button-send: 40px;
+@height-row-sendmessage: 60px;
+
+.fluid-row(@fixedWidth) {
+  width: ~"calc(100% - @{fixedWidth})";
+  float: left;
+  clear: both;
+}
+
 .col-lg-1, .col-lg-10, .col-lg-11, .col-lg-12, .col-lg-2, .col-lg-3, .col-lg-4, .col-lg-5, .col-lg-6, .col-lg-7, .col-lg-8, .col-lg-9, .col-md-1, .col-md-10, .col-md-11, .col-md-12, .col-md-2, .col-md-3, .col-md-4, .col-md-5, .col-md-6, .col-md-7, .col-md-8, .col-md-9, .col-sm-1, .col-sm-10, .col-sm-11, .col-sm-12, .col-sm-2, .col-sm-3, .col-sm-4, .col-sm-5, .col-sm-6, .col-sm-7, .col-sm-8, .col-sm-9, .col-xs-1, .col-xs-10, .col-xs-11, .col-xs-12, .col-xs-2, .col-xs-3, .col-xs-4, .col-xs-5, .col-xs-6, .col-xs-7, .col-xs-8, .col-xs-9 {
   position: relative;
   min-height: 1px;
@@ -16,7 +25,12 @@ body {
   color: #5e5e5e;
 }
 
-.content-container {
+// All container
+.container {
+  margin-top: 20px;
+}
+
+.container-content {
   background: #fff;
   font-size: 12px;
 
@@ -26,30 +40,42 @@ body {
   }
 }
 
-.contact-padding-container {
-  padding: 10px 20px;
-  border-bottom: 1px solid #EEE;
-}
-
-.container {
-  margin-top: 20px;
-}
-
 .contact-bar {
   min-height: 500px;
   background: #F8F8F8;
   border-right: 1px solid #EEE;
 }
 
-.message-container {
+.container-contact {
+  i {
+    float: right;
+    color: #f00;
+  }
+  &.active {
+    background: #aaa;
+  }
+}
+
+.container-contact-padding {
+  padding: 10px 20px;
+  border-bottom: 1px solid #EEE;
+}
+
+.container-message {
   min-height: 500px;
   background: #fff;
 }
 
-.message-box-container {
+.container-message-box {
   height: 436px;
   padding: 10px 5px 10px 0;
   overflow-y: scroll;
+}
+
+.message-box {
+  width: 70%;
+  margin-bottom: 5px;
+  float: right;
 }
 
 .searchform-input {
@@ -60,24 +86,34 @@ body {
   border: none;
 }
 
-textarea {
-  width: 100%;
-  font-size: 13px;
-  border: 0;
-  padding: 10px 8px;
-  resize: none;
-  height: 60px;
+.container-textarea {
+  .fluid-row(@width-button-send+4px);
+
+  textarea {
+    width: 100%;
+    font-size: 13px;
+    border: 0;
+    padding: 10px 8px;
+    resize: none;
+    height: @height-row-sendmessage;
+  }
 }
 
 button.btn-send-message {
-  width: 100%;
-  max-width: 80px;
-  height: 64px;
+  //width: 100%;
+  //max-width: 40px;
+  width: @width-button-send;
+  height: @height-row-sendmessage;
   border: none;
-  //background: #EEE;
+  //float: right;
+  //clear: both;
 
-  float: right;
-  clear: both;
+  color: grey;
+  background-color: white;
+
+  &:hover {
+    color: black;
+  }
 }
 
 .timestamp {
@@ -97,12 +133,6 @@ button.btn-send-message {
     margin-bottom: 0;
     float: right;
   }
-}
-
-.message-box {
-  width: 70%;
-  margin-bottom: 5px;
-  float: right;
 }
 
 .foreign {
@@ -127,31 +157,21 @@ button.btn-send-message {
   }
 }
 
-.contact-container {
-  i {
-    float: right;
-    color: #f00;
-  }
-  &.active {
-    background: #aaa;
-  }
-}
+ul.dropdown-menu {
+  margin: 0;
+  padding: 0;
+  border: 0;
 
-.user-dropdown {
-  position: absolute;
-  width: 75%;
-  z-index: 1;
+  li.dropdown-user-entry {
+    padding: 10px;
 
-}
-
-.user-entry {
-  display: none;
-  &:hover {
-    background: #F2F2F2;
-    cursor: pointer;
-  }
-  .glyphicon {
-    float: right;
-    clear: both;
+    &:hover {
+      background: #F2F2F2;
+      cursor: pointer;
+    }
+    .glyphicon {
+      float: right;
+      clear: both;
+    }
   }
 }

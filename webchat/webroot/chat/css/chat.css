@@ -1,149 +1,184 @@
-.col-lg-1, .col-lg-10, .col-lg-11, .col-lg-12, .col-lg-2, .col-lg-3, .col-lg-4, .col-lg-5, .col-lg-6, .col-lg-7, .col-lg-8, .col-lg-9, .col-md-1, .col-md-10, .col-md-11, .col-md-12, .col-md-2, .col-md-3, .col-md-4, .col-md-5, .col-md-6, .col-md-7, .col-md-8, .col-md-9, .col-sm-1, .col-sm-10, .col-sm-11, .col-sm-12, .col-sm-2, .col-sm-3, .col-sm-4, .col-sm-5, .col-sm-6, .col-sm-7, .col-sm-8, .col-sm-9, .col-xs-1, .col-xs-10, .col-xs-11, .col-xs-12, .col-xs-2, .col-xs-3, .col-xs-4, .col-xs-5, .col-xs-6, .col-xs-7, .col-xs-8, .col-xs-9 {
-    position: relative;
-    min-height: 1px;
-    padding-right: 4px;
-    padding-left: 4px;
+.col-lg-1,
+.col-lg-10,
+.col-lg-11,
+.col-lg-12,
+.col-lg-2,
+.col-lg-3,
+.col-lg-4,
+.col-lg-5,
+.col-lg-6,
+.col-lg-7,
+.col-lg-8,
+.col-lg-9,
+.col-md-1,
+.col-md-10,
+.col-md-11,
+.col-md-12,
+.col-md-2,
+.col-md-3,
+.col-md-4,
+.col-md-5,
+.col-md-6,
+.col-md-7,
+.col-md-8,
+.col-md-9,
+.col-sm-1,
+.col-sm-10,
+.col-sm-11,
+.col-sm-12,
+.col-sm-2,
+.col-sm-3,
+.col-sm-4,
+.col-sm-5,
+.col-sm-6,
+.col-sm-7,
+.col-sm-8,
+.col-sm-9,
+.col-xs-1,
+.col-xs-10,
+.col-xs-11,
+.col-xs-12,
+.col-xs-2,
+.col-xs-3,
+.col-xs-4,
+.col-xs-5,
+.col-xs-6,
+.col-xs-7,
+.col-xs-8,
+.col-xs-9 {
+  position: relative;
+  min-height: 1px;
+  padding-right: 4px;
+  padding-left: 4px;
 }
-
 .row {
-    margin-right: -4px;
-    margin-left: -4px;
+  margin-right: -4px;
+  margin-left: -4px;
 }
-
 body {
-    background: #edecec;
-    font-family: "Comic Sans MS", cursive, sans-serif;
-    color: #5e5e5e;
+  background: #edecec;
+  font-family: "Comic Sans MS", cursive, sans-serif;
+  color: #5e5e5e;
 }
-
-div.content-container {
-    background: #fff;
-    font-size: 12px;
+.container {
+  margin-top: 20px;
 }
-
-div.container {
-    margin-top: 20px;
+.container-content {
+  background: #fff;
+  font-size: 12px;
 }
-
-div.contact-bar {
-    min-height: 500px;
-    background: #F8F8F8;
-    border-right: 1px solid #EEE;
+.container-content:not(.active):hover {
+  background: #F2F2F2;
+  cursor: pointer;
 }
-
-div.message-container {
-    min-height: 500px;
-    background: #fff;
+.contact-bar {
+  min-height: 500px;
+  background: #F8F8F8;
+  border-right: 1px solid #EEE;
 }
-
-div.contact-container:not(.active):hover {
-    background: #F2F2F2;
-    cursor: pointer;
+.container-contact i {
+  float: right;
+  color: #f00;
 }
-
-div.contact-padding-container {
-    padding: 10px 20px;
-    border-bottom: 1px solid #EEE;
+.container-contact.active {
+  background: #aaa;
 }
-
-input.searchform-input {
-    height: 35px;
+.container-contact-padding {
+  padding: 10px 20px;
+  border-bottom: 1px solid #EEE;
 }
-
-div.no-border {
-    border: none;
+.container-message {
+  min-height: 500px;
+  background: #fff;
 }
-
-div.message-box-container {
-    height: 436px;
-    padding: 10px 5px 10px 0;
-    overflow-y: scroll;
+.container-message-box {
+  height: 436px;
+  padding: 10px 5px 10px 0;
+  overflow-y: scroll;
 }
-
-textarea {
-    width: 100%;
-    font-size: 13px;
-    border: 0;
-    padding: 10px 8px;
-    resize: none;
-    height: 60px;
+.message-box {
+  width: 70%;
+  margin-bottom: 5px;
+  float: right;
 }
-
+.searchform-input {
+  height: 35px;
+}
+.no-border {
+  border: none;
+}
+.container-textarea {
+  width: calc(100% - 44px);
+  float: left;
+  clear: both;
+}
+.container-textarea textarea {
+  width: 100%;
+  font-size: 13px;
+  border: 0;
+  padding: 10px 8px;
+  resize: none;
+  height: 60px;
+}
 button.btn-send-message {
-    width: 100%;
-    max-width: 80px;
-    height: 64px;
-    border: none;
-    /*background: #EEE;*/
-
-    float: right;
-    clear: both;
+  width: 40px;
+  height: 60px;
+  border: none;
+  color: grey;
+  background-color: white;
 }
-
-div.timestamp {
-    color: #B3B3B3;
-    font-size: 10px;
-    width: 100%;
+button.btn-send-message:hover {
+  color: black;
 }
-
-div.message {
-    width: 100%;
-    background: #eee;
+.timestamp {
+  color: #B3B3B3;
+  font-size: 10px;
+  width: 100%;
 }
-
-div.message p {
-    padding: 10px;
-    margin-bottom: 0;
+.timestamp span {
+  float: right;
 }
-
-div.message-box {
-    width: 70%;
-    margin-bottom: 5px;
+.message {
+  width: 100%;
+  background: #eee;
 }
-
-div.foreign {
-    background: #ffc107;
-    color: #fff;
+.message p {
+  padding: 10px;
+  margin-bottom: 0;
+  float: right;
 }
-
-div.name {
-    color: #B3B3B3;
-    font-weight: bold;
-    width: 100%;
-    height: 18px;
+.foreign {
+  background: #ffc107;
+  color: #fff;
 }
-
-div.message-box, div.name span, div.message p, div.timestamp span {
-    float: right;
+.name {
+  color: #B3B3B3;
+  font-weight: bold;
+  width: 100%;
+  height: 18px;
 }
-
-div.foreign-box, div.foreign-box div.name span, div.foreign-box div.foreign p, div.foreign-box div.timestamp span {
-    float: left;
+.name span {
+  float: right;
 }
-
-div.contact-container i {
-    float: right;
-    color: #f00;
+.foreign-box,
+.foreign-box .name span,
+.foreign-box .foreign p,
+.foreign-box .timestamp span {
+  float: left;
 }
-
-div.contact-container.active {
-    background: #aaa;
+ul.dropdown-menu {
+  margin: 0;
+  padding: 0;
+  border: 0;
 }
-
-.user-dropdown {
-    position: absolute;
-    width: 75%;
-    z-index: 1;
+ul.dropdown-menu li.dropdown-user-entry {
+  padding: 10px;
 }
-.user-entry {
-    display: none;
+ul.dropdown-menu li.dropdown-user-entry:hover {
+  background: #F2F2F2;
+  cursor: pointer;
 }
-.user-entry .glyphicon {
-    float: right;
-    clear: both;
-}
-
-.user-entry:hover {
-    background: #F2F2F2;
-    cursor: pointer;
+ul.dropdown-menu li.dropdown-user-entry .glyphicon {
+  float: right;
+  clear: both;
 }

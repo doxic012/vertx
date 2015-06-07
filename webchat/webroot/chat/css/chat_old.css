@@ -1,0 +1,149 @@
+.col-lg-1, .col-lg-10, .col-lg-11, .col-lg-12, .col-lg-2, .col-lg-3, .col-lg-4, .col-lg-5, .col-lg-6, .col-lg-7, .col-lg-8, .col-lg-9, .col-md-1, .col-md-10, .col-md-11, .col-md-12, .col-md-2, .col-md-3, .col-md-4, .col-md-5, .col-md-6, .col-md-7, .col-md-8, .col-md-9, .col-sm-1, .col-sm-10, .col-sm-11, .col-sm-12, .col-sm-2, .col-sm-3, .col-sm-4, .col-sm-5, .col-sm-6, .col-sm-7, .col-sm-8, .col-sm-9, .col-xs-1, .col-xs-10, .col-xs-11, .col-xs-12, .col-xs-2, .col-xs-3, .col-xs-4, .col-xs-5, .col-xs-6, .col-xs-7, .col-xs-8, .col-xs-9 {
+    position: relative;
+    min-height: 1px;
+    padding-right: 4px;
+    padding-left: 4px;
+}
+
+.row {
+    margin-right: -4px;
+    margin-left: -4px;
+}
+
+body {
+    background: #edecec;
+    font-family: "Comic Sans MS", cursive, sans-serif;
+    color: #5e5e5e;
+}
+
+div.content-container {
+    background: #fff;
+    font-size: 12px;
+}
+
+div.container {
+    margin-top: 20px;
+}
+
+div.contact-bar {
+    min-height: 500px;
+    background: #F8F8F8;
+    border-right: 1px solid #EEE;
+}
+
+div.message-container {
+    min-height: 500px;
+    background: #fff;
+}
+
+div.contact-container:not(.active):hover {
+    background: #F2F2F2;
+    cursor: pointer;
+}
+
+div.contact-padding-container {
+    padding: 10px 20px;
+    border-bottom: 1px solid #EEE;
+}
+
+input.searchform-input {
+    height: 35px;
+}
+
+div.no-border {
+    border: none;
+}
+
+div.message-box-container {
+    height: 436px;
+    padding: 10px 5px 10px 0;
+    overflow-y: scroll;
+}
+
+textarea {
+    width: 100%;
+    font-size: 13px;
+    border: 0;
+    padding: 10px 8px;
+    resize: none;
+    height: 60px;
+}
+
+button.btn-send-message {
+    width: 100%;
+    max-width: 80px;
+    height: 64px;
+    border: none;
+    /*background: #EEE;*/
+
+    float: right;
+    clear: both;
+}
+
+div.timestamp {
+    color: #B3B3B3;
+    font-size: 10px;
+    width: 100%;
+}
+
+div.message {
+    width: 100%;
+    background: #eee;
+}
+
+div.message p {
+    padding: 10px;
+    margin-bottom: 0;
+}
+
+div.message-box {
+    width: 70%;
+    margin-bottom: 5px;
+}
+
+div.foreign {
+    background: #ffc107;
+    color: #fff;
+}
+
+div.name {
+    color: #B3B3B3;
+    font-weight: bold;
+    width: 100%;
+    height: 18px;
+}
+
+div.message-box, div.name span, div.message p, div.timestamp span {
+    float: right;
+}
+
+div.foreign-box, div.foreign-box div.name span, div.foreign-box div.foreign p, div.foreign-box div.timestamp span {
+    float: left;
+}
+
+div.contact-container i {
+    float: right;
+    color: #f00;
+}
+
+div.contact-container.active {
+    background: #aaa;
+}
+
+.user-dropdown {
+    position: absolute;
+    width: 75%;
+    z-index: 1;
+}
+.user-entry {
+    display: none;
+}
+.user-entry .glyphicon {
+    float: right;
+    clear: both;
+}
+
+.user-entry:hover {
+    background: #F2F2F2;
+    cursor: pointer;
+}

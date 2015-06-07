@@ -68,7 +68,7 @@ public class ChatServerVerticle extends AbstractVerticle {
 				try {
 					WebSocketManager manager = new WebSocketManager(socket, session);
 
-					manager.addEvent(MessageType.MESSAGE_SEND, message -> {
+					manager.addEvent(MessageType.MESSAGE_SEND, (socketOrigin, message) -> {
 						JsonObject origin = message.getOrigin();
 						JsonObject target = message.getTarget();
 
@@ -78,36 +78,40 @@ public class ChatServerVerticle extends AbstractVerticle {
 						boolean status = MessageMapper.addMessage(origin.getInteger("uid"), target.getInteger("uid"), (String) message.getMessageData());
 
 						// reply to the user with a status message of the storages process
-						manager.writeMessage(message.setMessageData(status).setReply(true));
+						manager.writeMessage(socketOrigin, message.setMessageData(status).setReply(true));
 
 						// send message to target only if the storage process was successful
 						if (status) {
+							ContactMapper.setNotification(origin.getInteger("uid"), target.getInteger("uid"), true);
+
 							if (targetOnline)
 								manager.writeMessageToPrincipal(target, message);
-							else
-								ContactMapper.setNotification(origin.getInteger("uid"), target.getInteger("uid"));
 						}
 					});
-					manager.addEvent(MessageType.MESSAGE_READ, message -> {
+					manager.addEvent(MessageType.MESSAGE_READ, (socketOrigin, message) -> {
 						JsonObject origin = message.getOrigin();
 						JsonObject target = message.getTarget();
 
 						System.out.println("message read event. data: " + message.getMessageData() + ", target: " + target);
 
+						boolean status = ContactMapper.setNotification(origin.getInteger("uid"), target.getInteger("uid"), false);
+
 						// Notify the original sender of a message that the target has read it
+						if(status)
 						manager.writeMessageToPrincipal(target, message);
 					});
-					manager.addEvent(MessageType.MESSAGE_HISTORY, message -> {
+					manager.addEvent(MessageType.MESSAGE_HISTORY, (socketOrigin, message) -> {
 						JsonObject origin = message.getOrigin();
 						JsonObject target = message.getTarget();
 						int count = (int) message.getMessageData();
 
 						System.out.println("get message history event. data: " + message.getMessageData() + ", target: " + target);
 
+						// reply history to origin websocket only
 						JsonArray history = MessageMapper.getMessages(origin.getInteger("uid"), target.getInteger("uid"), count);
-						manager.writeMessageToPrincipal(origin, message.setMessageData(history).setReply(true));
+						manager.writeMessage(socketOrigin, message.setMessageData(history).setReply(true));
 					});
-					manager.addEvent(MessageType.CONTACT_ADD, message -> {
+					manager.addEvent(MessageType.CONTACT_ADD, (socketOrigin, message) -> {
 						JsonObject origin = message.getOrigin();
 						JsonObject target = message.getTarget();
 
@@ -115,7 +119,7 @@ public class ChatServerVerticle extends AbstractVerticle {
 
 						System.out.println("add contact event. data: " + message.getMessageData() + ", target: " + target);
 
-						// Add target to the contact list and reply the modified contact list to the user
+						// Add target to the contact list and reply the modified contact list to all sockets of the user
 						boolean status = ContactMapper.addContact(origin.getInteger("uid"), target.getInteger("uid"));
 
 						if (status) {
@@ -124,13 +128,13 @@ public class ChatServerVerticle extends AbstractVerticle {
 						}
 
 					});
-					manager.addEvent(MessageType.CONTACT_REMOVE, message -> {
+					manager.addEvent(MessageType.CONTACT_REMOVE, (socketOrigin, message) -> {
 						JsonObject origin = message.getOrigin();
 						JsonObject target = message.getTarget();
 
 						System.out.println("remove contact event. data: " + message.getMessageData() + ", target: " + target);
 
-						// Remove target from the contact list and reply the modified contact list to the user
+						// Remove target from the contact list and reply the modified contact list to all sockets of the user
 						boolean status = ContactMapper.removeContact(origin.getInteger("uid"), target.getInteger("uid"));
 
 						if (status) {
@@ -138,14 +142,14 @@ public class ChatServerVerticle extends AbstractVerticle {
 							manager.writeMessageToPrincipal(origin, new WebSocketMessage(MessageType.CONTACT_LIST, contactList));
 						}
 					});
-					manager.addEvent(MessageType.CONTACT_LIST, message -> {
+					manager.addEvent(MessageType.CONTACT_LIST, (socketOrigin, message) -> {
 						JsonObject origin = message.getOrigin();
 
 						System.out.println("get contact list event. data: " + message.getMessageData() + ", origin: " + origin);
 
-						// Reply the contact list
+						// Reply the contact list to the origin socket
 						JsonArray contacts = ContactMapper.getContacts(origin.getInteger("uid"));
-						manager.writeMessageToPrincipal(origin, message.setMessageData(contacts).setReply(true));
+						manager.writeMessage(socketOrigin, message.setMessageData(contacts).setReply(true));
 					});
 
 				} catch (Exception e) {
