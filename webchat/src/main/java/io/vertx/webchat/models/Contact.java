@@ -20,8 +20,8 @@ create TABLE contact (
 		  `notified` boolean DEFAULT NULL,
 		  `timestamp` timestamp,
 		  PRIMARY KEY (`uid`, `uidForeign`),
-		  FOREIGN KEY (`uid`) REFERENCES user (`uid`),
-		  FOREIGN KEY (`uidForeign`) REFERENCES user (`uid`)
+		  FOREIGN KEY (`uid`) REFERENCES owner (`uid`),
+		  FOREIGN KEY (`uidForeign`) REFERENCES owner (`uid`)
 		) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8;
 */
 
@@ -42,16 +42,7 @@ public class Contact implements Serializable {
 	
 	@Column
 	private boolean notified;
-//
-//	@OneToOne(cascade = CascadeType.ALL)
-//    @JoinTable (name = "user", joinColumns = {@JoinColumn(name = "uid")}, inverseJoinColumns = {@JoinColumn(name = "uid")})
-//	private User contactUser = new User();
-//	
-//	@OneToOne(cascade = CascadeType.ALL)
-//    @JoinTable (name = "user", joinColumns = {@JoinColumn(name = "uidforeign")}, inverseJoinColumns = {@JoinColumn(name = "uid")})
-//	private User contactForeign = new User();
-//	
-//	
+
 	public int getUid() {
 		return uid;
 	}

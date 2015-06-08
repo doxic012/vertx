@@ -23,7 +23,7 @@ public class ChatAuthRealm extends ShiroAuthRealmBase {
 	/**
 	 * This authentication-realm is based on the {@link ShiroAuthRealmBase}
 	 * using a {@link Subject} to
-	 * login the current user.
+	 * login the current owner.
 	 * The login-method is overriden to make use of the implemented
 	 * "rememberMe"-status of a UsernamePasswordToken.
 	 * 
@@ -32,7 +32,7 @@ public class ChatAuthRealm extends ShiroAuthRealmBase {
 	 * 
 	 * @param factory A hibernate session-factory
 	 * @param hashingInfo Information about a hashing-algorithm that shall be
-	 *            used when decoding the user credentials
+	 *            used when decoding the owner credentials
 	 */
 	public ChatAuthRealm(HashInfo hashingInfo) {
 		ChatJdbcRealm realm = new ChatJdbcRealm(hashingInfo);

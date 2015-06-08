@@ -51,13 +51,13 @@ public class ChatJdbcRealm extends JdbcRealm {
 		if (userPassToken.getUsername() == null)
 			throw new AuthenticationException("Invalid AuthenticationToken: username is null");
 
-		// Open hibernate session and read user credentials
+		// Open hibernate session and read owner credentials
 
 		User user = UserMapper.getUserCredentials(userPassToken.getUsername());
 
 		System.out.println(user);
 		if (user == null)
-			throw new AuthenticationException("No account found for user '" + userPassToken.getUsername() + "'");
+			throw new AuthenticationException("No account found for owner '" + userPassToken.getUsername() + "'");
 
 		return new SimpleAuthenticationInfo(user.getName(), user.getPassword().toCharArray(), getHashedSalt(user.getSalt()), user.getName());
 

@@ -84,7 +84,7 @@ public class FormLoginRememberHandlerImpl implements FormLoginRememberHandler {
 			// Get principle-data to save in the session
 				JsonObject principleData = UserMapper.getUserByEmail(userMail);
 
-				// Mark the user as logged in
+				// Mark the owner as logged in
 				session.setPrincipal(principleData);
 				session.setAuthProvider(authProvider);
 

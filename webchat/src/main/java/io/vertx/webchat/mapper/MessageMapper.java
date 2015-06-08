@@ -1,6 +1,7 @@
 package io.vertx.webchat.mapper;
 
 import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
 import io.vertx.webchat.models.Message;
 import io.vertx.webchat.util.HibernateUtil;
 
@@ -22,12 +23,13 @@ public class MessageMapper {
 		return new JsonArray(messages);
 	}
 
-	public static boolean addMessage(int uid, int uidForeign, String content) {
+	// Change: boolean -> Message
+	public static JsonObject addMessage(int uid, int uidForeign, String content) {
+		Message message = new Message();
 		Session session = HibernateUtil.getSession();
 		session.beginTransaction();
 
 		try {
-			Message message = new Message();
 			message.setMessage(content);
 			message.setUid(uid);
 			message.setUidForeign(uidForeign);
@@ -36,7 +38,7 @@ public class MessageMapper {
 			session.save(message);
 		} catch (Exception e) {
 			System.out.println("Wasn't able to add Message to database");
-			return false;
+			return null;
 		} finally {
 			session.getTransaction().commit();
 			
@@ -44,6 +46,6 @@ public class MessageMapper {
 				session.close();
 		}
 
-		return true;
+		return message.toJson();
 	}
 }

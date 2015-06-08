@@ -1,6 +1,9 @@
 @width-button-send: 40px;
 @height-row-sendmessage: 60px;
 
+@color-hover: #F2F2F2;
+@color-active: #aaa;
+
 .fluid-row(@fixedWidth) {
   width: ~"calc(100% - @{fixedWidth})";
   float: left;
@@ -25,59 +28,6 @@ body {
   color: #5e5e5e;
 }
 
-// All container
-.container {
-  margin-top: 20px;
-}
-
-.container-content {
-  background: #fff;
-  font-size: 12px;
-
-  &:not(.active):hover {
-    background: #F2F2F2;
-    cursor: pointer;
-  }
-}
-
-.contact-bar {
-  min-height: 500px;
-  background: #F8F8F8;
-  border-right: 1px solid #EEE;
-}
-
-.container-contact {
-  i {
-    float: right;
-    color: #f00;
-  }
-  &.active {
-    background: #aaa;
-  }
-}
-
-.container-contact-padding {
-  padding: 10px 20px;
-  border-bottom: 1px solid #EEE;
-}
-
-.container-message {
-  min-height: 500px;
-  background: #fff;
-}
-
-.container-message-box {
-  height: 436px;
-  padding: 10px 5px 10px 0;
-  overflow-y: scroll;
-}
-
-.message-box {
-  width: 70%;
-  margin-bottom: 5px;
-  float: right;
-}
-
 .searchform-input {
   height: 35px;
 }
@@ -86,28 +36,150 @@ body {
   border: none;
 }
 
-.container-textarea {
-  .fluid-row(@width-button-send+4px);
+// All container
+.container {
+  margin-top: 20px;
+}
 
-  textarea {
-    width: 100%;
-    font-size: 13px;
-    border: 0;
-    padding: 10px 8px;
-    resize: none;
-    height: @height-row-sendmessage;
+.container-content {
+  background: #fff;
+  font-size: 1em;
+
+  &:not(.active):hover {
+    background: @color-hover;
+    cursor: pointer;
   }
 }
 
-button.btn-send-message {
-  //width: 100%;
-  //max-width: 40px;
+.contact-bar {
+  min-height: 500px;
+  background: #F8F8F8;
+  border-right: 1px solid #EEE;
+
+  .owner {
+    text-align: center;
+    font-size: 1.15em;
+  }
+
+  .container-contact {
+    .contact-action {
+      float: right;
+      clear: both;
+      display: none;
+
+      &.add-contact:hover {
+        color: limegreen;
+      }
+      &.remove-contact:hover {
+        color: red;
+      }
+    }
+
+    &:hover {
+      background: @color-hover;
+      cursor: pointer;
+
+      .contact-action {
+        display: inline-block;
+      }
+    }
+
+    &.active {
+      background: @color-active;
+    }
+  }
+
+  .container-contact-padding {
+    padding: 10px;
+    border-bottom: 1px solid #EEE;
+  }
+}
+
+.container-message {
+  min-height: 500px;
+  background: #fff;
+
+  .container-message-box {
+    height: 436px;
+    padding: 10px 5px 10px 0;
+    overflow-y: scroll;
+  }
+
+  .message-box {
+    width: 70%;
+    margin-bottom: 5px;
+    float: right;
+  }
+
+  .container-textarea {
+    .fluid-row(@width-button-send+4px);
+
+    textarea {
+      width: 100%;
+      font-size: 13px;
+      border: 0;
+      padding: 10px 8px;
+      resize: none;
+      height: @height-row-sendmessage;
+    }
+  }
+
+  .timestamp {
+    color: #B3B3B3;
+    font-size: 10px;
+    width: 100%;
+    span {
+      float: right;
+    }
+  }
+
+  .message {
+    width: 100%;
+    background: #eee;
+    p {
+      padding: 10px;
+      margin-bottom: 0;
+      float: right;
+    }
+  }
+
+  .foreign {
+    background: #ffc107;
+    color: #fff;
+  }
+
+  .name {
+    color: #B3B3B3;
+    font-weight: bold;
+    width: 100%;
+    height: 18px;
+
+    span {
+      float: right;
+    }
+  }
+
+  .foreign-box {
+    &, .name span, .foreign p, .timestamp span {
+      float: left;
+    }
+  }
+}
+
+.dropdown-menu {
+  margin: 0;
+  padding: 0;
+  border: 0;
+
+  .dropdown-user-entry {
+    padding: 10px;
+  }
+}
+
+.btn-send-message {
   width: @width-button-send;
   height: @height-row-sendmessage;
   border: none;
-  //float: right;
-  //clear: both;
-
   color: grey;
   background-color: white;
 
@@ -116,62 +188,7 @@ button.btn-send-message {
   }
 }
 
-.timestamp {
-  color: #B3B3B3;
-  font-size: 10px;
-  width: 100%;
-  span {
-    float: right;
-  }
-}
-
-.message {
-  width: 100%;
-  background: #eee;
-  p {
-    padding: 10px;
-    margin-bottom: 0;
-    float: right;
-  }
-}
-
-.foreign {
-  background: #ffc107;
-  color: #fff;
-}
-
-.name {
-  color: #B3B3B3;
-  font-weight: bold;
-  width: 100%;
-  height: 18px;
-
-  span {
-    float: right;
-  }
-}
-
-.foreign-box {
-  &, .name span, .foreign p, .timestamp span {
-    float: left;
-  }
-}
-
-ul.dropdown-menu {
-  margin: 0;
-  padding: 0;
-  border: 0;
-
-  li.dropdown-user-entry {
-    padding: 10px;
-
-    &:hover {
-      background: #F2F2F2;
-      cursor: pointer;
-    }
-    .glyphicon {
-      float: right;
-      clear: both;
-    }
-  }
+.btn-logout {
+  float: right;
+  clear: both;
 }

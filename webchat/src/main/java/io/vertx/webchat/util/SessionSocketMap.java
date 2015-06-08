@@ -49,7 +49,7 @@ public final class SessionSocketMap extends HashMap<Session, List<ServerWebSocke
      */
     public boolean containsPrincipal(JsonObject principal) {
         int principalUid = principal.getInteger("uid");
-        // compare each session user with passed principal
+        // compare each session owner with passed principal
         for (Session session : keySet()) {
             int sessionUid = session.getPrincipal().getInteger("uid");
             if (principalUid == sessionUid)

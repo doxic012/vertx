@@ -20,6 +20,7 @@ import io.vertx.ext.auth.shiro.ShiroAuthProvider;
 import io.vertx.webchat.mapper.ContactMapper;
 import io.vertx.webchat.mapper.MessageMapper;
 import io.vertx.webchat.mapper.UserMapper;
+import io.vertx.webchat.models.Message;
 import io.vertx.webchat.models.User;
 import io.vertx.webchat.util.WebSocketManager;
 import io.vertx.webchat.util.WebSocketMessage;
@@ -36,163 +37,165 @@ import org.apache.shiro.crypto.hash.Sha256Hash;
 
 public class ChatServerVerticle extends AbstractVerticle {
 
-	private HashInfo hashInfo = new HashInfo(Sha256Hash.ALGORITHM_NAME, 1024, false);
+    private HashInfo hashInfo = new HashInfo(Sha256Hash.ALGORITHM_NAME, 1024, false);
 
-	@Override
-	public void start() throws IOException {
+    @Override
+    public void start() throws IOException {
 
-		// create http-server on port 8080
-		Router router = Router.router(vertx);
+        // Add manager for all websockets and add specific events for each MessageType that
+        // applies on all incoming websocket-messages from clients
+        WebSocketManager manager = new WebSocketManager();
+        manager.addEvent(MessageType.MESSAGE_SEND, (socketOrigin, message) -> {
+            JsonObject origin = message.getOrigin();
+            JsonObject target = message.getTarget();
 
-		// Handlers for cookies, sessions and request bodies
-		router.route().handler(CookieHandler.create());
-		router.route().handler(SessionHandler.create(LocalSessionStore.create(vertx)));
-		router.route().handler(BodyHandler.create());
+            System.out.println("message send event. data: " + message.getMessageData() + ", target: " + target);
 
-		EventBus eb = vertx.eventBus();
-		eb.consumer("chat.message.toServer", message -> {
-			System.out.println("got message: " + message.body());
-			String timestamp = LocalDate.now().toString();
-			eb.publish("chat.message.toClient", timestamp + ": " + message.body());
-		});
+            // TODO: Message.tojson anpassen
+            JsonObject resultMessage = MessageMapper.addMessage(origin.getInteger("uid"), target.getInteger("uid"), (String) message.getMessageData());
+            boolean targetOnline = manager.getUserConnections().containsPrincipal(target);
+            boolean status = resultMessage != null;
 
-		// Handle WebSocket-requests to /chat using a WebSocket-Verticle for each connection
-		router.route("/chat").handler(context -> {
-			HttpServerRequest request = context.request();
-			Session session = context.session();
+            // send message to target only if the storage process was successful
+            if (status) {
+                ContactMapper.setNotification(origin.getInteger("uid"), target.getInteger("uid"), true);
 
-			// login required to establish websocket connection
-			if (session.isLoggedIn()) {
-				ServerWebSocket socket = request.upgrade();
+                if (targetOnline)
+                    manager.writeMessageToPrincipal(target, message.setMessageData(resultMessage));
+            }
 
-				try {
-					WebSocketManager manager = new WebSocketManager(socket, session);
+            // reply to the owner with a status message of the storages process
+            manager.writeMessage(socketOrigin, message.setMessageData(status).setReply(true));
+        });
+        manager.addEvent(MessageType.MESSAGE_READ, (socketOrigin, message) -> {
+            JsonObject origin = message.getOrigin();
+            JsonObject target = message.getTarget();
 
-					manager.addEvent(MessageType.MESSAGE_SEND, (socketOrigin, message) -> {
-						JsonObject origin = message.getOrigin();
-						JsonObject target = message.getTarget();
+            System.out.println("message read event. data: " + message.getMessageData() + ", target: " + target);
 
-						System.out.println("message send event. data: " + message.getMessageData() + ", target: " + target);
+            boolean status = ContactMapper.setNotification(origin.getInteger("uid"), target.getInteger("uid"), false);
 
-						boolean targetOnline = manager.getUserConnections().containsPrincipal(target);
-						boolean status = MessageMapper.addMessage(origin.getInteger("uid"), target.getInteger("uid"), (String) message.getMessageData());
+            // Notify the original sender of a message that the target has read it
+            if (status)
+                manager.writeMessageToPrincipal(target, message);
+        });
+        manager.addEvent(MessageType.MESSAGE_HISTORY, (socketOrigin, message) -> {
+            JsonObject origin = message.getOrigin();
+            JsonObject target = message.getTarget();
+            int count = (int) message.getMessageData();
 
-						// reply to the user with a status message of the storages process
-						manager.writeMessage(socketOrigin, message.setMessageData(status).setReply(true));
+            System.out.println("get message history event. data: " + message.getMessageData() + ", target: " + target);
 
-						// send message to target only if the storage process was successful
-						if (status) {
-							ContactMapper.setNotification(origin.getInteger("uid"), target.getInteger("uid"), true);
+            // reply history to origin websocket only
+            JsonArray history = MessageMapper.getMessages(origin.getInteger("uid"), target.getInteger("uid"), count);
+            manager.writeMessage(socketOrigin, message.setMessageData(history).setReply(true));
+        });
+        manager.addEvent(MessageType.CONTACT_ADD, (socketOrigin, message) -> {
+            JsonObject origin = message.getOrigin();
+            JsonObject target = message.getTarget();
 
-							if (targetOnline)
-								manager.writeMessageToPrincipal(target, message);
-						}
-					});
-					manager.addEvent(MessageType.MESSAGE_READ, (socketOrigin, message) -> {
-						JsonObject origin = message.getOrigin();
-						JsonObject target = message.getTarget();
+            // TODO: Send request to target?
 
-						System.out.println("message read event. data: " + message.getMessageData() + ", target: " + target);
+            System.out.println("add contact event. data: " + message.getMessageData() + ", target: " + target);
 
-						boolean status = ContactMapper.setNotification(origin.getInteger("uid"), target.getInteger("uid"), false);
+            // Add target to the contact list and reply the modified contact list to all sockets of the owner
+            boolean status = ContactMapper.addContact(origin.getInteger("uid"), target.getInteger("uid"));
 
-						// Notify the original sender of a message that the target has read it
-						if(status)
-						manager.writeMessageToPrincipal(target, message);
-					});
-					manager.addEvent(MessageType.MESSAGE_HISTORY, (socketOrigin, message) -> {
-						JsonObject origin = message.getOrigin();
-						JsonObject target = message.getTarget();
-						int count = (int) message.getMessageData();
+            if (status) {
+                JsonArray contactList = ContactMapper.getContacts(origin.getInteger("uid"));
+                manager.writeMessageToPrincipal(origin, new WebSocketMessage(MessageType.CONTACT_LIST, contactList));
+            }
 
-						System.out.println("get message history event. data: " + message.getMessageData() + ", target: " + target);
+        });
+        manager.addEvent(MessageType.CONTACT_REMOVE, (socketOrigin, message) -> {
+            JsonObject origin = message.getOrigin();
+            JsonObject target = message.getTarget();
 
-						// reply history to origin websocket only
-						JsonArray history = MessageMapper.getMessages(origin.getInteger("uid"), target.getInteger("uid"), count);
-						manager.writeMessage(socketOrigin, message.setMessageData(history).setReply(true));
-					});
-					manager.addEvent(MessageType.CONTACT_ADD, (socketOrigin, message) -> {
-						JsonObject origin = message.getOrigin();
-						JsonObject target = message.getTarget();
+            System.out.println("remove contact event. data: " + message.getMessageData() + ", target: " + target);
 
-						// TODO: Send request to target?
+            // Remove target from the contact list and reply the modified contact list to all sockets of the owner
+            boolean status = ContactMapper.removeContact(origin.getInteger("uid"), target.getInteger("uid"));
 
-						System.out.println("add contact event. data: " + message.getMessageData() + ", target: " + target);
+            if (status) {
+                JsonArray contactList = ContactMapper.getContacts(origin.getInteger("uid"));
+                manager.writeMessageToPrincipal(origin, new WebSocketMessage(MessageType.CONTACT_LIST, contactList));
+            }
+        });
+        manager.addEvent(MessageType.CONTACT_LIST, (socketOrigin, message) -> {
+            JsonObject origin = message.getOrigin();
 
-						// Add target to the contact list and reply the modified contact list to all sockets of the user
-						boolean status = ContactMapper.addContact(origin.getInteger("uid"), target.getInteger("uid"));
+            System.out.println("get contact list event. data: " + message.getMessageData() + ", origin: " + origin);
 
-						if (status) {
-							JsonArray contactList = ContactMapper.getContacts(origin.getInteger("uid"));
-							manager.writeMessageToPrincipal(origin, new WebSocketMessage(MessageType.CONTACT_LIST, contactList));
-						}
+            // Reply the contact list to the origin socket
+            JsonArray contacts = ContactMapper.getContacts(origin.getInteger("uid"));
+            manager.writeMessage(socketOrigin, message.setMessageData(contacts).setReply(true));
+        });
 
-					});
-					manager.addEvent(MessageType.CONTACT_REMOVE, (socketOrigin, message) -> {
-						JsonObject origin = message.getOrigin();
-						JsonObject target = message.getTarget();
+        // create http-server on port 8080
+        Router router = Router.router(vertx);
 
-						System.out.println("remove contact event. data: " + message.getMessageData() + ", target: " + target);
+        // Handlers for cookies, sessions and request bodies
+        router.route().handler(CookieHandler.create());
+        router.route().handler(SessionHandler.create(LocalSessionStore.create(vertx)));
+        router.route().handler(BodyHandler.create());
 
-						// Remove target from the contact list and reply the modified contact list to all sockets of the user
-						boolean status = ContactMapper.removeContact(origin.getInteger("uid"), target.getInteger("uid"));
+        EventBus eb = vertx.eventBus();
+        eb.consumer("chat.message.toServer", message -> {
+            System.out.println("got message: " + message.body());
+            String timestamp = LocalDate.now().toString();
+            eb.publish("chat.message.toClient", timestamp + ": " + message.body());
+        });
 
-						if (status) {
-							JsonArray contactList = ContactMapper.getContacts(origin.getInteger("uid"));
-							manager.writeMessageToPrincipal(origin, new WebSocketMessage(MessageType.CONTACT_LIST, contactList));
-						}
-					});
-					manager.addEvent(MessageType.CONTACT_LIST, (socketOrigin, message) -> {
-						JsonObject origin = message.getOrigin();
+        // Handle WebSocket-requests to /chat using a WebSocket-Verticle for each connection
+        router.route("/chat").handler(context -> {
+            HttpServerRequest request = context.request();
+            Session session = context.session();
 
-						System.out.println("get contact list event. data: " + message.getMessageData() + ", origin: " + origin);
+            // login required to establish websocket connection
+            if (session.isLoggedIn()) {
+                try {
+                    manager.addWebSocket(request.upgrade(), session);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            } else {
+                context.fail(403);
+            }
+        });
 
-						// Reply the contact list to the origin socket
-						JsonArray contacts = ContactMapper.getContacts(origin.getInteger("uid"));
-						manager.writeMessage(socketOrigin, message.setMessageData(contacts).setReply(true));
-					});
+        // Map all requests to /chat/* to a redirect-handler that sends the owner
+        // to the loginpage
+        // Using the custom chat authentication realm with hibernate
+        AuthProvider authProvider = ShiroAuthProvider.create(vertx, new ChatAuthRealm(hashInfo));
+        router.route("/chat/*").handler(RedirectAuthHandler.create(authProvider, "/"));
 
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			} else {
-				context.fail(403);
-			}
-		});
+        // Handles the registration
+        router.route("/register").handler(FormRegistrationHandler.create(hashInfo, authProvider));
 
-		// Map all requests to /chat/* to a redirect-handler that sends the user
-		// to the loginpage
-		// Using the custom chat authentication realm with hibernate
-		AuthProvider authProvider = ShiroAuthProvider.create(vertx, new ChatAuthRealm(hashInfo));
-		router.route("/chat/*").handler(RedirectAuthHandler.create(authProvider, "/"));
+        // Handle login by html-form and pass principle-data to the session after a successful login
+        router.route("/login").handler(FormLoginRememberHandler.create(authProvider));
 
-		// Handles the registration
-		router.route("/register").handler(FormRegistrationHandler.create(hashInfo, authProvider));
+        // Handle logout
+        router.route("/logout").handler(context -> {
+            System.out.println("logging out");
+            context.session().logout();
+            context.response().putHeader("location", "/").setStatusCode(302).end();
+        });
 
-		// Handle login by html-form and pass principle-data to the session after a successful login
-		router.route("/login").handler(FormLoginRememberHandler.create(authProvider));
+        // failure handler
+        router.get().failureHandler(failureHandler -> {
+            int code = failureHandler.statusCode();
 
-		// Handle logout
-		router.route("/logout").handler(context -> {
-			System.out.println("logging out");
-			context.session().logout();
-			context.response().putHeader("location", "/").setStatusCode(302).end();
-		});
+            HttpServerResponse response = failureHandler.response();
+            response.setStatusCode(code).end("Failed to process: Status Code: " + code);
+        });
 
-		// failure handler
-		router.get().failureHandler(failureHandler -> {
-			int code = failureHandler.statusCode();
+        // static resources (css, js, ...)
+        // StaticHandlers always need to be the final routings!
+        // router.route("/chat/*").handler(StaticHandler.create().setCachingEnabled(false));//.setWebRoot("chat"));
+        router.route().handler(StaticHandler.create());
 
-			HttpServerResponse response = failureHandler.response();
-			response.setStatusCode(code).end("Failed to process: Status Code: " + code);
-		});
-
-		// static resources (css, js, ...)
-		// StaticHandlers always need to be the final routings!
-		// router.route("/chat/*").handler(StaticHandler.create().setCachingEnabled(false));//.setWebRoot("chat"));
-		router.route().handler(StaticHandler.create());
-
-		// HttpServerOptions serverOptions = new HttpServerOptions().setMaxWebsocketFrameSize(100000);
-		vertx.createHttpServer().requestHandler(router::accept).listen(8080);
-	}
+        // HttpServerOptions serverOptions = new HttpServerOptions().setMaxWebsocketFrameSize(100000);
+        vertx.createHttpServer().requestHandler(router::accept).listen(8080);
+    }
 }

@@ -80,7 +80,7 @@ public class FormRegistrationHandlerImpl implements FormRegistrationHandler {
 		// registration process
 		JsonObject registeredUser = UserMapper.addUser(hashInfo, username, email, password);	
 
-		// Mark the registered user as logged in
+		// Mark the registered owner as logged in
 		if (loginOnSuccess) {
 			if (authProvider != null && registeredUser != null) {
 				log.debug("auto login after registration for principal " + username);

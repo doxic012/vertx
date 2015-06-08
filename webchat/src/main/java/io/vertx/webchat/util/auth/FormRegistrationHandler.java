@@ -15,7 +15,7 @@ public interface FormRegistrationHandler extends FormLoginHandler {
 	 * Create a registration handler
 	 *
 	 * @param registrationHandler the handler that contains the actual registration method. It will be invoked with a
-	 *            JSON-object containing all information about the user passed in the registration-form.
+	 *            JSON-object containing all information about the owner passed in the registration-form.
 	 * @return the handler
 	 */
 	static FormRegistrationHandler create(HashInfo hashInfo) {
@@ -26,7 +26,7 @@ public interface FormRegistrationHandler extends FormLoginHandler {
 	 * Create a registration handler
 	 *
 	 * @param registrationHandler the handler that contains the actual registration method. It will be invoked with a
-	 *            JSON-object containing all information about the user passed in the registration-form. The given
+	 *            JSON-object containing all information about the owner passed in the registration-form. The given
 	 *            information are mapped to a JsonObject.
 	 * @return the handler
 	 */
@@ -38,8 +38,8 @@ public interface FormRegistrationHandler extends FormLoginHandler {
 	 * Create a registration handler
 	 *
 	 * @param registrationHandler the handler that contains the actual registration method. It will be invoked with a
-	 *            JSON-object containing all information about the user passed in the registration-form. The given
-	 *            information are mapped to a JsonObject and, if the user wishes to auto-login, the information will be
+	 *            JSON-object containing all information about the owner passed in the registration-form. The given
+	 *            information are mapped to a JsonObject and, if the owner wishes to auto-login, the information will be
 	 *            passed as the active principle to the current session.
 	 * @param loginOnSuccess Do a login after a successful registration
 	 * @return the handler
@@ -53,8 +53,8 @@ public interface FormRegistrationHandler extends FormLoginHandler {
 	 * Create a handler
 	 * 
 	 * @param registrationHandler the handler that contains the actual registration method. It will be invoked with a
-	 *            JSON-object containing all information about the user passed in the registration-form. The given
-	 *            information are mapped to a JsonObject and, if the user wishes to auto-login, the information will be
+	 *            JSON-object containing all information about the owner passed in the registration-form. The given
+	 *            information are mapped to a JsonObject and, if the owner wishes to auto-login, the information will be
 	 *            passed as the active principle to the current session.
 	 * @param usernameParam the value of the form attribute which will contain the username
 	 * @param emailParam the value of the form attribute which will contain the email

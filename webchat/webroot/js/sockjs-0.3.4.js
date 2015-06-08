@@ -404,7 +404,7 @@ var JSONQuote = (JSON && JSON.stringify) || function(string) {
     return '"' + string + '"';
 };
 
-// This may be quite slow, so let's delay until user actually uses bad
+// This may be quite slow, so let's delay until owner actually uses bad
 // characters.
 var unroll_lookup = function(escapable) {
     var i;
@@ -974,7 +974,7 @@ var SockJS = function(url, dep_protocols_whitelist, options) {
         that._ir = null;
         if (info) {
             if (that._options.info) {
-                // Override if user supplies the option
+                // Override if owner supplies the option
                 info = utils.objectExtend(info, that._options.info);
             }
             if (that._options.rtt) {
@@ -1215,7 +1215,7 @@ var WebSocketTransport = SockJS.websocket = function(ri, trans_url) {
         that.ri._didMessage(e.data);
     };
     // Firefox has an interesting bug. If a websocket connection is
-    // created after onunload, it stays alive even when user
+    // created after onunload, it stays alive even when owner
     // navigates away from the page. In such situation let's lie -
     // let's not open the ws connection at all. See:
     // https://github.com/sockjs/sockjs-client/issues/28
@@ -1618,7 +1618,7 @@ var jsonPReceiverWrapper = function(url, constructReceiver, user_callback) {
     var stop = function() {
         if (_window[WPrefix][id]) {
             aborting = 1;
-            _window[WPrefix][id](utils.closeFrame(1000, "JSONP user aborted read"));
+            _window[WPrefix][id](utils.closeFrame(1000, "JSONP owner aborted read"));
         }
     };
     return stop;
@@ -2205,7 +2205,7 @@ var EventSourceReceiver = function(url) {
     that.es_close = es.onerror = function(e, abort_reason) {
         // ES on reconnection has readyState = 0 or 1.
         // on network error it's CLOSED = 2
-        var reason = abort_reason ? 'user' :
+        var reason = abort_reason ? 'owner' :
             (es.readyState !== 2 ? 'network' : 'permanent');
         that.es_close = es.onmessage = es.onerror = null;
         // EventSource reconnects automatically.
@@ -2294,7 +2294,7 @@ HtmlfileReceiver.prototype = new REventTarget();
 HtmlfileReceiver.prototype.abort = function() {
     var that = this;
     if (that.iframe_close) {
-        that.iframe_close({}, 'user');
+        that.iframe_close({}, 'owner');
     }
 };
 //         [*] End of lib/trans-receiver-htmlfile.js
@@ -2339,7 +2339,7 @@ XhrReceiver.prototype.abort = function() {
     var that = this;
     if (that.xo) {
         that.xo.close();
-        that.dispatchEvent(new SimpleEvent('close', {reason: 'user'}));
+        that.dispatchEvent(new SimpleEvent('close', {reason: 'owner'}));
         that.xo = null;
     }
 };

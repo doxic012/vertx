@@ -1,5 +1,7 @@
 package io.vertx.webchat.models;
 
+import io.vertx.core.json.JsonObject;
+
 import java.io.Serializable;
 import java.sql.Timestamp;
 
@@ -18,8 +20,8 @@ create TABLE message (
 		  `message` text DEFAULT NULL,
 		  `timestamp` timestamp,
 		  PRIMARY KEY (`id`),
-		  FOREIGN KEY (`uid`) REFERENCES user (`uid`),
-		  FOREIGN KEY (`uidForeign`) REFERENCES user (`uid`),
+		  FOREIGN KEY (`uid`) REFERENCES owner (`uid`),
+		  FOREIGN KEY (`uidForeign`) REFERENCES owner (`uid`),
 		  UNIQUE KEY `id_unique` (`id`)
 		) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8;
 */
@@ -84,5 +86,11 @@ public class Message implements Serializable {
 
 	public void setMessage(String message) {
 		this.message = message;
+	}
+
+	// TODO: Message.tojson anpassen
+	public JsonObject toJson() {
+		JsonObject message = new JsonObject().put("uid", getUid()).put("uidForeign", getUid()).put("id", getId()).put("timestamp", getTimestamp().toString()).put("message", getMessage());
+		return message;
 	}
 }

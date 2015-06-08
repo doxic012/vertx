@@ -60,15 +60,21 @@ body {
   font-family: "Comic Sans MS", cursive, sans-serif;
   color: #5e5e5e;
 }
+.searchform-input {
+  height: 35px;
+}
+.no-border {
+  border: none;
+}
 .container {
   margin-top: 20px;
 }
 .container-content {
   background: #fff;
-  font-size: 12px;
+  font-size: 1em;
 }
 .container-content:not(.active):hover {
-  background: #F2F2F2;
+  background: #f2f2f2;
   cursor: pointer;
 }
 .contact-bar {
@@ -76,43 +82,55 @@ body {
   background: #F8F8F8;
   border-right: 1px solid #EEE;
 }
-.container-contact i {
+.contact-bar .owner {
+  text-align: center;
+  font-size: 1.15em;
+}
+.contact-bar .container-contact .contact-action {
   float: right;
-  color: #f00;
+  clear: both;
+  display: none;
 }
-.container-contact.active {
-  background: #aaa;
+.contact-bar .container-contact .contact-action.add-contact:hover {
+  color: limegreen;
 }
-.container-contact-padding {
-  padding: 10px 20px;
+.contact-bar .container-contact .contact-action.remove-contact:hover {
+  color: red;
+}
+.contact-bar .container-contact:hover {
+  background: #f2f2f2;
+  cursor: pointer;
+}
+.contact-bar .container-contact:hover .contact-action {
+  display: inline-block;
+}
+.contact-bar .container-contact.active {
+  background: #aaaaaa;
+}
+.contact-bar .container-contact-padding {
+  padding: 10px;
   border-bottom: 1px solid #EEE;
 }
 .container-message {
   min-height: 500px;
   background: #fff;
 }
-.container-message-box {
+.container-message .container-message-box {
   height: 436px;
   padding: 10px 5px 10px 0;
   overflow-y: scroll;
 }
-.message-box {
+.container-message .message-box {
   width: 70%;
   margin-bottom: 5px;
   float: right;
 }
-.searchform-input {
-  height: 35px;
-}
-.no-border {
-  border: none;
-}
-.container-textarea {
+.container-message .container-textarea {
   width: calc(100% - 44px);
   float: left;
   clear: both;
 }
-.container-textarea textarea {
+.container-message .container-textarea textarea {
   width: 100%;
   font-size: 13px;
   border: 0;
@@ -120,65 +138,61 @@ body {
   resize: none;
   height: 60px;
 }
-button.btn-send-message {
+.container-message .timestamp {
+  color: #B3B3B3;
+  font-size: 10px;
+  width: 100%;
+}
+.container-message .timestamp span {
+  float: right;
+}
+.container-message .message {
+  width: 100%;
+  background: #eee;
+}
+.container-message .message p {
+  padding: 10px;
+  margin-bottom: 0;
+  float: right;
+}
+.container-message .foreign {
+  background: #ffc107;
+  color: #fff;
+}
+.container-message .name {
+  color: #B3B3B3;
+  font-weight: bold;
+  width: 100%;
+  height: 18px;
+}
+.container-message .name span {
+  float: right;
+}
+.container-message .foreign-box,
+.container-message .foreign-box .name span,
+.container-message .foreign-box .foreign p,
+.container-message .foreign-box .timestamp span {
+  float: left;
+}
+.dropdown-menu {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.dropdown-menu .dropdown-user-entry {
+  padding: 10px;
+}
+.btn-send-message {
   width: 40px;
   height: 60px;
   border: none;
   color: grey;
   background-color: white;
 }
-button.btn-send-message:hover {
+.btn-send-message:hover {
   color: black;
 }
-.timestamp {
-  color: #B3B3B3;
-  font-size: 10px;
-  width: 100%;
-}
-.timestamp span {
-  float: right;
-}
-.message {
-  width: 100%;
-  background: #eee;
-}
-.message p {
-  padding: 10px;
-  margin-bottom: 0;
-  float: right;
-}
-.foreign {
-  background: #ffc107;
-  color: #fff;
-}
-.name {
-  color: #B3B3B3;
-  font-weight: bold;
-  width: 100%;
-  height: 18px;
-}
-.name span {
-  float: right;
-}
-.foreign-box,
-.foreign-box .name span,
-.foreign-box .foreign p,
-.foreign-box .timestamp span {
-  float: left;
-}
-ul.dropdown-menu {
-  margin: 0;
-  padding: 0;
-  border: 0;
-}
-ul.dropdown-menu li.dropdown-user-entry {
-  padding: 10px;
-}
-ul.dropdown-menu li.dropdown-user-entry:hover {
-  background: #F2F2F2;
-  cursor: pointer;
-}
-ul.dropdown-menu li.dropdown-user-entry .glyphicon {
+.btn-logout {
   float: right;
   clear: both;
 }

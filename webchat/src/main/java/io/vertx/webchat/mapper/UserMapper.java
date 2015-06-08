@@ -45,7 +45,7 @@ public class UserMapper {
 	}
 
 	/**
-	 * Register a new user with a username, email an password.
+	 * Register a new owner with a username, email an password.
 	 * Optional: Admin role
 	 *
 	 * @param hashingInfo

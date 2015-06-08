@@ -1,114 +1,133 @@
+var contactTest = [];
+var userTest = {};
 angular.module('chatApp', []).
-    controller('socketCtrl', ['$scope', 'chatSocket', function ($scope, socket) {
-        console.log(socket);
+    controller('socketCtrl', ['$scope', 'chatSocket', function ($scope, chatSocket) {
+        var socket = new chatSocket("ws://localhost:8080/chat");
         var allUsers = [];
-        $scope.contacts = [];
-        $scope.user = {};
+
+        $scope.contacts = []; // alle Kontakte
+        $scope.messageHistory = [];
+        $scope.owner = {};
         $scope.activeContact = null;
 
-        $scope.hasContact = function() {
-            return $scope.activeContact != null;
-        }
-
-        $scope.getAllUsers = function () {
+        $scope.hasContact = function (user) {
+            var contains = false;
+            $scope.contacts.forEach(function (contact) {
+                if (!contains && user.uid == contact.uid)
+                    contains = true;
+            });
+            return contains;
+        };
+        $scope.getRemainingUsers = function () {
             return allUsers.filter(function (user) {
-                var contains = false;
-
-                $scope.contacts.forEach(function (contact) {
-                    if (user.uid === contact.uid) {
-                        contains = true;
-                        return;
-                    }
-                });
-                return !contains;
+                return !$scope.hasContact(user);
             });
         };
-
-        $scope.setActive = function (contact) {
-            $scope.activeContact = contact;
-            socket.sendMessage(socket.MESSAGE_HISTORY, 20, $scope.activeContact, false);
-        };
-
-        $scope.isActive = function (contact) {
+        $scope.isActiveContact = function (contact) {
             return $scope.activeContact != null && contact.uid == $scope.activeContact.uid;
         };
-
+        $scope.setActiveContact = function (contact) {
+            if (!$scope.isActiveContact(contact) && $scope.hasContact(contact)) {
+                $scope.activeContact = contact;
+                socket.sendMessage(socket.MESSAGE_HISTORY, 20, contact, false);
+            }
+        };
         $scope.addContact = function (contact) {
             console.log("adding contact");
             console.log(contact);
             socket.sendMessage(socket.CONTACT_ADD, "", contact, false);
         };
-
+        $scope.removeContact = function (contact) {
+            console.log("removing contact");
+            console.log(contact);
+            socket.sendMessage(socket.CONTACT_REMOVE, "", contact, false);
+        };
         $scope.sendMessage = function (message) {
+            $scope.textMessage = '';
             if (message.length > 0) {
                 socket.sendMessage(socket.MESSAGE_SEND, message, $scope.activeContact, false);
             }
         };
 
         // Socket binding events
-        socket.bind(socket.USER_DATA, function (message) {
+        socket.bind(socket.USER_DATA, function (event) {
             $scope.$apply(function () {
-                $scope.user = message.messageData;
+                $scope.owner = event.messageData;
+                userTest = $scope.owner;
             });
         });
-
-        socket.bind(socket.MESSAGE_SEND, function (message) {
+        socket.bind(socket.MESSAGE_SEND, function (event) {
             console.log("got message:");
-            console.log(message);
+            console.log(event);
+            // TODO: Caching
+            // TODO: Notification at user display
+            if (!$scope.isActiveContact(event.origin))
+                return;
+
+            $scope.$apply(function () {
+                console.log($scope.messageHistory);
+                $scope.messageHistory.push(event.messageData);
+                console.log($scope.messageHistory);
+            });
         });
-        socket.bind(socket.MESSAGE_READ, function (message) {
+        socket.bind(socket.MESSAGE_READ, function (event) {
             console.log("message was read:");
-            console.log(message);
+            console.log(event);
         });
-        socket.bind(socket.MESSAGE_HISTORY, function (message) {
-            console.log("got message history:");
-            console.log(message);
-        });
-        socket.bind(socket.CONTACT_ALL, function (message) {
+        socket.bind(socket.MESSAGE_HISTORY, function (event) {
             $scope.$apply(function () {
-                allUsers = message.messageData;
+                $scope.messageHistory = event.messageData;
+                console.log($scope.messageHistory);
             });
         });
-        socket.bind(socket.CONTACT_LIST, function (message) {
+        socket.bind(socket.CONTACT_ALL, function (event) {
             $scope.$apply(function () {
-                $scope.contacts = message.messageData;
+                allUsers = event.messageData;
             });
         });
-        socket.bind(socket.CONTACT_ADD, function (message) {
+        socket.bind(socket.CONTACT_LIST, function (event) {
             $scope.$apply(function () {
-                $scope.contacts = message.messageData;
+                $scope.contacts = event.messageData;
+                contactTest = event.messageData;
             });
         });
-        socket.bind(socket.CONTACT_REMOVE, function (message) {
+        socket.bind(socket.CONTACT_ADD, function (event) {
             $scope.$apply(function () {
-                $scope.contacts = message.messageData;
+                $scope.contacts = event.messageData;
             });
         });
-        socket.bind(socket.CONTACT_NOTIFY, function (message) {
+        socket.bind(socket.CONTACT_REMOVE, function (event) {
+            $scope.$apply(function () {
+                $scope.contacts = event.messageData;
+            });
+        });
+        socket.bind(socket.CONTACT_NOTIFY, function (event) {
 
         });
-        socket.bind(socket.USER_ONLINE, function (message) {
+        socket.bind(socket.USER_ONLINE, function (event) {
             console.log("user online");
-            console.log(message.messageData);
+            console.log(event.messageData);
         });
-        socket.bind(socket.USER_OFFLINE, function (message) {
+        socket.bind(socket.USER_OFFLINE, function (event) {
             console.log("user offline");
-            console.log(message.messageData);
+            console.log(event.messageData);
         });
     }]).
     factory('chatSocket', ['$window', function (window) {
-        if (window.WebSocket) {
-            console.log("creating websocket");
-            var socket = new ChatWebSocket("ws://localhost:8080/chat");
+        return function (url) {
+            // no WebSockets supported
+            if (!window.WebSocket) {
+                console.log("Your browser does not support Websockets.(Use Chrome)");
+                return null;
+            }
 
-            socket.onopen = function (event) {
-                console.log("Web Socket opened!");
-            };
+            var socket = new WebSocket(url);
 
-            socket.onclose = function (event) {
-                console.log("Web Socket closed.");
-            };
+            // socket is undefined
+            if (typeof socket === "undefined")
+                return null;
 
+            var events = {};
             var messageType = {
                 USER_DATA: "USER_DATA",
                 MESSAGE_SEND: "MESSAGE_SEND",
@@ -125,7 +144,44 @@ angular.module('chatApp', []).
 
             angular.extend(socket, messageType);
 
+            // trigger an event and pass some data
+            socket.trigger = function (eventName, data) {
+                events[eventName] && events[eventName](data);
+            };
+
+            // unbind an event
+            socket.unbind = function (eventName) {
+                delete events[eventName];
+            };
+
+            // bind an event
+            socket.bind = function (eventName, callback) {
+                if (callback != undefined && callback != null) {
+                    //console.log("binding event " + eventName);
+                    events[eventName] = callback;
+                }
+            };
+
+            socket.onmessage = function (event) {
+                var data = JSON.parse(event.data);
+                if (socket.trigger)
+                    socket.trigger(data.messageType, data);
+            }
+
+            // We wrap send, so we need the original method
+            socket.sendMessage = function (messageType, data, target, isReply) {
+                var socketMsg = {
+                    messageType: messageType,
+                    messageData: data,
+                    //	origin : "", // applied at server-side
+                    target: JSON.stringify(target),
+                    timestamp: new Date().toISOString(),
+                    reply: isReply
+                }
+
+                socket.send(JSON.stringify(socketMsg));
+            };
+
             return socket;
-        }
-        return null;
+        };
     }]);

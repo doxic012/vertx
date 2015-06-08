@@ -38,6 +38,20 @@ public class ContactMapper {
         return new JsonArray();
     }
 
+    public static JsonArray getContactList(int uid) {
+        Session connectSession = HibernateUtil.getSession();
+
+        try {
+            List<Contact> contacts = (List<Contact> ) connectSession.createQuery("FROM Contact where u.uid=:uid").setParameter("uid", uid).list();
+
+            return new JsonArray(contacts);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return new JsonArray();
+    }
     public static boolean addContact(int uid, int uidForeign) {
         Session session = HibernateUtil.getSession();
         session.beginTransaction();
