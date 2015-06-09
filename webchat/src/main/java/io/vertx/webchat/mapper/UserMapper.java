@@ -2,6 +2,8 @@ package io.vertx.webchat.mapper;
 
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.impl.LoggerFactory;
 import io.vertx.webchat.models.User;
 import io.vertx.webchat.util.HibernateUtil;
 import io.vertx.webchat.util.auth.HashInfo;
@@ -33,9 +35,9 @@ public class UserMapper {
 		Session session = HibernateUtil.getSession();
 
 		List<User> userList = (List<User>) session.createQuery("from User").list();
-		List<JsonObject> users = new ArrayList<JsonObject>();
-		userList.forEach(contact -> {
-			users.add(contact.toJson());
+		List<JsonObject> users = new ArrayList<>();
+		userList.forEach(user -> {
+			users.add(user.toJson());
 		});
 		return new JsonArray(users);
 	}
@@ -48,10 +50,10 @@ public class UserMapper {
 	 * Register a new owner with a username, email an password.
 	 * Optional: Admin role
 	 *
-	 * @param hashingInfo
-	 * @param username
-	 * @param email
-	 * @param plainTextPassword
+	 * @param hashingInfo the hashing object that contains all information about the hashing algorithm, iterations, etc.
+	 * @param username the username
+	 * @param email the users email
+	 * @param plainTextPassword the plain text password that will be hashed using the hashing information
 	 */
 	public static JsonObject addUser(HashInfo hashingInfo, String username, String email, String plainTextPassword) {
 		JsonObject userObject;
@@ -73,7 +75,6 @@ public class UserMapper {
 			System.out.println("User with email:" + user.getEmail() + " hashedPassword:" + user.getPassword() + " salt:" + user.getSalt());
 
 			session.save(user);
-
 			userObject = user.toJson();
 		} finally {
 			session.getTransaction().commit();

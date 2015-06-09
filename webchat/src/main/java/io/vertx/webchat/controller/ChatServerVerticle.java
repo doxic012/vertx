@@ -45,27 +45,26 @@ public class ChatServerVerticle extends AbstractVerticle {
         // Add manager for all websockets and add specific events for each MessageType that
         // applies on all incoming websocket-messages from clients
         WebSocketManager manager = new WebSocketManager();
+
         manager.addEvent(MessageType.MESSAGE_SEND, (socketOrigin, message) -> {
             JsonObject origin = message.getOrigin();
             JsonObject target = message.getTarget();
 
             System.out.println("message send event. data: " + message.getMessageData() + ", target: " + target);
 
-            // TODO: Message.tojson anpassen
             JsonObject resultMessage = MessageMapper.addMessage(origin.getInteger("uid"), target.getInteger("uid"), (String) message.getMessageData());
-            boolean targetOnline = manager.getUserConnections().containsPrincipal(target);
-            boolean status = resultMessage != null;
 
             // send message to target only if the storage process was successful
-            if (status) {
+            if (resultMessage != null) {
                 ContactMapper.setNotification(origin.getInteger("uid"), target.getInteger("uid"), true);
 
-                if (targetOnline)
+                // is target online?
+                if (manager.getUserConnections().containsPrincipal(target))
                     manager.writeMessageToPrincipal(target, message.setMessageData(resultMessage));
             }
 
-            // reply to the owner with a status message of the storages process
-            manager.writeMessage(socketOrigin, message.setMessageData(status).setReply(true));
+            // reply to the owner with a status message of the storage process
+            manager.writeMessage(socketOrigin, message.setMessageData(resultMessage != null).setReply(true));
         });
         manager.addEvent(MessageType.MESSAGE_READ, (socketOrigin, message) -> {
             JsonObject origin = message.getOrigin();
@@ -99,9 +98,10 @@ public class ChatServerVerticle extends AbstractVerticle {
             System.out.println("add contact event. data: " + message.getMessageData() + ", target: " + target);
 
             // Add target to the contact list and reply the modified contact list to all sockets of the owner
-            boolean status = ContactMapper.addContact(origin.getInteger("uid"), target.getInteger("uid"));
+            JsonObject contact = ContactMapper.addContact(origin.getInteger("uid"), target.getInteger("uid"));
 
-            if (status) {
+            // TODO: Nur einzelnen Kontakt senden
+            if (contact != null) {
                 JsonArray contactList = ContactMapper.getContacts(origin.getInteger("uid"));
                 manager.writeMessageToPrincipal(origin, new WebSocketMessage(MessageType.CONTACT_LIST, contactList));
             }
@@ -124,8 +124,6 @@ public class ChatServerVerticle extends AbstractVerticle {
         manager.addEvent(MessageType.CONTACT_LIST, (socketOrigin, message) -> {
             JsonObject origin = message.getOrigin();
 
-            System.out.println("get contact list event. data: " + message.getMessageData() + ", origin: " + origin);
-
             // Reply the contact list to the origin socket
             JsonArray contacts = ContactMapper.getContacts(origin.getInteger("uid"));
             manager.writeMessage(socketOrigin, message.setMessageData(contacts).setReply(true));
@@ -138,13 +136,6 @@ public class ChatServerVerticle extends AbstractVerticle {
         router.route().handler(CookieHandler.create());
         router.route().handler(SessionHandler.create(LocalSessionStore.create(vertx)));
         router.route().handler(BodyHandler.create());
-
-        EventBus eb = vertx.eventBus();
-        eb.consumer("chat.message.toServer", message -> {
-            System.out.println("got message: " + message.body());
-            String timestamp = LocalDate.now().toString();
-            eb.publish("chat.message.toClient", timestamp + ": " + message.body());
-        });
 
         // Handle WebSocket-requests to /chat using a WebSocket-Verticle for each connection
         router.route("/chat").handler(context -> {

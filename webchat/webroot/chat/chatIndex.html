@@ -54,9 +54,12 @@
                         </div>
 
                         <!-- Contact-list -->
-                        <div class="container-contact-padding container-contact no-border" ng-repeat="contact in contacts"  ng-class="{active : isActiveContact(contact) }" ng-click="setActiveContact(contact)">
-                            <span >{{contact.name}}</span>
-                            <i class="contact-action remove-contact glyphicon glyphicon-minus" ng-click="removeContact(contact)"></i>
+                        <div class="container-contact-padding container-contact no-border"
+                             ng-repeat="contact in contacts" ng-class="{active : isActiveContact(contact) }"
+                             ng-click="setActiveContact(contact)">
+                            <span>{{contact.name}}</span>
+                            <i class="contact-action remove-contact glyphicon glyphicon-minus"
+                               ng-click="removeContact(contact)"></i>
                         </div>
                     </div>
                     <div class="col-xs-9">
@@ -64,7 +67,6 @@
 
                             <!-- message display -->
                             <div class="container-message-box">
-                                <div class="message" ng-repeat="history in messageHistory | orderBy:'id'">{{history.message}}</div>
                             </div>
 
                             <!-- message textbox-->
