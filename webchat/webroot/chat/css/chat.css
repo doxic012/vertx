@@ -73,8 +73,11 @@ body {
   background: #fff;
   font-size: 1em;
 }
+.container-content .row {
+  background: #fff;
+}
 .contact-bar {
-  min-height: 500px;
+  min-height: 524px;
   background: #F8F8F8;
   border-right: 1px solid #EEE;
 }
@@ -157,6 +160,22 @@ body {
   padding: 10px;
   margin-bottom: 0;
   float: right;
+}
+.container-message .container-message-box .glyphicon-myok-sent {
+  float: left;
+  font-size: 8px;
+}
+.container-message .container-message-box .glyphicon-myok-sent:after {
+  content: "\e013";
+  color: #b3b3b3;
+}
+.container-message .container-message-box .glyphicon-myok-received {
+  float: left;
+  font-size: 8px;
+}
+.container-message .container-message-box .glyphicon-myok-received:after {
+  content: "\e013\e013";
+  color: #44A329;
 }
 .container-message .container-message-box .foreign {
   background: #ffc107;
