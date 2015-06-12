@@ -64,7 +64,7 @@ public class ChatServerVerticle extends AbstractVerticle {
             }
 
             // reply to the owner with a status message of the storage process
-            manager.writeMessage(webSocket, message.setMessageData(resultMessage != null).setReply(true));
+            manager.writeMessageToPrincipal(origin, message.setMessageData(resultMessage).setReply(true));
         });
         manager.addEvent(MessageType.MESSAGE_READ, (socketOrigin, message) -> {
             JsonObject origin = message.getOrigin();

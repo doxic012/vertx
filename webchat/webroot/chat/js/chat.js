@@ -66,9 +66,13 @@ angular.module('chatApp', []).
             // Wenn reply, dann Serverantwort auf unsere Nachricht
             var contact = wsMessage.reply ? wsMessage.target : wsMessage.origin;
 
-            // TODO: Notification at user display
             $scope.$apply(function () {
                 cm.pushMessages(contact.uid, wsMessage.messageData);
+
+                // TODO: Notification at user display
+                //if (!wsMessage.reply) {
+                // doNotify
+                //}
             });
         });
         socket.bind(socket.MESSAGE_READ, function (wsMessage) {
