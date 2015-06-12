@@ -118,7 +118,7 @@ body {
 .container-message .container-message-box {
   height: 436px;
   padding: 10px 5px 10px 0;
-  overflow-y: scroll;
+  overflow-y: auto;
 }
 .container-message .message-box {
   width: 70%;
@@ -196,8 +196,8 @@ body {
   float: right;
   clear: both;
 }
-.online-icon {
-  font-size: 10px;
-  display: none;
+.icon-online {
+  font-size: 8px;
   color: limegreen;
+  display: none;
 }

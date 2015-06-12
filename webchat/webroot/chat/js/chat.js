@@ -5,8 +5,7 @@ angular.module('chatApp', []).
         var socket = new chatSocket("ws://localhost:8080/chat");
         var allUsers = [];
 
-        $scope.contacts = []; // alle Kontakte
-        $scope.messageHistory = {};
+        $scope.contacts = {}; // alle Kontakte
         $scope.owner = {};
         $scope.activeContact = null;
 
@@ -31,6 +30,7 @@ angular.module('chatApp', []).
                 $scope.activeContact = contact;
 
                 // History gestückelt holen: offset ist messageHistory.length
+                //TODO: Durch variable im Kontakt ersetzen
                 socket.sendMessage(socket.MESSAGE_HISTORY, $scope.messageHistory.length, contact, false);
             }
         };
@@ -68,7 +68,7 @@ angular.module('chatApp', []).
 
             $scope.$apply(function () {
                 console.log($scope.messageHistory);
-                $scope.messageHistory.push(event.messageData);
+                $scope.messageHistory = event.messageData; //.push(event.messageData);
                 console.log($scope.messageHistory);
             });
         });
@@ -90,26 +90,29 @@ angular.module('chatApp', []).
         });
         socket.bind(socket.CONTACT_LIST, function (event) {
             $scope.$apply(function () {
-                $scope.contacts = event.messageData;
-                contactTest = event.messageData;
-            });
-        });
-        socket.bind(socket.CONTACT_ADD, function (event) {
-            $scope.$apply(function () {
+
+                // TODO: zu objekt umbauen
+                // uid: Contact
                 $scope.contacts = event.messageData;
             });
         });
-        socket.bind(socket.CONTACT_REMOVE, function (event) {
-            $scope.$apply(function () {
-                $scope.contacts = event.messageData;
-            });
-        });
+        //socket.bind(socket.CONTACT_ADD, function (event) {
+        //    $scope.$apply(function () {
+        //        $scope.contacts = event.messageData;
+        //    });
+        //});
+        //socket.bind(socket.CONTACT_REMOVE, function (event) {
+        //    $scope.$apply(function () {
+        //        $scope.contacts = event.messageData;
+        //    });
+        //});
         socket.bind(socket.CONTACT_NOTIFY, function (event) {
 
         });
         socket.bind(socket.USER_ONLINE, function (event) {
             console.log("user online");
             console.log(event.messageData);
+
         });
         socket.bind(socket.USER_OFFLINE, function (event) {
             console.log("user offline");
