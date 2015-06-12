@@ -22,7 +22,7 @@
         </div>
         <div class="col-xs-2">
             <h1>
-                <a class="btn btn-primary btn-logout">Ausloggen</a>
+                <a href="/logout" class="btn btn-primary btn-logout">Ausloggen</a>
             </h1>
         </div>
     </div>
@@ -74,7 +74,7 @@
                                         <p>{{message.message}} - gelesen: {{message.messageRead}}</p>
                                         <div style="clear: both;"></div>
                                     </div>
-                                    <span class="glyphicon glyphicon-myok-received" aria-hidden="true" ng-hide="isForeign(message.uid)"></span>
+                                    <span class="glyphicon glyphicon-myok" aria-hidden="true" ng-hide="isForeign(message.uid)" ng-class="{sent: !message.messageRead, read: message.messageRead}"></span>
                                     <div class="timestamp"><span>{{message.timestamp | date:"dd/MM/yyyy 'um' hh:mm"}}</span></div>
                                     <div style="clear: both;"></div>
                                 </div>

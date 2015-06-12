@@ -152,22 +152,15 @@ body {
       }
     }
 
-    .glyphicon-myok-sent {
+    .glyphicon-myok {
       float: left;
       font-size: 8px;
 
-      &:after {
+      &.sent:after {
         content: "\e013";
         color: @color-name;
-        //color: #44A329;
       }
-    }
-
-    .glyphicon-myok-received {
-      float: left;
-      font-size: 8px;
-
-      &:after {
+      &.read:after {
         content: "\e013\e013";
         color: #44A329;
       }
