@@ -64,6 +64,8 @@ public class WebSocketManager {
         writeMessage(socket, new WebSocketMessage(MessageType.USER_DATA, currentUser));
         writeMessage(socket, new WebSocketMessage(MessageType.USER_LIST, users));
         writeMessage(socket, new WebSocketMessage(MessageType.CONTACT_LIST, ContactMapper.getContacts(currentUser.getInteger("uid"))));
+
+//        userMap.forEach();
     }
     /**
      * Nachrichten vom Client abhandeln (socket.send)

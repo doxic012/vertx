@@ -11,7 +11,9 @@ angular.module('chatApp', []).
         $scope.getContacts = function () {
             return cm.getContacts();
         };
-
+        $scope.updateNotification = function (contact) {
+            socket.sendMessage(socket.CONTACT_NOTIFIED, "", contact, false);
+        };
         $scope.getRemainingUsers = function () {
             return allUsers.filter(function (user) {
                 return !cm.containsContact(user);
@@ -24,8 +26,11 @@ angular.module('chatApp', []).
             if (!$scope.isActiveContact(contact) && cm.containsContact(contact)) {
                 $scope.activeContact = contact;
 
+                cm.setNotified(contact.uid, false);
+
                 // History gestückelt holen: offset ist länge der messageHistory
                 socket.sendMessage(socket.MESSAGE_HISTORY, 20, contact, false);
+                socket.sendMessage(socket.MESSAGE_READ, true, contact, false);
             }
         };
         $scope.addContact = function (contact) {
@@ -37,6 +42,7 @@ angular.module('chatApp', []).
             console.log("removing contact");
             console.log(contact);
             socket.sendMessage(socket.CONTACT_REMOVE, "", contact, false);
+            cm.removeContact(contact.uid);
         };
         $scope.sendMessage = function (message) {
             $scope.textMessage = '';
@@ -54,7 +60,7 @@ angular.module('chatApp', []).
                 socket.sendMessage(socket.MESSAGE_HISTORY, 0, $scope.activeContact, false);
                 return cm.pullMessages($scope.activeContact.uid);
             }
-        }
+        };
         $scope.isForeign = function (uid) {
             return $scope.activeContact.uid == uid;
         };
@@ -74,9 +80,9 @@ angular.module('chatApp', []).
             console.log("user online");
             console.log(wsMessage.messageData);
 
-            var user = cm.findContact(wsMessage.target.uid);
-            if(user)
-                user.online = wsMessage.messageData;
+            $scope.$apply(function () {
+                var user = cm.setOnline(wsMessage.target.uid, wsMessage.messageData);
+            });
         });
         socket.bind(socket.MESSAGE_SEND, function (wsMessage) {
             console.log("got message:");
@@ -86,17 +92,20 @@ angular.module('chatApp', []).
             var contact = wsMessage.reply ? wsMessage.target : wsMessage.origin;
 
             $scope.$apply(function () {
+
+                // TODO: Set Messagestatus to sent
                 cm.pushMessages(contact.uid, wsMessage.messageData);
 
-                // TODO: Notification at user display
-                //if (!wsMessage.reply) {
-                // doNotify
-                //}
+                // Notification anzeigen
+                if (!wsMessage.reply)
+                    cm.setNotified(contact.uid, true);
             });
         });
         socket.bind(socket.MESSAGE_READ, function (wsMessage) {
             console.log("message was read:");
             console.log(wsMessage);
+
+            //TODO: Set message status to received
         });
         socket.bind(socket.MESSAGE_HISTORY, function (wsMessage) {
             $scope.$apply(function () {
@@ -105,12 +114,20 @@ angular.module('chatApp', []).
         });
         socket.bind(socket.CONTACT_LIST, function (wsMessage) {
             $scope.$apply(function () {
-                cm.replaceContacts(wsMessage.messageData);
+                cm.clearContacts();
+
+                wsMessage.messageData.forEach(function (contact, index, array) {
+                    cm.addContact(contact);
+                    $scope.updateNotification(contact);
+                });
             });
         });
         socket.bind(socket.CONTACT_ADD, function (wsMessage) {
+            var contact = wsMessage.messageData;
+
             $scope.$apply(function () {
-                cm.addContact(wsMessage.messageData);
+                cm.addContact(contact);
+                $scope.updateNotification(contact);
             });
         });
         socket.bind(socket.CONTACT_REMOVE, function (wsMessage) {
@@ -118,8 +135,10 @@ angular.module('chatApp', []).
                 cm.removeContact(wsMessage.messageData);
             });
         });
-        socket.bind(socket.CONTACT_NOTIFY, function (wsMessage) {
-
+        socket.bind(socket.CONTACT_NOTIFIED, function (wsMessage) {
+            $scope.$apply(function () {
+                cm.setNotified(wsMessage.target.uid, wsMessage.messageData);
+            });
         });
     }]).
     factory('chatSocket', ['$window', function (window) {
@@ -147,7 +166,7 @@ angular.module('chatApp', []).
                 CONTACT_LIST: "CONTACT_LIST",
                 CONTACT_ADD: "CONTACT_ADD",
                 CONTACT_REMOVE: "CONTACT_REMOVE",
-                CONTACT_NOTIFY: "CONTACT_NOTIFY"
+                CONTACT_NOTIFIED: "CONTACT_NOTIFIED"
             };
 
             angular.extend(socket, messageType);
@@ -210,6 +229,7 @@ angular.module('chatApp', []).
                 contacts[contact.uid] = contact;
                 contacts[contact.uid]['messageHistory'] = [];
                 contacts[contact.uid]['online'] = false;
+                contacts[contact.uid]["notified"] = false;
             };
 
             this.removeContact = function (contact) {
@@ -221,19 +241,35 @@ angular.module('chatApp', []).
             };
 
             this.pushMessages = function (uid, message) {
-                if(contacts[uid] != null)
-                contacts[uid]['messageHistory'] = contacts[uid]['messageHistory'].concat(message);
+                if (contacts[uid] != null)
+                    contacts[uid]['messageHistory'] = contacts[uid]['messageHistory'].concat(message);
             };
 
             this.pullMessages = function (uid) {
                 return contacts[uid] != null && contacts[uid]['messageHistory'];
             };
 
-            this.replaceContacts = function (contactArray) {
+            this.isOnline = function (uid) {
+                return contacts[uid] != null && contacts[uid]['online'];
+            };
+
+            this.setOnline = function (uid, status) {
+                if (contacts[uid] != null)
+                    contacts[uid]['online'] = status;
+            }
+            this.isNotified = function (uid) {
+                return contacts[uid] != null && contacts[uid]['notified'];
+            };
+            this.setNotified = function (uid, status) {
+                if (contacts[uid] != null)
+                    contacts[uid]['notified'] = status;
+            }
+            this.clearHistory = function (uid) {
+                if (contacts[uid] != null)
+                    contacts[uid]['messageHistory'] = [];
+            }
+            this.clearContacts = function () {
                 contacts = {};
-                contactArray.forEach(function (contact, index, array) {
-                    self.addContact(contact);
-                });
             }
         };
     });

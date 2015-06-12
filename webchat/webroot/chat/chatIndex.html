@@ -57,7 +57,7 @@
                         <div class="container-contact-padding container-contact no-border"
                              ng-repeat="(uid, contact) in getContacts()" ng-class="{active : isActiveContact(contact) }"
                              ng-click="setActiveContact(contact)">
-                            <span class="icon-online glyphicon glyphicon-asterisk"></span>
+                            <span class="icon-status glyphicon glyphicon-asterisk" ng-show="contact.notified || contact.online" ng-class="{online: contact.online, notified: contact.notified }"></span>
                             <span>{{contact.name}}</span>
                             <i class="contact-action remove-contact glyphicon glyphicon-minus"
                                ng-click="removeContact(contact)"></i>
