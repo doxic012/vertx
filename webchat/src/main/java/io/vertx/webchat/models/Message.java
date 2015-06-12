@@ -4,6 +4,7 @@ import io.vertx.core.json.JsonObject;
 
 import java.io.Serializable;
 import java.sql.Timestamp;
+import io.vertx.webchat.util.StringUtils;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -81,7 +82,7 @@ public class Message implements Serializable {
 	}
 
 	public String getMessage() {
-		return message;
+		return StringUtils.unescapeHtml3(message);
 	}
 
 	public void setMessage(String message) {
