@@ -18,12 +18,17 @@ public class MessageMapper {
     private static final Logger log = LoggerFactory.getLogger(MessageMapper.class);
 
     @SuppressWarnings("unchecked")
-    public static JsonArray getMessages(int uid, int uidForeign, int countMessages) {
+    public static JsonArray getMessages(int uid, int uidForeign, int countMessages, int startPosition) {
         Session session = HibernateUtil.getSession();
         System.out.println("getting messages by uid: " + uid + " and uid_foreign: " + uidForeign);
 
         try {
-            List<Message> messages = (List<Message>) session.createQuery("FROM Message WHERE (uid=:uid AND uidForeign=:uidForeign) or (uid=:uidForeign AND uidForeign=:uid) ORDER BY id DESC").setMaxResults(countMessages).setParameter("uid", uid).setParameter("uidForeign", uidForeign).list();
+            List<Message> messages = (List<Message>) session.createQuery("FROM Message WHERE (uid=:uid AND uidForeign=:uidForeign) or (uid=:uidForeign AND uidForeign=:uid) ORDER BY id DESC").
+                    setFirstResult(startPosition).
+                    setMaxResults(countMessages).
+                    setParameter("uid", uid).
+                    setParameter("uidForeign", uidForeign).
+                    list();
             return new JsonArray(messages);
 
         } catch (Exception ex) {

@@ -3,6 +3,7 @@
 
 @color-hover: #F2F2F2;
 @color-active: #aaa;
+@color-name: #B3B3B3;
 
 .fluid-row(@fixedWidth) {
   width: ~"calc(100% - @{fixedWidth})";
@@ -125,7 +126,7 @@ body {
   }
 
   .timestamp {
-    color: #B3B3B3;
+    color: @color-name;
     font-size: 10px;
     width: 100%;
     span {
@@ -149,7 +150,7 @@ body {
   }
 
   .name {
-    color: #B3B3B3;
+    color: @color-name;
     font-weight: bold;
     width: 100%;
     height: 18px;
@@ -191,4 +192,10 @@ body {
 .btn-logout {
   float: right;
   clear: both;
+}
+
+.online-icon {
+  font-size: 10px;
+  display: none;
+  color: limegreen;
 }

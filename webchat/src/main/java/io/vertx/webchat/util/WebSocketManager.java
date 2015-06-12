@@ -29,6 +29,42 @@ public class WebSocketManager {
 
     private HashMap<MessageType, BiConsumer<ServerWebSocket, WebSocketMessage>> socketEvents = new HashMap<>();
 
+    public void addWebSocket(ServerWebSocket socket, Session session) throws Exception {
+
+        // TODO: correct exception type
+        if (session == null || socket == null) {
+            if (socket != null)
+                socket.reject();
+
+            throw new Exception("Missing or invalid arguments for WebSocketManager");
+        }
+
+//		this.session = session;
+//		this.socket = ws;
+
+        // Principal enthält JsonObject aus User-Model (uid, email, username)
+        JsonObject currentUser = session.getPrincipal();
+
+        // Benutzer ist noch nicht online -> Verschicke Statusnachricht an alle anderen
+        if (!userMap.containsPrincipal(currentUser))
+            broadcastMessage(currentUser, new WebSocketMessage(MessageType.USER_STATUS_ONLINE, currentUser));
+
+        // Verknüpfe Benutzer mit Websocket (welche E-Mail gehört zu welchem Websocket) als Hashmap
+        userMap.add(session, socket);
+
+        log.debug("registering new connection with id: " + socket.textHandlerID() + " for owner: " + session.getPrincipal().getString("email") + ", users online: " + userMap.size());
+
+        socket.closeHandler(getCloseHandler(socket, session));
+        socket.frameHandler(getFrameHandler(socket, session));
+
+        JsonArray users = UserMapper.getUsers();
+        users.remove(currentUser);
+
+        // Verschicke Benutzerobjekt und Kontaktliste
+        writeMessage(socket, new WebSocketMessage(MessageType.USER_DATA, currentUser));
+        writeMessage(socket, new WebSocketMessage(MessageType.CONTACT_ALL, users));
+        writeMessage(socket, new WebSocketMessage(MessageType.CONTACT_LIST, ContactMapper.getContacts(currentUser.getInteger("uid"))));
+    }
     /**
      * Nachrichten vom Client abhandeln (socket.send)
      *
@@ -86,43 +122,6 @@ public class WebSocketManager {
 
             log.debug("un-registering new connection with id: " + socket.textHandlerID() + " for owner: " + session.getPrincipal().getString("email") + ", users online:" + userMap.size());
         };
-    }
-
-    public void addWebSocket(ServerWebSocket socket, Session session) throws Exception {
-
-        // TODO: correct exception type
-        if (session == null || socket == null) {
-            if (socket != null)
-                socket.reject();
-
-            throw new Exception("Missing or invalid arguments for WebSocketManager");
-        }
-
-//		this.session = session;
-//		this.socket = ws;
-
-        // Principal enthält JsonObject aus User-Model (uid, email, username)
-        JsonObject currentUser = session.getPrincipal();
-
-        // Benutzer ist noch nicht online -> Verschicke Statusnachricht an alle anderen
-        if (!userMap.containsPrincipal(currentUser))
-            broadcastMessage(currentUser, new WebSocketMessage(MessageType.USER_STATUS_ONLINE, currentUser));
-
-        // Verknüpfe Benutzer mit Websocket (welche E-Mail gehört zu welchem Websocket) als Hashmap
-        userMap.add(session, socket);
-
-        log.debug("registering new connection with id: " + socket.textHandlerID() + " for owner: " + session.getPrincipal().getString("email") + ", users online: " + userMap.size());
-
-        socket.closeHandler(getCloseHandler(socket, session));
-        socket.frameHandler(getFrameHandler(socket, session));
-
-        JsonArray users = UserMapper.getUsers();
-        users.remove(currentUser);
-
-        // Verschicke Benutzerobjekt und Kontaktliste
-        writeMessage(socket, new WebSocketMessage(MessageType.USER_DATA, currentUser));
-        writeMessage(socket, new WebSocketMessage(MessageType.CONTACT_ALL, users));
-        writeMessage(socket, new WebSocketMessage(MessageType.CONTACT_LIST, ContactMapper.getContacts(currentUser.getInteger("uid"))));
     }
 
     /**

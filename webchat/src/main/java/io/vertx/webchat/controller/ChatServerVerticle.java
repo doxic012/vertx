@@ -81,12 +81,12 @@ public class ChatServerVerticle extends AbstractVerticle {
         manager.addEvent(MessageType.MESSAGE_HISTORY, (socketOrigin, message) -> {
             JsonObject origin = message.getOrigin();
             JsonObject target = message.getTarget();
-            int count = (int) message.getMessageData();
+            int offset = (int) message.getMessageData();
 
             System.out.println("get message history event. data: " + message.getMessageData() + ", target: " + target);
 
             // reply history to origin websocket only
-            JsonArray history = MessageMapper.getMessages(origin.getInteger("uid"), target.getInteger("uid"), count);
+            JsonArray history = MessageMapper.getMessages(origin.getInteger("uid"), target.getInteger("uid"), 20, offset);
             manager.writeMessage(socketOrigin, message.setMessageData(history).setReply(true));
         });
         manager.addEvent(MessageType.CONTACT_ADD, (socketOrigin, message) -> {
@@ -105,7 +105,6 @@ public class ChatServerVerticle extends AbstractVerticle {
                 JsonArray contactList = ContactMapper.getContacts(origin.getInteger("uid"));
                 manager.writeMessageToPrincipal(origin, new WebSocketMessage(MessageType.CONTACT_LIST, contactList));
             }
-
         });
         manager.addEvent(MessageType.CONTACT_REMOVE, (socketOrigin, message) -> {
             JsonObject origin = message.getOrigin();

@@ -6,7 +6,7 @@ angular.module('chatApp', []).
         var allUsers = [];
 
         $scope.contacts = []; // alle Kontakte
-        $scope.messageHistory = [];
+        $scope.messageHistory = {};
         $scope.owner = {};
         $scope.activeContact = null;
 
@@ -29,7 +29,9 @@ angular.module('chatApp', []).
         $scope.setActiveContact = function (contact) {
             if (!$scope.isActiveContact(contact) && $scope.hasContact(contact)) {
                 $scope.activeContact = contact;
-                socket.sendMessage(socket.MESSAGE_HISTORY, 20, contact, false);
+
+                // History gestückelt holen: offset ist messageHistory.length
+                socket.sendMessage(socket.MESSAGE_HISTORY, $scope.messageHistory.length, contact, false);
             }
         };
         $scope.addContact = function (contact) {
@@ -74,10 +76,11 @@ angular.module('chatApp', []).
             console.log("message was read:");
             console.log(event);
         });
+        // TODO: Unterteilen in einzelne Benutzer
         socket.bind(socket.MESSAGE_HISTORY, function (event) {
             $scope.$apply(function () {
-                $scope.messageHistory = event.messageData;
                 console.log($scope.messageHistory);
+                $scope.messageHistory.push(event.messageData);
             });
         });
         socket.bind(socket.CONTACT_ALL, function (event) {

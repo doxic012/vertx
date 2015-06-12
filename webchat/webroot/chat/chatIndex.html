@@ -57,6 +57,7 @@
                         <div class="container-contact-padding container-contact no-border"
                              ng-repeat="contact in contacts" ng-class="{active : isActiveContact(contact) }"
                              ng-click="setActiveContact(contact)">
+                            <span class="icon-online glyphicon glyphicon-asterisk"></span>
                             <span>{{contact.name}}</span>
                             <i class="contact-action remove-contact glyphicon glyphicon-minus"
                                ng-click="removeContact(contact)"></i>
@@ -66,6 +67,7 @@
                         <div class="container-message">
 
                             <!-- message display -->
+                            <!-- TODO: 'More messages'-button -->
                             <div class="container-message-box">
                             </div>
 

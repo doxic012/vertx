@@ -139,7 +139,7 @@ body {
   height: 60px;
 }
 .container-message .timestamp {
-  color: #B3B3B3;
+  color: #b3b3b3;
   font-size: 10px;
   width: 100%;
 }
@@ -160,7 +160,7 @@ body {
   color: #fff;
 }
 .container-message .name {
-  color: #B3B3B3;
+  color: #b3b3b3;
   font-weight: bold;
   width: 100%;
   height: 18px;
@@ -195,4 +195,9 @@ body {
 .btn-logout {
   float: right;
   clear: both;
+}
+.online-icon {
+  font-size: 10px;
+  display: none;
+  color: limegreen;
 }
