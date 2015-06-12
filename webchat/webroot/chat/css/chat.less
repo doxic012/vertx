@@ -63,10 +63,8 @@ body {
       clear: both;
       display: none;
 
-      &.add-contact {
-        &, :hover {
-          color: limegreen;
-        }
+      &.add-contact:hover {
+        color: limegreen;
       }
       &.remove-contact:hover {
         color: red;
@@ -211,8 +209,13 @@ body {
   clear: both;
 }
 
-.icon-online {
+.icon-status {
   font-size: 8px;
-  color: limegreen;
-  display: none;
+
+  &.online {
+    color: limegreen;
+  }
+  &.notified {
+    color: #00b3ee;
+  }
 }

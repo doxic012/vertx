@@ -90,7 +90,11 @@ public class ContactMapper {
 
     public static boolean hasNotification(int uid, int uidForeign) {
         Session session = HibernateUtil.getSession();
-        Contact contact = (Contact) session.createQuery("FROM Contact WHERE uid=:uid").setParameter("uid", uid).uniqueResult();
+        Contact contact = (Contact) session.createQuery("FROM Contact WHERE uid=:uid and uidForeign=:uidForeign")
+                .setParameter("uid", uid)
+                .setParameter("uidForeign", uidForeign)
+                .setMaxResults(1)
+                .uniqueResult();
 
         return contact.notified();
     }

@@ -87,8 +87,7 @@ body {
   clear: both;
   display: none;
 }
-.contact-bar .container-contact .contact-action.add-contact,
-.contact-bar .container-contact .contact-action.add-contact :hover {
+.contact-bar .container-contact .contact-action.add-contact:hover {
   color: limegreen;
 }
 .contact-bar .container-contact .contact-action.remove-contact:hover {
@@ -208,8 +207,12 @@ body {
   float: right;
   clear: both;
 }
-.icon-online {
+.icon-status {
   font-size: 8px;
+}
+.icon-status.online {
   color: limegreen;
-  display: none;
+}
+.icon-status.notified {
+  color: #00b3ee;
 }

@@ -100,9 +100,8 @@ public class ChatServerVerticle extends AbstractVerticle {
             // Add target to the contact list and reply the modified contact list to all sockets of the owner
             JsonObject contact = ContactMapper.addContact(origin.getInteger("uid"), target.getInteger("uid"));
 
-            // TODO: Nur einzelnen Kontakt senden
             if (contact != null) {
-                manager.writeMessageToPrincipal(origin, new WebSocketMessage(MessageType.CONTACT_ADD, contact));
+                manager.writeMessageToPrincipal(origin, new WebSocketMessage(MessageType.CONTACT_ADD, target));
             }
         });
         manager.addEvent(MessageType.CONTACT_REMOVE, (webSocket, message) -> {
@@ -124,6 +123,14 @@ public class ChatServerVerticle extends AbstractVerticle {
             // Reply the contact list to the origin socket
             JsonArray contacts = ContactMapper.getContacts(origin.getInteger("uid"));
             manager.writeMessage(webSocket, message.setMessageData(contacts).setReply(true));
+        });
+        manager.addEvent(MessageType.CONTACT_NOTIFIED, (webSocket, message) -> {
+            JsonObject origin = message.getOrigin();
+            JsonObject target = message.getTarget();
+
+            // Check whether the user has a notification of the target contact
+            boolean notification = ContactMapper.hasNotification(origin.getInteger("uid"), target.getInteger("uid"));
+            manager.writeMessage(webSocket, message.setMessageData(notification).setReply(true));
         });
         manager.addEvent(MessageType.USER_STATUS, (webSocket, message) -> {
             JsonObject origin = message.getOrigin();
