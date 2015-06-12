@@ -49,11 +49,11 @@ public class WebSocketMessage {
 	}
 
 	@JsonIgnore
-	public WebSocketMessage(MessageType messageType, Object messageData, JsonObject Origin, JsonObject target) {
+	public WebSocketMessage(MessageType messageType, Object messageData, JsonObject origin, JsonObject target) {
 		this.setMessageType(messageType);
 		this.setMessageData(messageData);
-		this.setTarget(target);
 		this.setOrigin(origin);
+		this.setTarget(target);
 		this.setTimestamp(Timestamp.valueOf(LocalDateTime.now()));
 	}
 
