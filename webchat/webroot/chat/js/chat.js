@@ -1,6 +1,10 @@
 angular.module('chatApp', []).
     controller('socketCtrl', ['$scope', 'chatSocket', 'contactManager', function ($scope, chatSocket, contactManager) {
-        var socket = new chatSocket("ws://localhost:8080/chat");
+        var socket = new chatSocket("ws://192.168.178.59:8080/chat");
+
+        if(socket.readyState == socket.CLOSED)
+        socket = new chatSocket("ws://localhost:8080/chat");
+
         var allUsers = [];
         var cm = new contactManager();
 

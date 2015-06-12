@@ -26,7 +26,7 @@ public class ContactMapper {
         User user = (User) session.createQuery("FROM User u INNER JOIN FETCH u.contacts where u.uid=:uid").setParameter("uid", uid).uniqueResult();
 
         List<JsonObject> contactList = new ArrayList<>();
-        if (user.getContacts() != null) {
+        if (user != null && user.getContacts() != null) {
             user.getContacts().forEach(contact -> {
                 contactList.add(contact.toJson());
             });
