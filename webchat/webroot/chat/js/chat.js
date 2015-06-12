@@ -51,7 +51,7 @@ angular.module('chatApp', []).
         };
         $scope.getAllMessages = function () {
             if ($scope.activeContact) {
-                socket.sendMessage(socket.MESSAGE_HISTORY, 0, contact, false);
+                socket.sendMessage(socket.MESSAGE_HISTORY, 0, $scope.activeContact, false);
                 return cm.pullMessages($scope.activeContact.uid);
             }
         }
