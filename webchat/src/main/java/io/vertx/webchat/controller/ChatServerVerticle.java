@@ -54,7 +54,7 @@ public class ChatServerVerticle extends AbstractVerticle {
 
             // Send message to target only if the storage process was successful
             if (resultMessage != null) {
-                ContactMapper.setNotification(origin.getInteger("uid"), target.getInteger("uid"), true);
+                ContactMapper.setNotification(target.getInteger("uid"),origin.getInteger("uid"), true);
 
                 // If target is online, notify it and parse the message
                 if (manager.getUserConnections().containsPrincipal(target)) {
