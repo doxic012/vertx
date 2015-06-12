@@ -97,16 +97,6 @@ angular.module('chatApp', []).
                 $scope.contacts = cm.contacts;
             });
         });
-        //socket.bind(socket.CONTACT_ADD, function (event) {
-        //    $scope.$apply(function () {
-        //        $scope.contacts = event.messageData;
-        //    });
-        //});
-        //socket.bind(socket.CONTACT_REMOVE, function (event) {
-        //    $scope.$apply(function () {
-        //        $scope.contacts = event.messageData;
-        //    });
-        //});
         socket.bind(socket.CONTACT_NOTIFY, function (event) {
 
         });

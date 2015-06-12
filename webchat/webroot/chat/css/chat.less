@@ -14,8 +14,8 @@
 .col-lg-1, .col-lg-10, .col-lg-11, .col-lg-12, .col-lg-2, .col-lg-3, .col-lg-4, .col-lg-5, .col-lg-6, .col-lg-7, .col-lg-8, .col-lg-9, .col-md-1, .col-md-10, .col-md-11, .col-md-12, .col-md-2, .col-md-3, .col-md-4, .col-md-5, .col-md-6, .col-md-7, .col-md-8, .col-md-9, .col-sm-1, .col-sm-10, .col-sm-11, .col-sm-12, .col-sm-2, .col-sm-3, .col-sm-4, .col-sm-5, .col-sm-6, .col-sm-7, .col-sm-8, .col-sm-9, .col-xs-1, .col-xs-10, .col-xs-11, .col-xs-12, .col-xs-2, .col-xs-3, .col-xs-4, .col-xs-5, .col-xs-6, .col-xs-7, .col-xs-8, .col-xs-9 {
   position: relative;
   min-height: 1px;
-  padding-right: 4px;
-  padding-left: 4px;
+  padding-right: 0;
+  padding-left: 0;
 }
 
 .row {
@@ -45,11 +45,6 @@ body {
 .container-content {
   background: #fff;
   font-size: 1em;
-
-  &:not(.active):hover {
-    background: @color-hover;
-    cursor: pointer;
-  }
 }
 
 .contact-bar {
@@ -68,8 +63,10 @@ body {
       clear: both;
       display: none;
 
-      &.add-contact:hover {
-        color: limegreen;
+      &.add-contact {
+        &, :hover {
+          color: limegreen;
+        }
       }
       &.remove-contact:hover {
         color: red;
@@ -104,65 +101,67 @@ body {
     height: 436px;
     padding: 10px 5px 10px 0;
     overflow-y: auto; //scroll;
-  }
 
-  .message-box {
-    width: 70%;
-    margin-bottom: 5px;
-    float: right;
-  }
+    .message-box {
+      width: 70%;
+      margin-bottom: 5px;
+      float: right;
+    }
 
-  .container-textarea {
-    .fluid-row(@width-button-send+4px);
+    .foreign-box {
+      &, .name span, .foreign p, .timestamp span {
+        float: left;
+      }
+    }
 
-    textarea {
+    .timestamp {
+      color: @color-name;
+      font-size: 10px;
       width: 100%;
-      font-size: 13px;
-      border: 0;
-      padding: 10px 8px;
-      resize: none;
-      height: @height-row-sendmessage;
+      span {
+        float: right;
+      }
     }
-  }
 
-  .timestamp {
-    color: @color-name;
-    font-size: 10px;
-    width: 100%;
-    span {
-      float: right;
+    .message {
+      width: 100%;
+      background: #eee;
+      p {
+        padding: 10px;
+        margin-bottom: 0;
+        float: right;
+      }
     }
-  }
 
-  .message {
-    width: 100%;
-    background: #eee;
-    p {
-      padding: 10px;
-      margin-bottom: 0;
-      float: right;
+    .foreign {
+      background: #ffc107;
+      color: #fff;
     }
-  }
 
-  .foreign {
-    background: #ffc107;
-    color: #fff;
-  }
+    .name {
+      color: @color-name;
+      font-weight: bold;
+      width: 100%;
+      height: 18px;
 
-  .name {
-    color: @color-name;
-    font-weight: bold;
-    width: 100%;
-    height: 18px;
-
-    span {
-      float: right;
+      span {
+        float: right;
+      }
     }
-  }
 
-  .foreign-box {
-    &, .name span, .foreign p, .timestamp span {
-      float: left;
+  }
+  .container-message-box {
+    .container-textarea {
+      .fluid-row(@width-button-send+4px);
+
+      textarea {
+        width: 100%;
+        font-size: 13px;
+        border: 0;
+        padding: 10px 8px;
+        resize: none;
+        height: @height-row-sendmessage;
+      }
     }
   }
 }
@@ -171,6 +170,7 @@ body {
   margin: 0;
   padding: 0;
   border: 0;
+  width: 100%;
 
   .dropdown-user-entry {
     padding: 10px;
