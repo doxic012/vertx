@@ -55,7 +55,7 @@
 
                         <!-- Contact-list -->
                         <div class="container-contact-padding container-contact no-border"
-                             ng-repeat="contact in contacts" ng-class="{active : isActiveContact(contact) }"
+                             ng-repeat="(uid, contact) in getContacts()" ng-class="{active : isActiveContact(contact) }"
                              ng-click="setActiveContact(contact)">
                             <span class="icon-online glyphicon glyphicon-asterisk"></span>
                             <span>{{contact.name}}</span>
@@ -68,8 +68,8 @@
 
                             <!-- message display -->
                             <!-- TODO: 'More messages'-button -->
-                            <div class="container-message-box" ng-repeat="message in getMessages()">
-                                <div class="message-box" ng-class="{foreign-box : isForeign(message.uid) }">
+                            <div class="container-message-box">
+                                <div class="message-box" ng-repeat="message in getActiveMessages()" ng-class="{'foreign-box' : isForeign(message.uid) }">
                                     <div class="name"><span>{{activeContact.name}}</span></div>
                                     <div class="message" ng-class="{foreign : isForeign(message.uid) }">
                                         <p>{{message.message}}</p>
