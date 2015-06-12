@@ -6,6 +6,7 @@ angular.module('chatApp', []).
 
         $scope.owner = {};
         $scope.activeContact = null;
+        $scope.getHistory = false;
 
         // alle Kontakte
         $scope.getContacts = function () {
@@ -51,6 +52,7 @@ angular.module('chatApp', []).
         };
         $scope.getAllMessages = function () {
             if ($scope.activeContact) {
+                $scope.getHistory = true;
                 socket.sendMessage(socket.MESSAGE_HISTORY, 0, $scope.activeContact, false);
                 return cm.pullMessages($scope.activeContact.uid);
             }
@@ -100,6 +102,7 @@ angular.module('chatApp', []).
         });
         socket.bind(socket.MESSAGE_HISTORY, function (wsMessage) {
             $scope.$apply(function () {
+                cm.findContact(wsMessage.target.uid).messageHistory = [];
                 cm.pushMessages(wsMessage.target.uid, wsMessage.messageData);
             });
         });
@@ -120,6 +123,14 @@ angular.module('chatApp', []).
         });
         socket.bind(socket.CONTACT_NOTIFY, function (wsMessage) {
 
+        });
+        $scope.$on('onRepeatLast', function(scope, element, attrs){
+            if(!$scope.getHistory) {
+                $(".container-message-box").animate({ scrollTop: $('.container-message-box')[0].scrollHeight}, 500);
+            } else {
+                $(".container-message-box").animate({ scrollTop: 0}, 500);
+            }
+            $scope.getHistory = false;
         });
     }]).
     factory('chatSocket', ['$window', function (window) {
@@ -234,6 +245,12 @@ angular.module('chatApp', []).
                 contactArray.forEach(function (contact, index, array) {
                     self.addContact(contact);
                 });
-            }
+            };
+        };
+    }).directive('onLastRepeat', function() {
+        return function(scope, element, attrs) {
+            if (scope.$last) setTimeout(function(){
+                scope.$emit('onRepeatLast', element, attrs);
+            }, 1);
         };
     });

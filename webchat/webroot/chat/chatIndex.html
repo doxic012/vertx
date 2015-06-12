@@ -68,10 +68,10 @@
                             <div class="old-messages" ng-click="getAllMessages(activeContact)" ng-show="activeContact"><span>Alte Nachrichten laden...</span></div>
                             <!-- message display -->
                             <div class="container-message-box">
-                                <div class="message-box" ng-repeat="message in getActiveMessages() | orderBy:'message.id'" ng-class="{'foreign-box' : isForeign(message.uid) }">
+                                <div class="message-box" ng-repeat="message in getActiveMessages() | orderBy : 'id' : reverse" ng-class="{'foreign-box' : isForeign(message.uid) }" on-last-repeat>
                                     <div class="name"><span>{{activeContact.uid==message.uid?activeContact.name:owner.name}}</span></div>
                                     <div class="message" ng-class="{foreign : isForeign(message.uid) }">
-                                        <p>{{message.message}}</p>
+                                        <p>{{message.message}} - {{message.id}}</p>
                                         <div style="clear: both;"></div>
                                     </div>
                                     <div class="timestamp"><span>{{message.timestamp | date:"dd/MM/yyyy 'um' hh:mm"}}</span></div>

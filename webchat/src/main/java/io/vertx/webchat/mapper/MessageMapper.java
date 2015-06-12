@@ -24,7 +24,7 @@ public class MessageMapper {
         System.out.println("getting messages by uid: " + uid + " and uid_foreign: " + uidForeign);
 
         try {
-            Query qry = session.createQuery("FROM Message WHERE (uid=:uid AND uidForeign=:uidForeign) or (uid=:uidForeign AND uidForeign=:uid) ORDER BY id").
+            Query qry = session.createQuery("FROM Message WHERE (uid=:uid AND uidForeign=:uidForeign) or (uid=:uidForeign AND uidForeign=:uid) ORDER BY id DESC").
                     setParameter("uid", uid).
                     setParameter("uidForeign", uidForeign);
 
