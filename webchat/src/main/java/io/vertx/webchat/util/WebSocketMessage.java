@@ -22,7 +22,7 @@ public class WebSocketMessage {
 
 	private JsonObject origin = new JsonObject().put("name", "server"); // wer verschickt? server/client
 
-	private JsonObject target; // wohin geht die Nachricht? server/client
+	private JsonObject target;
 
 	private Timestamp timestamp;
 

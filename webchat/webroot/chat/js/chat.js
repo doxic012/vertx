@@ -1,11 +1,12 @@
 var contactTest = [];
 var userTest = {};
 angular.module('chatApp', []).
-    controller('socketCtrl', ['$scope', 'chatSocket', function ($scope, chatSocket) {
+    controller('socketCtrl', ['$scope', 'chatSocket', 'contactManager', function ($scope, chatSocket, contactManager) {
         var socket = new chatSocket("ws://localhost:8080/chat");
         var allUsers = [];
+        var cm;
 
-        $scope.contacts = {}; // alle Kontakte
+        $scope.contacts = []; // alle Kontakte
         $scope.owner = {};
         $scope.activeContact = null;
 
@@ -80,6 +81,7 @@ angular.module('chatApp', []).
         socket.bind(socket.MESSAGE_HISTORY, function (event) {
             $scope.$apply(function () {
                 console.log($scope.messageHistory);
+                cm.pushMessages(event.target.uid, event.messageData);
                 $scope.messageHistory.push(event.messageData);
             });
         });
@@ -90,10 +92,9 @@ angular.module('chatApp', []).
         });
         socket.bind(socket.CONTACT_LIST, function (event) {
             $scope.$apply(function () {
+                cm = new contactManager(event.messageData);
 
-                // TODO: zu objekt umbauen
-                // uid: Contact
-                $scope.contacts = event.messageData;
+                $scope.contacts = cm.contacts;
             });
         });
         //socket.bind(socket.CONTACT_ADD, function (event) {
@@ -190,4 +191,33 @@ angular.module('chatApp', []).
 
             return socket;
         };
-    }]);
+    }]).
+    factory('contactManager', function (window) {
+        return function (contacts) {
+            var contacts = contacts;
+            var self = this;
+
+            this.addContact = function(contact) {
+                contacts[contact.uid] = contact;
+                contacts[contact.uid]['messageHistory'] = [];
+            };
+
+            this.removeContact = function(uid) {
+                delete contacts[uid];
+            };
+
+            this.pushMessages = function(uid, message) {
+                contacts[uid]['messageHistory'].push(message);
+            };
+
+            this.pullMessages = function(uid) {
+                return  contacts[uid]['messageHistory'];
+            };
+
+            if(contacts) {
+                contacts.forEach(function(contact, index, array) {
+                    self.addContact(contact);
+                });
+            }
+        };
+    });
