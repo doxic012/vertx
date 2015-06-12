@@ -46,7 +46,7 @@ public class ChatServerVerticle extends AbstractVerticle {
         // applies on all incoming websocket-messages from clients
         WebSocketManager manager = new WebSocketManager();
 
-        manager.addEvent(MessageType.MESSAGE_SEND, (socketOrigin, message) -> {
+        manager.addEvent(MessageType.MESSAGE_SEND, (webSocket, message) -> {
             JsonObject origin = message.getOrigin();
             JsonObject target = message.getTarget();
 
@@ -64,7 +64,7 @@ public class ChatServerVerticle extends AbstractVerticle {
             }
 
             // reply to the owner with a status message of the storage process
-            manager.writeMessage(socketOrigin, message.setMessageData(resultMessage != null).setReply(true));
+            manager.writeMessage(webSocket, message.setMessageData(resultMessage != null).setReply(true));
         });
         manager.addEvent(MessageType.MESSAGE_READ, (socketOrigin, message) -> {
             JsonObject origin = message.getOrigin();
@@ -78,7 +78,7 @@ public class ChatServerVerticle extends AbstractVerticle {
             if (status)
                 manager.writeMessageToPrincipal(target, message);
         });
-        manager.addEvent(MessageType.MESSAGE_HISTORY, (socketOrigin, message) -> {
+        manager.addEvent(MessageType.MESSAGE_HISTORY, (webSocket, message) -> {
             JsonObject origin = message.getOrigin();
             JsonObject target = message.getTarget();
             int offset = (int) message.getMessageData();
@@ -87,9 +87,9 @@ public class ChatServerVerticle extends AbstractVerticle {
 
             // reply history to origin websocket only
             JsonArray history = MessageMapper.getMessages(origin.getInteger("uid"), target.getInteger("uid"), 20, offset);
-            manager.writeMessage(socketOrigin, message.setMessageData(history).setReply(true));
+            manager.writeMessage(webSocket, message.setMessageData(history).setReply(true));
         });
-        manager.addEvent(MessageType.CONTACT_ADD, (socketOrigin, message) -> {
+        manager.addEvent(MessageType.CONTACT_ADD, (webSocket, message) -> {
             JsonObject origin = message.getOrigin();
             JsonObject target = message.getTarget();
 
@@ -106,7 +106,7 @@ public class ChatServerVerticle extends AbstractVerticle {
                 manager.writeMessageToPrincipal(origin, new WebSocketMessage(MessageType.CONTACT_LIST, contactList));
             }
         });
-        manager.addEvent(MessageType.CONTACT_REMOVE, (socketOrigin, message) -> {
+        manager.addEvent(MessageType.CONTACT_REMOVE, (webSocket, message) -> {
             JsonObject origin = message.getOrigin();
             JsonObject target = message.getTarget();
 
@@ -120,12 +120,12 @@ public class ChatServerVerticle extends AbstractVerticle {
                 manager.writeMessageToPrincipal(origin, new WebSocketMessage(MessageType.CONTACT_LIST, contactList));
             }
         });
-        manager.addEvent(MessageType.CONTACT_LIST, (socketOrigin, message) -> {
+        manager.addEvent(MessageType.CONTACT_LIST, (webSocket, message) -> {
             JsonObject origin = message.getOrigin();
 
             // Reply the contact list to the origin socket
             JsonArray contacts = ContactMapper.getContacts(origin.getInteger("uid"));
-            manager.writeMessage(socketOrigin, message.setMessageData(contacts).setReply(true));
+            manager.writeMessage(webSocket, message.setMessageData(contacts).setReply(true));
         });
 
         // create http-server on port 8080
