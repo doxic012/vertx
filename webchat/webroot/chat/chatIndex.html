@@ -68,7 +68,16 @@
 
                             <!-- message display -->
                             <!-- TODO: 'More messages'-button -->
-                            <div class="container-message-box">
+                            <div class="container-message-box" ng-repeat="message in getMessages()">
+                                <div class="message-box" ng-class="{foreign-box : isForeign(message.uid) }">
+                                    <div class="name"><span>{{activeContact.name}}</span></div>
+                                    <div class="message" ng-class="{foreign : isForeign(message.uid) }">
+                                        <p>{{message.message}}</p>
+                                        <div style="clear: both;"></div>
+                                    </div>
+                                    <div class="timestamp"><span>{{message.timestamp}}</span></div>
+                                    <div style="clear: both;"></div>
+                                </div>
                             </div>
 
                             <!-- message textbox-->

@@ -51,6 +51,13 @@ angular.module('chatApp', []).
                 socket.sendMessage(socket.MESSAGE_SEND, message, $scope.activeContact, false);
             }
         };
+        $scope.getMesssages = function() {
+            if($scope.activeContact) return cm.pullMessages($scope.activeContact.uid);
+        }
+        $scope.isForeign = function(uid) {
+            if($scope.activeContact.uid == uid) return true;
+            return false;
+        }
 
         // Socket binding events
         socket.bind(socket.USER_DATA, function (event) {
@@ -77,12 +84,10 @@ angular.module('chatApp', []).
             console.log("message was read:");
             console.log(event);
         });
-        // TODO: Unterteilen in einzelne Benutzer
         socket.bind(socket.MESSAGE_HISTORY, function (event) {
             $scope.$apply(function () {
                 console.log($scope.messageHistory);
                 cm.pushMessages(event.target.uid, event.messageData);
-                $scope.messageHistory.push(event.messageData);
             });
         });
         socket.bind(socket.CONTACT_ALL, function (event) {
