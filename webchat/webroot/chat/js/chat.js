@@ -63,9 +63,12 @@ angular.module('chatApp', []).
             console.log("got message:");
             console.log(wsMessage);
 
+            // Wenn reply, dann Serverantwort auf unsere Nachricht
+            var contact = wsMessage.reply ? wsMessage.target : wsMessage.origin;
+
             // TODO: Notification at user display
             $scope.$apply(function () {
-                cm.pushMessages(wsMessage.origin.uid, wsMessage.messageData);
+                cm.pushMessages(contact.uid, wsMessage.messageData);
             });
         });
         socket.bind(socket.MESSAGE_READ, function (wsMessage) {
@@ -196,7 +199,7 @@ angular.module('chatApp', []).
 
             this.containsContact = function(contact) {
                 return contacts[contact.uid] != null;
-            }
+            };
 
             this.pushMessages = function (uid, message) {
                 contacts[uid]['messageHistory'] = contacts[uid]['messageHistory'].concat(message);
