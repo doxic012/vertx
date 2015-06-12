@@ -7,6 +7,7 @@ import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.http.ServerWebSocket;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import io.vertx.core.json.impl.Json;
 import io.vertx.ext.apex.Router;
 import io.vertx.ext.apex.Session;
 import io.vertx.ext.apex.handler.BodyHandler;
@@ -49,18 +50,17 @@ public class ChatServerVerticle extends AbstractVerticle {
         manager.addEvent(MessageType.MESSAGE_SEND, (webSocket, message) -> {
             JsonObject origin = message.getOrigin();
             JsonObject target = message.getTarget();
-
-            System.out.println("message send event. data: " + message.getMessageData() + ", target: " + target);
-
             JsonObject resultMessage = MessageMapper.addMessage(origin.getInteger("uid"), target.getInteger("uid"), (String) message.getMessageData());
 
-            // send message to target only if the storage process was successful
+            // Send message to target only if the storage process was successful
             if (resultMessage != null) {
                 ContactMapper.setNotification(origin.getInteger("uid"), target.getInteger("uid"), true);
 
-                // is target online?
-                if (manager.getUserConnections().containsPrincipal(target))
+                // If target is online, notify it and parse the message
+                if (manager.getUserConnections().containsPrincipal(target)) {
+                    manager.writeMessageToPrincipal(target, new WebSocketMessage(MessageType.CONTACT_NOTIFIED, true, origin, target));
                     manager.writeMessageToPrincipal(target, message.setMessageData(resultMessage));
+                }
             }
 
             // reply to the owner with a status message of the storage process
@@ -70,12 +70,11 @@ public class ChatServerVerticle extends AbstractVerticle {
             JsonObject origin = message.getOrigin();
             JsonObject target = message.getTarget();
 
-            System.out.println("message read event. data: " + message.getMessageData() + ", target: " + target);
-
-            boolean status = ContactMapper.setNotification(origin.getInteger("uid"), target.getInteger("uid"), false);
+            boolean messageStatus = MessageMapper.setMessageRead(target.getInteger("uid"), origin.getInteger("uid"));
+            boolean notifyStatus = ContactMapper.setNotification(origin.getInteger("uid"), target.getInteger("uid"), false);
 
             // Notify the original sender of a message that the target has read it
-            if (status)
+            if (messageStatus && notifyStatus)
                 manager.writeMessageToPrincipal(target, message);
         });
         manager.addEvent(MessageType.MESSAGE_HISTORY, (webSocket, message) -> {

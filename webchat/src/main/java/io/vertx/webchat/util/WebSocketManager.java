@@ -64,8 +64,6 @@ public class WebSocketManager {
         writeMessage(socket, new WebSocketMessage(MessageType.USER_DATA, currentUser));
         writeMessage(socket, new WebSocketMessage(MessageType.USER_LIST, users));
         writeMessage(socket, new WebSocketMessage(MessageType.CONTACT_LIST, ContactMapper.getContacts(currentUser.getInteger("uid"))));
-
-//        userMap.forEach();
     }
     /**
      * Nachrichten vom Client abhandeln (socket.send)
@@ -118,6 +116,7 @@ public class WebSocketManager {
             }
 
             JsonObject currentUser = session.getPrincipal();
+
             // Wenn keine Session des Benutzers offen, dann Broadcast mit offline-status an alle
             if (userMap.containsPrincipal(session.getPrincipal()))
                 broadcastMessage(currentUser, new WebSocketMessage(MessageType.USER_STATUS, false, currentUser));

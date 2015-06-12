@@ -208,11 +208,11 @@ body {
   clear: both;
 }
 .icon-status {
-  font-size: 8px;
+  font-size: 9px;
 }
 .icon-status.online {
   color: limegreen;
 }
 .icon-status.notified {
-  color: #00b3ee;
+  color: red;
 }

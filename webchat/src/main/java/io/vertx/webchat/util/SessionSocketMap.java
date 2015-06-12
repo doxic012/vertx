@@ -4,9 +4,7 @@ import io.vertx.core.http.ServerWebSocket;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.apex.Session;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 import java.util.function.Function;
 
 public final class SessionSocketMap extends HashMap<Session, List<ServerWebSocket>> {
@@ -94,5 +92,15 @@ public final class SessionSocketMap extends HashMap<Session, List<ServerWebSocke
             int jsonUid = json.getInteger("uid");
             return jsonUid != principalUid;
         });
+    }
+
+    public List<JsonObject> getSessionPrincipals() {
+        List<JsonObject> principals = new ArrayList<>();
+
+        forEach((session, socket) -> {
+            if (!principals.contains(session.getPrincipal()))
+                principals.add(session.getPrincipal());
+        });
+        return principals;
     }
 }

@@ -49,6 +49,15 @@ public class WebSocketMessage {
 	}
 
 	@JsonIgnore
+	public WebSocketMessage(MessageType messageType, Object messageData, JsonObject Origin, JsonObject target) {
+		this.setMessageType(messageType);
+		this.setMessageData(messageData);
+		this.setTarget(target);
+		this.setOrigin(origin);
+		this.setTimestamp(Timestamp.valueOf(LocalDateTime.now()));
+	}
+
+	@JsonIgnore
 	public WebSocketMessage(MessageType messageType, Object messageData) {
 		this.setMessageType(messageType);
 		this.setMessageData(messageData);

@@ -104,7 +104,6 @@ public class ContactMapper {
         session.beginTransaction();
 
         try {
-//			session.createSQLQuery("UPDATE Contact SET notification = :status WHERE uid = :uid AND uidForeign = :uidForeign").setParameter("status", status).setParameter("uid", uid).setParameter("uidForeign", uidForeign);
             Contact contact = (Contact) session.createQuery("FROM Contact WHERE uid = :uid AND uidForeign = :uidForeign").setParameter("uid", uid).setParameter("uidForeign", uidForeign).uniqueResult();
             contact.setNotified(status);
             session.update(contact);

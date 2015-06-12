@@ -18,7 +18,8 @@ create TABLE message (
 		  `uid` int(11) NOT NULL,
 		  `uidForeign` int(11) NOT NULL,
 		  `message` text DEFAULT NULL,
-		  `timestamp` timestamp,
+		  `timestamp` timestamp NOT NULL,
+		  `messageRead` TINYINT NOT NULL,
 		  PRIMARY KEY (`id`),
 		  FOREIGN KEY (`uid`) REFERENCES owner (`uid`),
 		  FOREIGN KEY (`uidForeign`) REFERENCES owner (`uid`),
@@ -47,6 +48,9 @@ public class Message implements Serializable {
 
 	@Column
 	private String message;
+
+	@Column
+	private boolean messageRead;
 
 	public int getId() {
 		return id;
@@ -86,6 +90,14 @@ public class Message implements Serializable {
 
 	public void setMessage(String message) {
 		this.message = message;
+	}
+
+	public boolean getMessageRead() {
+		return messageRead;
+	}
+
+	public void setMessageRead(boolean messageRead) {
+		this.messageRead = messageRead;
 	}
 
 	// TODO: Message.tojson anpassen

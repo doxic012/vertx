@@ -22,7 +22,7 @@
         </div>
         <div class="col-xs-2">
             <h1>
-                <a class="btn btn-primary btn-logout">Ausloggen</a>
+                <a href="/logout" class="btn btn-primary btn-logout">Ausloggen</a>
             </h1>
         </div>
     </div>
@@ -71,7 +71,7 @@
                                 <div class="message-box" ng-repeat="message in getActiveMessages() | orderBy : 'id' : reverse" ng-class="{'foreign-box' : isForeign(message.uid) }" on-last-repeat>
                                     <div class="name"><span>{{activeContact.uid==message.uid?activeContact.name:owner.name}}</span></div>
                                     <div class="message" ng-class="{foreign : isForeign(message.uid) }">
-                                        <p>{{message.message}} - {{message.id}}</p>
+                                        <p>{{message.message}} - gelesen: {{message.messageRead}}</p>
                                         <div style="clear: both;"></div>
                                     </div>
                                     <div class="timestamp"><span>{{message.timestamp | date:"dd/MM/yyyy 'um' hh:mm"}}</span></div>

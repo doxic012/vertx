@@ -18,6 +18,9 @@ import org.hibernate.Session;
 public class MessageMapper {
     private static final Logger log = LoggerFactory.getLogger(MessageMapper.class);
 
+    public static int MESSAGE_STATUS_SENT = 1;
+    public static int MESSAGE_STATUS_READ = 2;
+
     @SuppressWarnings("unchecked")
     public static JsonArray getMessages(int uid, int uidForeign, int countMessages) {
         Session session = HibernateUtil.getSession();
@@ -64,5 +67,31 @@ public class MessageMapper {
         }
 
         return null;
+    }
+
+    public static boolean setMessageRead(int uid, int uidForeign) {
+        Session session = HibernateUtil.getSession();
+        session.beginTransaction();
+
+        try {
+            session.createSQLQuery("UPDATE message SET messageRead=1 WHERE uid=:uid and uidForeign=:uidForeign")
+                    .setParameter("uid", uid)
+                    .setParameter("uidForeign", uidForeign)
+                    .executeUpdate();
+//            List<Message> message = (List<Message>) session.createQuery("FROM Message WHERE id = :id").setParameter("id", id).uniqueResult();
+//            message.setMessageRead(status);
+//            session.update(message);
+
+            return true;
+        } catch (Exception e) {
+            log.debug("Exception at setMessageStatus in database: "+e.getMessage());
+
+        } finally {
+            session.getTransaction().commit();
+
+            if (session.isOpen())
+                session.close();
+        }
+        return false;
     }
 }

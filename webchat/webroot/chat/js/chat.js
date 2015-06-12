@@ -4,6 +4,14 @@ angular.module('chatApp', []).
         var allUsers = [];
         var cm = new contactManager();
 
+        var updateNotification = function (contact) {
+            socket.sendMessage(socket.CONTACT_NOTIFIED, "", contact);
+        };
+
+        var updateUserStatus = function (contact) {
+            socket.sendMessage(socket.USER_STATUS, "", contact);
+        };
+
         $scope.owner = {};
         $scope.activeContact = null;
         $scope.getHistory = false;
@@ -12,16 +20,14 @@ angular.module('chatApp', []).
         $scope.getContacts = function () {
             return cm.getContacts();
         };
-        $scope.updateNotification = function (contact) {
-            socket.sendMessage(socket.CONTACT_NOTIFIED, "", contact, false);
-        };
+
         $scope.getRemainingUsers = function () {
             return allUsers.filter(function (user) {
                 return !cm.containsContact(user);
             });
         };
         $scope.isActiveContact = function (contact) {
-            return $scope.activeContact != null && contact.uid == $scope.activeContact.uid;
+            return $scope.activeContact && contact.uid == $scope.activeContact.uid;
         };
         $scope.setActiveContact = function (contact) {
             if (!$scope.isActiveContact(contact) && cm.containsContact(contact)) {
@@ -30,25 +36,24 @@ angular.module('chatApp', []).
                 cm.setNotified(contact.uid, false);
 
                 // History gestückelt holen: offset ist länge der messageHistory
-                socket.sendMessage(socket.MESSAGE_HISTORY, 20, contact, false);
-                socket.sendMessage(socket.MESSAGE_READ, true, contact, false);
+                socket.sendMessage(socket.MESSAGE_HISTORY, 20, contact);
             }
         };
         $scope.addContact = function (contact) {
             console.log("adding contact");
             console.log(contact);
-            socket.sendMessage(socket.CONTACT_ADD, "", contact, false);
+            socket.sendMessage(socket.CONTACT_ADD, "", contact);
         };
         $scope.removeContact = function (contact) {
             console.log("removing contact");
             console.log(contact);
-            socket.sendMessage(socket.CONTACT_REMOVE, "", contact, false);
+            socket.sendMessage(socket.CONTACT_REMOVE, "", contact);
             cm.removeContact(contact.uid);
         };
         $scope.sendMessage = function (message) {
             $scope.textMessage = '';
             if (message.length > 0) {
-                socket.sendMessage(socket.MESSAGE_SEND, message, $scope.activeContact, false);
+                socket.sendMessage(socket.MESSAGE_SEND, message, $scope.activeContact);
             }
         };
         $scope.getActiveMessages = function () {
@@ -59,12 +64,13 @@ angular.module('chatApp', []).
         $scope.getAllMessages = function () {
             if ($scope.activeContact) {
                 $scope.getHistory = true;
-                socket.sendMessage(socket.MESSAGE_HISTORY, 0, $scope.activeContact, false);
+                socket.sendMessage(socket.MESSAGE_HISTORY, 0, $scope.activeContact);
                 return cm.pullMessages($scope.activeContact.uid);
             }
         };
         $scope.isForeign = function (uid) {
-            return $scope.activeContact.uid == uid;
+            if ($scope.activeContact)
+                return $scope.activeContact.uid == uid;
         };
 
         // Socket binding events
@@ -79,49 +85,66 @@ angular.module('chatApp', []).
             });
         });
         socket.bind(socket.USER_STATUS, function (wsMessage) {
-            console.log("user online");
+            console.log("user status");
             console.log(wsMessage.messageData);
 
             $scope.$apply(function () {
                 var user = cm.setOnline(wsMessage.target.uid, wsMessage.messageData);
             });
         });
-        socket.bind(socket.MESSAGE_SEND, function (wsMessage) {
-            console.log("got message:");
-            console.log(wsMessage);
 
+        /**
+         * Gesendete Nachrichten (von owner oder anderen Contacts)
+         */
+        socket.bind(socket.MESSAGE_SEND, function (wsMessage) {
             // Wenn reply, dann Serverantwort auf unsere Nachricht
             var contact = wsMessage.reply ? wsMessage.target : wsMessage.origin;
+            var message = wsMessage.messageData;
 
             $scope.$apply(function () {
+                cm.pushMessages(contact.uid, message);
 
-                // TODO: Set Messagestatus to sent
-                cm.pushMessages(contact.uid, wsMessage.messageData);
-
-                // Notification anzeigen
-                if (!wsMessage.reply)
-                    cm.setNotified(contact.uid, true);
+                if (!wsMessage.reply && $scope.isActiveContact(contact)) {
+                    message.messageRead = true;
+                    socket.sendMessage(socket.MESSAGE_READ, message.id, contact);
+                }
             });
         });
-        socket.bind(socket.MESSAGE_READ, function (wsMessage) {
-            console.log("message was read:");
-            console.log(wsMessage);
 
-            //TODO: Set message status to received
+        /**
+         * Nachricht wurde gelesen, also aktualisiere Nachrichten-Status
+         */
+        socket.bind(socket.MESSAGE_READ, function (wsMessage) {
+            var contact = wsMessage.origin;
+            $scope.$apply(function () {
+                cm.setMessagesRead(contact.uid);
+            });
         });
+
+        /**
+         * Server sendet Nachrichten-History, die Aktuelle wird durch die neue ersetzt
+         */
         socket.bind(socket.MESSAGE_HISTORY, function (wsMessage) {
             $scope.$apply(function () {
+
                 cm.findContact(wsMessage.target.uid).messageHistory = [];
                 cm.pushMessages(wsMessage.target.uid, wsMessage.messageData);
+                socket.sendMessage(socket.MESSAGE_READ, "", wsMessage.target);
             });
         });
+
+        /**
+         * Server sendet gesamte Kontaktliste, daher Online-status und notification überprüfen
+         */
         socket.bind(socket.CONTACT_LIST, function (wsMessage) {
             $scope.$apply(function () {
                 cm.clearContacts();
 
-                wsMessage.messageData.forEach(function (contact, index, array) {
+                wsMessage.messageData.forEach(function (contact) {
                     cm.addContact(contact);
-                    $scope.updateNotification(contact);
+
+                    updateUserStatus(contact);
+                    updateNotification(contact);
                 });
             });
         });
@@ -130,7 +153,9 @@ angular.module('chatApp', []).
 
             $scope.$apply(function () {
                 cm.addContact(contact);
-                $scope.updateNotification(contact);
+
+                updateUserStatus(contact);
+                updateNotification(contact);
             });
         });
         socket.bind(socket.CONTACT_REMOVE, function (wsMessage) {
@@ -140,14 +165,20 @@ angular.module('chatApp', []).
         });
         socket.bind(socket.CONTACT_NOTIFIED, function (wsMessage) {
             $scope.$apply(function () {
-                cm.setNotified(wsMessage.target.uid, wsMessage.messageData);
+
+                // Notification nur, wenn Benutzer mit jemand anderem chattet, etc.
+                // Andernfalls direkte Lesebestätigung
+                if ($scope.isActiveContact(wsMessage.target))
+                    socket.sendMessage(socket.MESSAGE_READ, true, wsMessage.origin);
+                else
+                    cm.setNotified(wsMessage.target.uid, wsMessage.messageData);
             });
         });
-        $scope.$on('onRepeatLast', function(scope, element, attrs){
-            if(!$scope.getHistory) {
-                $(".container-message-box").animate({ scrollTop: $('.container-message-box')[0].scrollHeight}, 500);
+        $scope.$on('onRepeatLast', function (scope, element, attrs) {
+            if (!$scope.getHistory) {
+                $(".container-message-box").animate({scrollTop: $('.container-message-box')[0].scrollHeight}, 500);
             } else {
-                $(".container-message-box").animate({ scrollTop: 0}, 500);
+                $(".container-message-box").animate({scrollTop: 0}, 500);
             }
             $scope.getHistory = false;
         });
@@ -207,14 +238,14 @@ angular.module('chatApp', []).
             }
 
             // We wrap send, so we need the original method
-            socket.sendMessage = function (messageType, data, target, isReply) {
+            socket.sendMessage = function (messageType, data, target) {
                 var socketMsg = {
                     messageType: messageType,
                     messageData: data,
                     //	origin : "", // applied at server-side
                     target: JSON.stringify(target),
                     timestamp: new Date().toISOString(),
-                    reply: isReply
+                    reply: false
                 }
 
                 socket.send(JSON.stringify(socketMsg));
@@ -260,6 +291,12 @@ angular.module('chatApp', []).
                 return contacts[uid] != null && contacts[uid]['messageHistory'];
             };
 
+            this.setMessagesRead = function (uid) {
+                var currentMessages = this.pullMessages(uid);
+                for (var i in currentMessages) {
+                    currentMessages[i].messageRead = true;
+                }
+            }
             this.isOnline = function (uid) {
                 return contacts[uid] != null && contacts[uid]['online'];
             };
@@ -283,9 +320,9 @@ angular.module('chatApp', []).
                 contacts = {};
             };
         };
-    }).directive('onLastRepeat', function() {
-        return function(scope, element, attrs) {
-            if (scope.$last) setTimeout(function(){
+    }).directive('onLastRepeat', function () {
+        return function (scope, element, attrs) {
+            if (scope.$last) setTimeout(function () {
                 scope.$emit('onRepeatLast', element, attrs);
             }, 1);
         };
