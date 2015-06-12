@@ -25,7 +25,7 @@ angular.module('chatApp', []).
                 $scope.activeContact = contact;
 
                 // History gestückelt holen: offset ist länge der messageHistory
-                socket.sendMessage(socket.MESSAGE_HISTORY, cm.pullMessages(contact.uid).length, contact, false);
+                socket.sendMessage(socket.MESSAGE_HISTORY, 20, contact, false);
             }
         };
         $scope.addContact = function (contact) {
@@ -49,6 +49,12 @@ angular.module('chatApp', []).
                 return cm.pullMessages($scope.activeContact.uid);
             }
         };
+        $scope.getAllMessages = function () {
+            if ($scope.activeContact) {
+                socket.sendMessage(socket.MESSAGE_HISTORY, 0, contact, false);
+                return cm.pullMessages($scope.activeContact.uid);
+            }
+        }
         $scope.isForeign = function (uid) {
             return $scope.activeContact.uid == uid;
         };
