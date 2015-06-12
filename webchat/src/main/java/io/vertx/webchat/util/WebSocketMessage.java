@@ -13,7 +13,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 public class WebSocketMessage {
 
 	public static enum MessageType {
-		USER_DATA, MESSAGE_SEND, MESSAGE_READ, MESSAGE_HISTORY, CONTACT_ALL, CONTACT_LIST, CONTACT_ADD, CONTACT_REMOVE, CONTACT_NOTIFY, USER_STATUS_ONLINE, USER_STATUS_OFFLINE
+		USER_DATA, USER_LIST, MESSAGE_SEND, MESSAGE_READ, MESSAGE_HISTORY, CONTACT_LIST, CONTACT_ADD, CONTACT_REMOVE, CONTACT_NOTIFY, USER_STATUS
 	}
 
 	private MessageType messageType;
@@ -41,15 +41,11 @@ public class WebSocketMessage {
 	}
 
 	@JsonIgnore
-	public WebSocketMessage(MessageType messageType, Object messageData, JsonObject origin, JsonObject target, Timestamp timestamp, boolean isReply) {
+	public WebSocketMessage(MessageType messageType, Object messageData, JsonObject target) {
 		this.setMessageType(messageType);
 		this.setMessageData(messageData);
-		this.setOrigin(origin);
 		this.setTarget(target);
-		this.setTimestamp(timestamp);
-		this.setReply(isReply);
-
-		System.out.println(this.toString());
+		this.setTimestamp(Timestamp.valueOf(LocalDateTime.now()));
 	}
 
 	@JsonIgnore
@@ -58,8 +54,6 @@ public class WebSocketMessage {
 		this.setMessageData(messageData);
 		this.setTimestamp(Timestamp.valueOf(LocalDateTime.now()));
 		this.setReply(reply);
-
-		System.out.println(this.toString());
 	}
 
 	/**

@@ -141,6 +141,7 @@ body {
   background: #eee;
 }
 .container-message .container-message-box .message p {
+  width: 100%;
   padding: 10px;
   margin-bottom: 0;
   float: right;

@@ -47,7 +47,7 @@ public class WebSocketManager {
 
         // Benutzer ist noch nicht online -> Verschicke Statusnachricht an alle anderen
         if (!userMap.containsPrincipal(currentUser))
-            broadcastMessage(currentUser, new WebSocketMessage(MessageType.USER_STATUS_ONLINE, currentUser));
+            broadcastMessage(currentUser, new WebSocketMessage(MessageType.USER_STATUS, true, currentUser));
 
         // Verknüpfe Benutzer mit Websocket (welche E-Mail gehört zu welchem Websocket) als Hashmap
         userMap.add(session, socket);
@@ -62,7 +62,7 @@ public class WebSocketManager {
 
         // Verschicke Benutzerobjekt und Kontaktliste
         writeMessage(socket, new WebSocketMessage(MessageType.USER_DATA, currentUser));
-        writeMessage(socket, new WebSocketMessage(MessageType.CONTACT_ALL, users));
+        writeMessage(socket, new WebSocketMessage(MessageType.USER_LIST, users));
         writeMessage(socket, new WebSocketMessage(MessageType.CONTACT_LIST, ContactMapper.getContacts(currentUser.getInteger("uid"))));
     }
     /**
@@ -118,7 +118,7 @@ public class WebSocketManager {
             JsonObject currentUser = session.getPrincipal();
             // Wenn keine Session des Benutzers offen, dann Broadcast mit offline-status an alle
             if (userMap.containsPrincipal(session.getPrincipal()))
-                broadcastMessage(currentUser, new WebSocketMessage(MessageType.USER_STATUS_OFFLINE, currentUser));
+                broadcastMessage(currentUser, new WebSocketMessage(MessageType.USER_STATUS, false, currentUser));
 
             log.debug("un-registering new connection with id: " + socket.textHandlerID() + " for owner: " + session.getPrincipal().getString("email") + ", users online:" + userMap.size());
         };

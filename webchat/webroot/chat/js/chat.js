@@ -8,7 +8,7 @@ angular.module('chatApp', []).
         $scope.activeContact = null;
 
         // alle Kontakte
-        $scope.getContacts = function() {
+        $scope.getContacts = function () {
             return cm.getContacts();
         };
 
@@ -59,6 +59,19 @@ angular.module('chatApp', []).
                 $scope.owner = wsMessage.messageData;
             });
         });
+        socket.bind(socket.USER_LIST, function (wsMessage) {
+            $scope.$apply(function () {
+                allUsers = wsMessage.messageData;
+            });
+        });
+        socket.bind(socket.USER_STATUS, function (wsMessage) {
+            console.log("user online");
+            console.log(wsMessage.messageData);
+
+            var user = cm.findContact(wsMessage.target.uid);
+            if(user)
+                user.online = wsMessage.messageData;
+        });
         socket.bind(socket.MESSAGE_SEND, function (wsMessage) {
             console.log("got message:");
             console.log(wsMessage);
@@ -84,27 +97,23 @@ angular.module('chatApp', []).
                 cm.pushMessages(wsMessage.target.uid, wsMessage.messageData);
             });
         });
-        socket.bind(socket.CONTACT_ALL, function (wsMessage) {
-            $scope.$apply(function () {
-                allUsers = wsMessage.messageData;
-            });
-        });
         socket.bind(socket.CONTACT_LIST, function (wsMessage) {
             $scope.$apply(function () {
                 cm.replaceContacts(wsMessage.messageData);
             });
         });
+        socket.bind(socket.CONTACT_ADD, function (wsMessage) {
+            $scope.$apply(function () {
+                cm.addContact(wsMessage.messageData);
+            });
+        });
+        socket.bind(socket.CONTACT_REMOVE, function (wsMessage) {
+            $scope.$apply(function () {
+                cm.removeContact(wsMessage.messageData);
+            });
+        });
         socket.bind(socket.CONTACT_NOTIFY, function (wsMessage) {
 
-        });
-        socket.bind(socket.USER_ONLINE, function (wsMessage) {
-            console.log("user online");
-            console.log(wsMessage.messageData);
-
-        });
-        socket.bind(socket.USER_OFFLINE, function (wsMessage) {
-            console.log("user offline");
-            console.log(wsMessage.messageData);
         });
     }]).
     factory('chatSocket', ['$window', function (window) {
@@ -124,16 +133,15 @@ angular.module('chatApp', []).
             var events = {};
             var messageType = {
                 USER_DATA: "USER_DATA",
+                USER_LIST: "USER_LIST",
+                USER_STATUS: "USER_STATUS",
                 MESSAGE_SEND: "MESSAGE_SEND",
                 MESSAGE_READ: "MESSAGE_READ",
                 MESSAGE_HISTORY: "MESSAGE_HISTORY",
-                CONTACT_ALL: "CONTACT_ALL",
                 CONTACT_LIST: "CONTACT_LIST",
                 CONTACT_ADD: "CONTACT_ADD",
                 CONTACT_REMOVE: "CONTACT_REMOVE",
-                CONTACT_NOTIFY: "CONTACT_NOTIFY",
-                USER_ONLINE: "USER_STATUS_ONLINE",
-                USER_OFFLINE: "USER_STATUS_OFFLINE"
+                CONTACT_NOTIFY: "CONTACT_NOTIFY"
             };
 
             angular.extend(socket, messageType);
@@ -184,36 +192,38 @@ angular.module('chatApp', []).
             var contacts = {};
             var self = this;
 
-            this.getContacts = function() {
+            this.getContacts = function () {
                 return contacts;
             };
 
-            this.findContact = function(uid) {
+            this.findContact = function (uid) {
                 return contacts[uid];
             };
 
             this.addContact = function (contact) {
                 contacts[contact.uid] = contact;
                 contacts[contact.uid]['messageHistory'] = [];
+                contacts[contact.uid]['online'] = false;
             };
 
-            this.removeContact = function (uid) {
-                delete contacts[uid];
+            this.removeContact = function (contact) {
+                delete contacts[contact.uid];
             };
 
-            this.containsContact = function(contact) {
+            this.containsContact = function (contact) {
                 return contacts[contact.uid] != null;
             };
 
             this.pushMessages = function (uid, message) {
+                if(contacts[uid] != null)
                 contacts[uid]['messageHistory'] = contacts[uid]['messageHistory'].concat(message);
             };
 
             this.pullMessages = function (uid) {
-                return contacts[uid]['messageHistory'];
+                return contacts[uid] != null && contacts[uid]['messageHistory'];
             };
 
-            this.replaceContacts = function(contactArray) {
+            this.replaceContacts = function (contactArray) {
                 contacts = {};
                 contactArray.forEach(function (contact, index, array) {
                     self.addContact(contact);

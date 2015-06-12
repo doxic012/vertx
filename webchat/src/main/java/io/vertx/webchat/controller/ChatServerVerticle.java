@@ -102,8 +102,7 @@ public class ChatServerVerticle extends AbstractVerticle {
 
             // TODO: Nur einzelnen Kontakt senden
             if (contact != null) {
-                JsonArray contactList = ContactMapper.getContacts(origin.getInteger("uid"));
-                manager.writeMessageToPrincipal(origin, new WebSocketMessage(MessageType.CONTACT_LIST, contactList));
+                manager.writeMessageToPrincipal(origin, new WebSocketMessage(MessageType.CONTACT_ADD, contact));
             }
         });
         manager.addEvent(MessageType.CONTACT_REMOVE, (webSocket, message) -> {
@@ -116,8 +115,7 @@ public class ChatServerVerticle extends AbstractVerticle {
             boolean status = ContactMapper.removeContact(origin.getInteger("uid"), target.getInteger("uid"));
 
             if (status) {
-                JsonArray contactList = ContactMapper.getContacts(origin.getInteger("uid"));
-                manager.writeMessageToPrincipal(origin, new WebSocketMessage(MessageType.CONTACT_LIST, contactList));
+                manager.writeMessageToPrincipal(origin, new WebSocketMessage(MessageType.CONTACT_REMOVE, target));
             }
         });
         manager.addEvent(MessageType.CONTACT_LIST, (webSocket, message) -> {
@@ -126,6 +124,15 @@ public class ChatServerVerticle extends AbstractVerticle {
             // Reply the contact list to the origin socket
             JsonArray contacts = ContactMapper.getContacts(origin.getInteger("uid"));
             manager.writeMessage(webSocket, message.setMessageData(contacts).setReply(true));
+        });
+        manager.addEvent(MessageType.USER_STATUS, (webSocket, message) -> {
+            JsonObject origin = message.getOrigin();
+            JsonObject target = message.getTarget();
+
+            boolean isOnline = manager.getUserConnections().containsPrincipal(target);
+
+            // reply to the owner with a status message of the storage process
+            manager.writeMessageToPrincipal(origin, message.setMessageData(isOnline).setReply(true));
         });
 
         // create http-server on port 8080
