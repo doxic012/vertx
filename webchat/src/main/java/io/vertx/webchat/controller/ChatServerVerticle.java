@@ -66,23 +66,31 @@ public class ChatServerVerticle extends AbstractVerticle {
             // reply to the owner with a status message of the storage process
             manager.writeMessageToPrincipal(origin, message.setMessageData(resultMessage).setReply(true));
         });
-        manager.addEvent(MessageType.MESSAGE_READ, (socketOrigin, message) -> {
-            JsonObject origin = message.getOrigin();
-            JsonObject target = message.getTarget();
-
-            boolean messageStatus = MessageMapper.setMessageRead(target.getInteger("uid"), origin.getInteger("uid"));
-            boolean notifyStatus = ContactMapper.setNotification(origin.getInteger("uid"), target.getInteger("uid"), false);
-
-            // Notify the original sender of a message that the target has read it
-            if (messageStatus && notifyStatus)
-                manager.writeMessageToPrincipal(target, message);
-        });
+//        manager.addEvent(MessageType.MESSAGE_READ, (socketOrigin, message) -> {
+//            JsonObject origin = message.getOrigin();
+//            JsonObject target = message.getTarget();
+//
+//            boolean messageStatus = MessageMapper.setMessageRead(target.getInteger("uid"), origin.getInteger("uid"));
+//            boolean notifyStatus = ContactMapper.setNotification(origin.getInteger("uid"), target.getInteger("uid"), false);
+//
+//            // Notify the original sender of a message that the target has read it
+//            if (messageStatus && notifyStatus)
+//                manager.writeMessageToPrincipal(target, message);
+//        });
         manager.addEvent(MessageType.MESSAGE_HISTORY, (webSocket, message) -> {
             JsonObject origin = message.getOrigin();
             JsonObject target = message.getTarget();
             int limit = (int) message.getMessageData();
 
             System.out.println("get message history event. data: " + message.getMessageData() + ", target: " + target);
+
+            // mark messages as read
+            boolean messageStatus = MessageMapper.setMessageRead(target.getInteger("uid"), origin.getInteger("uid"));
+            boolean notifyStatus = ContactMapper.setNotification(origin.getInteger("uid"), target.getInteger("uid"), false);
+
+            // Notify the original sender of a message that the target has read it
+            if (messageStatus && notifyStatus)
+                manager.writeMessageToPrincipal(target, new WebSocketMessage(MessageType.MESSAGE_READ, "", origin, target));
 
             // reply history to origin websocket only
             JsonArray history = MessageMapper.getMessages(origin.getInteger("uid"), target.getInteger("uid"), limit);

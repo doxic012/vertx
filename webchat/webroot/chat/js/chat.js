@@ -129,7 +129,6 @@ angular.module('chatApp', []).
 
                 cm.findContact(wsMessage.target.uid).messageHistory = [];
                 cm.pushMessages(wsMessage.target.uid, wsMessage.messageData);
-                socket.sendMessage(socket.MESSAGE_READ, "", wsMessage.target);
             });
         });
 
@@ -166,12 +165,14 @@ angular.module('chatApp', []).
         socket.bind(socket.CONTACT_NOTIFIED, function (wsMessage) {
             $scope.$apply(function () {
 
+                var contact = wsMessage.target.uid != $scope.owner.uid ? wsMessage.target : wsMessage.origin;
+
                 // Notification nur, wenn Benutzer mit jemand anderem chattet, etc.
                 // Andernfalls direkte Lesebestätigung
-                if ($scope.isActiveContact(wsMessage.target))
-                    socket.sendMessage(socket.MESSAGE_READ, true, wsMessage.origin);
+                if ($scope.isActiveContact(contact))
+                    socket.sendMessage(socket.MESSAGE_READ, true, contact);
                 else
-                    cm.setNotified(wsMessage.target.uid, wsMessage.messageData);
+                    cm.setNotified(contact.uid, wsMessage.messageData);
             });
         });
         $scope.$on('onRepeatLast', function (scope, element, attrs) {
