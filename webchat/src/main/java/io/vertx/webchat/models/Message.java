@@ -85,6 +85,7 @@ public class Message implements Serializable {
 		this.timestamp = timestamp;
 	}
 
+	// unescape whole string and replace line-breaks with <br />
 	public String getMessage() {
 		return StringUtils.unescapeHtml3(message);
 	}

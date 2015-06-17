@@ -1,4 +1,4 @@
-angular.module('chatApp', []).
+angular.module('chatApp', ['ngSanitize']).
     controller('socketCtrl', ['$scope', 'chatSocket', 'contactManager', function ($scope, chatSocket, contactManager) {
         var socket = new chatSocket("ws://localhost:8080/chat");
 
@@ -17,9 +17,11 @@ angular.module('chatApp', []).
         $scope.activeContact = null;
         $scope.getHistory = false;
 
-        $scope.checkKeypress = function(event, message) {
+        $scope.replaceBreaks = function(message) {
+            return message.replace(new RegExp('\r?\n','g'), '<br />');
+        };
 
-            console.log(event.keyCode+", shift: "+event.shiftKey);
+        $scope.checkKeypress = function(event, message) {
 
             // Shift+Enter, dann senden
             if(event.keyCode == 13 && !event.shiftKey) {
@@ -52,13 +54,9 @@ angular.module('chatApp', []).
             }
         };
         $scope.addContact = function (contact) {
-            console.log("adding contact");
-            console.log(contact);
             socket.sendMessage(socket.CONTACT_ADD, "", contact);
         };
         $scope.removeContact = function (contact) {
-            console.log("removing contact");
-            console.log(contact);
             socket.sendMessage(socket.CONTACT_REMOVE, "", contact);
             cm.removeContact(contact.uid);
         };
@@ -100,9 +98,6 @@ angular.module('chatApp', []).
             });
         });
         socket.bind(socket.USER_STATUS, function (wsMessage) {
-            console.log("user status");
-            console.log(wsMessage.messageData);
-
             $scope.$apply(function () {
                 var user = cm.setOnline(wsMessage.target.uid, wsMessage.messageData);
             });
@@ -242,7 +237,6 @@ angular.module('chatApp', []).
             // bind an event
             socket.bind = function (eventName, callback) {
                 if (callback != undefined && callback != null) {
-                    //console.log("binding event " + eventName);
                     events[eventName] = callback;
                 }
             };
