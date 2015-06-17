@@ -14,7 +14,6 @@ import io.vertx.webchat.mapper.UserMapper;
 import io.vertx.webchat.util.WebSocketMessage.MessageType;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.function.BiConsumer;
 
 /**
@@ -25,7 +24,7 @@ import java.util.function.BiConsumer;
 public class WebSocketManager {
     private static final Logger log = LoggerFactory.getLogger(WebSocketManager.class);
 
-    private SessionSocketMap userMap = new SessionSocketMap();
+    private SessionSocketMap sessionMap = new SessionSocketMap();
 
     private HashMap<MessageType, BiConsumer<ServerWebSocket, WebSocketMessage>> socketEvents = new HashMap<>();
 
@@ -39,20 +38,17 @@ public class WebSocketManager {
             throw new Exception("Missing or invalid arguments for WebSocketManager");
         }
 
-//		this.session = session;
-//		this.socket = ws;
-
         // Principal enthält JsonObject aus User-Model (uid, email, username)
         JsonObject currentUser = session.getPrincipal();
 
         // Benutzer ist noch nicht online -> Verschicke Statusnachricht an alle anderen
-        if (!userMap.containsPrincipal(currentUser))
+        if (!sessionMap.containsPrincipal(currentUser))
             broadcastMessage(currentUser, new WebSocketMessage(MessageType.USER_STATUS, true, currentUser));
 
         // Verknüpfe Benutzer mit Websocket (welche E-Mail gehört zu welchem Websocket) als Hashmap
-        userMap.add(session, socket);
+        sessionMap.add(session, socket);
 
-        log.debug("registering new connection with id: " + socket.textHandlerID() + " for owner: " + session.getPrincipal().getString("email") + ", users online: " + userMap.size());
+        log.debug("registering new connection with id: " + socket.textHandlerID() + " for owner: " + session.getPrincipal().getString("email") + ", users online: " + sessionMap.size());
 
         socket.closeHandler(getCloseHandler(socket, session));
         socket.frameHandler(getFrameHandler(socket, session));
@@ -106,22 +102,18 @@ public class WebSocketManager {
      */
     private Handler<Void> getCloseHandler(ServerWebSocket socket, Session session) {
         return handler -> {
-
-            // Session ist abgelaufen oder Benutzer hat sich ausgeloggt
-            // Dann broadcast an alle anderen Verbindungen
-            if (session.isDestroyed() || !session.isLoggedIn()) {
-                userMap.remove(session);
-            } else {
-                userMap.remove(session, socket);
-            }
-
             JsonObject currentUser = session.getPrincipal();
 
-            // Wenn keine Session des Benutzers offen, dann Broadcast mit offline-status an alle
-            if (userMap.containsPrincipal(session.getPrincipal()))
-                broadcastMessage(currentUser, new WebSocketMessage(MessageType.USER_STATUS, false, currentUser));
+            // Session ist abgelaufen
+            if (session.isDestroyed()) {
+                sessionMap.remove(session);
+            } else {
+                sessionMap.remove(session, socket);
+            }
 
-            log.debug("un-registering new connection with id: " + socket.textHandlerID() + " for owner: " + session.getPrincipal().getString("email") + ", users online:" + userMap.size());
+            // Wenn keine Session des Benutzers offen, dann Broadcast an alle mit offline-status
+            if (currentUser != null && !sessionMap.containsPrincipal(currentUser))
+                broadcastMessage(currentUser, new WebSocketMessage(MessageType.USER_STATUS, false, currentUser));
         };
     }
 
@@ -129,7 +121,7 @@ public class WebSocketManager {
      * @return Gibt die aktuelle HashMap mit allen Benutzersessions und zugehörigen WebSockets zurück
      */
     public SessionSocketMap getUserConnections() {
-        return userMap;
+        return sessionMap;
     }
 
     /**
@@ -152,7 +144,7 @@ public class WebSocketManager {
      * @param message Schickt Message an alle Benutzer/Websockets in der HashMap des Managers.
      */
     public void broadcastMessage(JsonObject excludeUser, WebSocketMessage message) {
-        userMap
+        sessionMap
                 .exceptUserSockets(excludeUser)
                 .forEach(socket -> {
                     writeMessage(socket, message);
@@ -177,7 +169,7 @@ public class WebSocketManager {
      * @param message
      */
     public void writeMessageToPrincipal(JsonObject principal, WebSocketMessage message) {
-        userMap.getUserSockets(principal).forEach(socket -> {
+        sessionMap.getUserSockets(principal).forEach(socket -> {
             writeMessage(socket, message);
         });
     }

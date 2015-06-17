@@ -1,5 +1,6 @@
 package io.vertx.webchat.controller;
 
+import com.mysql.fabric.Server;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.http.HttpServerRequest;
@@ -23,6 +24,7 @@ import io.vertx.webchat.mapper.MessageMapper;
 import io.vertx.webchat.mapper.UserMapper;
 import io.vertx.webchat.models.Message;
 import io.vertx.webchat.models.User;
+import io.vertx.webchat.util.SessionSocketMap;
 import io.vertx.webchat.util.WebSocketManager;
 import io.vertx.webchat.util.WebSocketMessage;
 import io.vertx.webchat.util.WebSocketMessage.MessageType;
@@ -33,6 +35,7 @@ import io.vertx.webchat.util.auth.realm.ChatAuthRealm;
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.util.HashMap;
 
 import org.apache.shiro.crypto.hash.Sha256Hash;
 
@@ -45,28 +48,28 @@ public class ChatServerVerticle extends AbstractVerticle {
 
         // Add manager for all websockets and add specific events for each MessageType that
         // applies on all incoming websocket-messages from clients
-        WebSocketManager manager = new WebSocketManager();
+        WebSocketManager wsManager = new WebSocketManager();
 
-        manager.addEvent(MessageType.MESSAGE_SEND, (webSocket, message) -> {
+        wsManager.addEvent(MessageType.MESSAGE_SEND, (webSocket, message) -> {
             JsonObject origin = message.getOrigin();
             JsonObject target = message.getTarget();
             JsonObject resultMessage = MessageMapper.addMessage(origin.getInteger("uid"), target.getInteger("uid"), (String) message.getMessageData());
 
             // Send message to target only if the storage process was successful
             if (resultMessage != null) {
-                ContactMapper.setNotification(target.getInteger("uid"),origin.getInteger("uid"), true);
+                ContactMapper.setNotification(target.getInteger("uid"), origin.getInteger("uid"), true);
 
                 // If target is online, notify it and parse the message
-                if (manager.getUserConnections().containsPrincipal(target)) {
-                    manager.writeMessageToPrincipal(target, new WebSocketMessage(MessageType.CONTACT_NOTIFIED, true, origin, target));
-                    manager.writeMessageToPrincipal(target, message.setMessageData(resultMessage));
+                if (wsManager.getUserConnections().containsPrincipal(target)) {
+                    wsManager.writeMessageToPrincipal(target, new WebSocketMessage(MessageType.CONTACT_NOTIFIED, true, origin, target));
+                    wsManager.writeMessageToPrincipal(target, message.setMessageData(resultMessage));
                 }
             }
 
             // reply to the owner with a status message of the storage process
-            manager.writeMessageToPrincipal(origin, message.setMessageData(resultMessage).setReply(true));
+            wsManager.writeMessageToPrincipal(origin, message.setMessageData(resultMessage).setReply(true));
         });
-        manager.addEvent(MessageType.MESSAGE_READ, (socketOrigin, message) -> {
+        wsManager.addEvent(MessageType.MESSAGE_READ, (socketOrigin, message) -> {
             JsonObject origin = message.getOrigin();
             JsonObject target = message.getTarget();
 
@@ -75,14 +78,12 @@ public class ChatServerVerticle extends AbstractVerticle {
 
             // Notify the original sender of a message that the target has read it
             if (messageStatus && notifyStatus)
-                manager.writeMessageToPrincipal(target, message);
+                wsManager.writeMessageToPrincipal(target, message);
         });
-        manager.addEvent(MessageType.MESSAGE_HISTORY, (webSocket, message) -> {
+        wsManager.addEvent(MessageType.MESSAGE_HISTORY, (webSocket, message) -> {
             JsonObject origin = message.getOrigin();
             JsonObject target = message.getTarget();
             int limit = (int) message.getMessageData();
-
-            System.out.println("get message history event. data: " + message.getMessageData() + ", target: " + target);
 
             // mark messages as read
             boolean messageStatus = MessageMapper.setMessageRead(target.getInteger("uid"), origin.getInteger("uid"));
@@ -90,63 +91,55 @@ public class ChatServerVerticle extends AbstractVerticle {
 
             // Notify the original sender of a message that the target has read it
             if (messageStatus && notifyStatus)
-                manager.writeMessageToPrincipal(target, new WebSocketMessage(MessageType.MESSAGE_READ, "", origin, target));
+                wsManager.writeMessageToPrincipal(target, new WebSocketMessage(MessageType.MESSAGE_READ, "", origin, target));
 
             // reply history to origin websocket only
             JsonArray history = MessageMapper.getMessages(origin.getInteger("uid"), target.getInteger("uid"), limit);
-            manager.writeMessage(webSocket, message.setMessageData(history).setReply(true));
+            wsManager.writeMessage(webSocket, message.setMessageData(history).setReply(true));
         });
-        manager.addEvent(MessageType.CONTACT_ADD, (webSocket, message) -> {
+        wsManager.addEvent(MessageType.CONTACT_ADD, (webSocket, message) -> {
             JsonObject origin = message.getOrigin();
             JsonObject target = message.getTarget();
-
-            // TODO: Send request to target?
-
-            System.out.println("add contact event. data: " + message.getMessageData() + ", target: " + target);
 
             // Add target to the contact list and reply the modified contact list to all sockets of the owner
             JsonObject contact = ContactMapper.addContact(origin.getInteger("uid"), target.getInteger("uid"));
 
-            if (contact != null) {
-                manager.writeMessageToPrincipal(origin, new WebSocketMessage(MessageType.CONTACT_ADD, target));
-            }
+            if (contact != null)
+                wsManager.writeMessageToPrincipal(origin, new WebSocketMessage(MessageType.CONTACT_ADD, target));
         });
-        manager.addEvent(MessageType.CONTACT_REMOVE, (webSocket, message) -> {
+        wsManager.addEvent(MessageType.CONTACT_REMOVE, (webSocket, message) -> {
             JsonObject origin = message.getOrigin();
             JsonObject target = message.getTarget();
-
-            System.out.println("remove contact event. data: " + message.getMessageData() + ", target: " + target);
 
             // Remove target from the contact list and reply the modified contact list to all sockets of the owner
             boolean status = ContactMapper.removeContact(origin.getInteger("uid"), target.getInteger("uid"));
 
-            if (status) {
-                manager.writeMessageToPrincipal(origin, new WebSocketMessage(MessageType.CONTACT_REMOVE, target));
-            }
+            if (status)
+                wsManager.writeMessageToPrincipal(origin, new WebSocketMessage(MessageType.CONTACT_REMOVE, target);
         });
-        manager.addEvent(MessageType.CONTACT_LIST, (webSocket, message) -> {
+        wsManager.addEvent(MessageType.CONTACT_LIST, (webSocket, message) -> {
             JsonObject origin = message.getOrigin();
 
             // Reply the contact list to the origin socket
             JsonArray contacts = ContactMapper.getContacts(origin.getInteger("uid"));
-            manager.writeMessage(webSocket, message.setMessageData(contacts).setReply(true));
+            wsManager.writeMessage(webSocket, message.setMessageData(contacts).setReply(true));
         });
-        manager.addEvent(MessageType.CONTACT_NOTIFIED, (webSocket, message) -> {
+        wsManager.addEvent(MessageType.CONTACT_NOTIFIED, (webSocket, message) -> {
             JsonObject origin = message.getOrigin();
             JsonObject target = message.getTarget();
 
             // Check whether the user has a notification of the target contact
             boolean notification = ContactMapper.hasNotification(origin.getInteger("uid"), target.getInteger("uid"));
-            manager.writeMessage(webSocket, message.setMessageData(notification).setReply(true));
+            wsManager.writeMessage(webSocket, message.setMessageData(notification).setReply(true));
         });
-        manager.addEvent(MessageType.USER_STATUS, (webSocket, message) -> {
+        wsManager.addEvent(MessageType.USER_STATUS, (webSocket, message) -> {
             JsonObject origin = message.getOrigin();
             JsonObject target = message.getTarget();
 
-            boolean isOnline = manager.getUserConnections().containsPrincipal(target);
+            boolean isOnline = wsManager.getUserConnections().containsPrincipal(target);
 
             // reply to the owner with a status message of the storage process
-            manager.writeMessageToPrincipal(origin, message.setMessageData(isOnline).setReply(true));
+            wsManager.writeMessageToPrincipal(origin, message.setMessageData(isOnline).setReply(true));
         });
 
         // create http-server on port 8080
@@ -165,7 +158,7 @@ public class ChatServerVerticle extends AbstractVerticle {
             // login required to establish websocket connection
             if (session.isLoggedIn()) {
                 try {
-                    manager.addWebSocket(request.upgrade(), session);
+                    wsManager.addWebSocket(request.upgrade(), session);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -188,8 +181,19 @@ public class ChatServerVerticle extends AbstractVerticle {
 
         // Handle logout
         router.route("/logout").handler(context -> {
-            System.out.println("logging out");
-            context.session().logout();
+            Session session = context.session();
+            JsonObject currentUser = session.getPrincipal();
+
+            // Aktuelle Session aus liste der Connections entfernen
+            SessionSocketMap sessionMap = wsManager.getUserConnections();
+            sessionMap.remove(session);
+
+            // Wenn keine Session des Benutzers offen, dann Broadcast mit offline-status an alle
+            if (currentUser != null && !sessionMap.containsPrincipal(currentUser))
+                wsManager.broadcastMessage(currentUser, new WebSocketMessage(MessageType.USER_STATUS, false, currentUser));
+
+            // Benutzer als ausgeloggt kennzeichnen
+            session.logout();
             context.response().putHeader("location", "/").setStatusCode(302).end();
         });
 

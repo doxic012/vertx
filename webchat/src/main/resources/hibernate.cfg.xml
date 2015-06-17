@@ -21,7 +21,7 @@
 		<property name="hibernate.current_session_context_class">thread</property>
 
 		<!-- Debug -->
-		<property name="hibernate.show_sql">true</property>
+		<property name="hibernate.show_sql">false</property>
 
 		<!-- Mappings -->
 		<mapping class="io.vertx.webchat.models.User"></mapping>

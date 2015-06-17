@@ -27,7 +27,7 @@ public final class SessionSocketMap extends HashMap<Session, List<ServerWebSocke
      * @param socket
      */
     public void remove(Session session, ServerWebSocket socket) {
-        if (!this.containsKey(session))
+        if (!containsKey(session))
             return;
 
         List<ServerWebSocket> socketList = this.get(session);
@@ -36,7 +36,7 @@ public final class SessionSocketMap extends HashMap<Session, List<ServerWebSocke
             socketList.remove(socket);
 
         if (socketList.size() == 0)
-            this.remove(session);
+            remove(session);
     }
 
     /**
@@ -55,7 +55,6 @@ public final class SessionSocketMap extends HashMap<Session, List<ServerWebSocke
         }
         return false;
     }
-
     /**
      * Filtert alle ServerWebSockets anhand der übergebenen filterFunction.
      * Nimmt die filterFunction den Wert true an, so werden alle ServerWebSockets des entsprechenden JsonObjects der
