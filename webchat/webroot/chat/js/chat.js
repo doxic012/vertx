@@ -17,6 +17,17 @@ angular.module('chatApp', []).
         $scope.activeContact = null;
         $scope.getHistory = false;
 
+        $scope.checkKeypress = function(event, message) {
+
+            console.log(event.keyCode+", shift: "+event.shiftKey);
+
+            // Shift+Enter, dann senden
+            if(event.keyCode == 13 && !event.shiftKey) {
+                event.preventDefault();
+
+                $scope.sendMessage(message);
+            }
+        }
         // alle Kontakte
         $scope.getContacts = function () {
             return cm.getContacts();
@@ -52,6 +63,9 @@ angular.module('chatApp', []).
             cm.removeContact(contact.uid);
         };
         $scope.sendMessage = function (message) {
+            if($scope.activeContact == null)
+            return;
+
             $scope.textMessage = '';
             if (message.length > 0) {
                 socket.sendMessage(socket.MESSAGE_SEND, message, $scope.activeContact);

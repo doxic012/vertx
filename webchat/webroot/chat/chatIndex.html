@@ -84,7 +84,7 @@
                             <div class="container-new-message">
                                 <div class="container-textarea">
                                     <textarea placeholder="Schreibe eine Nachricht..." name="message"
-                                              ng-model="textMessage"></textarea>
+                                              ng-model="textMessage" ng-keypress="checkKeypress($event, textMessage);"></textarea>
                                 </div>
                                 <button class="btn btn-send-message" name="sendmessage"
                                         ng-click="sendMessage(textMessage)" ng-disabled="activeContact == null">

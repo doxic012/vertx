@@ -115,7 +115,7 @@ public class ChatServerVerticle extends AbstractVerticle {
             boolean status = ContactMapper.removeContact(origin.getInteger("uid"), target.getInteger("uid"));
 
             if (status)
-                wsManager.writeMessageToPrincipal(origin, new WebSocketMessage(MessageType.CONTACT_REMOVE, target);
+                wsManager.writeMessageToPrincipal(origin, new WebSocketMessage(MessageType.CONTACT_REMOVE, target));
         });
         wsManager.addEvent(MessageType.CONTACT_LIST, (webSocket, message) -> {
             JsonObject origin = message.getOrigin();
