@@ -150,7 +150,7 @@ public class ChatServerVerticle extends AbstractVerticle {
         router.route().handler(SessionHandler.create(LocalSessionStore.create(vertx)));
         router.route().handler(BodyHandler.create());
 
-        // Handle WebSocket-requests to /chat using a WebSocket-Verticle for each connection
+        // Handle WebSocket-requests to /chat using the WebSocketManager for each connection
         router.route("/chat").handler(context -> {
             HttpServerRequest request = context.request();
             Session session = context.session();
@@ -167,9 +167,9 @@ public class ChatServerVerticle extends AbstractVerticle {
             }
         });
 
-        // Map all requests to /chat/* to a redirect-handler that sends the owner
-        // to the loginpage
-        // Using the custom chat authentication realm with hibernate
+        // Map all requests to /chat/* to a redirect-handler that checks authentication
+        // using the custom chat authentication realm with hibernate (including hashing)
+        // Redirects user to the starting/login page otherwise
         AuthProvider authProvider = ShiroAuthProvider.create(vertx, new ChatAuthRealm(hashInfo));
         router.route("/chat/*").handler(RedirectAuthHandler.create(authProvider, "/"));
 

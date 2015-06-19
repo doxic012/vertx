@@ -4,6 +4,7 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.impl.LoggerFactory;
+import io.vertx.webchat.models.Contact;
 import io.vertx.webchat.models.User;
 import io.vertx.webchat.util.HibernateUtil;
 import io.vertx.webchat.util.auth.HashInfo;
@@ -18,7 +19,7 @@ import org.apache.shiro.crypto.hash.SimpleHash;
 import org.apache.shiro.util.ByteSource;
 import org.hibernate.Session;
 
-public class UserMapper {
+public class UserMapper extends User {
 	public static User getUserCredentials(String email) {
 		Session connectSession = HibernateUtil.getSession();
 		return (User) connectSession.createQuery("from User where email=:email").setParameter("email", email).uniqueResult();

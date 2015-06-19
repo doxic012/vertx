@@ -16,7 +16,7 @@ import java.util.List;
 
 import org.hibernate.Session;
 
-public class ContactMapper {
+public class ContactMapper extends Contact {
     private static final Logger log = LoggerFactory.getLogger(ContactMapper.class);
 
     @SuppressWarnings("unchecked")

@@ -15,7 +15,7 @@ import java.util.List;
 import org.hibernate.Query;
 import org.hibernate.Session;
 
-public class MessageMapper {
+public class MessageMapper extends Message {
     private static final Logger log = LoggerFactory.getLogger(MessageMapper.class);
 
     public static int MESSAGE_STATUS_SENT = 1;
