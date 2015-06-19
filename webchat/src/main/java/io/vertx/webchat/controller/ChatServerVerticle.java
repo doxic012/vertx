@@ -142,7 +142,7 @@ public class ChatServerVerticle extends AbstractVerticle {
             wsManager.writeMessageToPrincipal(origin, message.setMessageData(isOnline).setReply(true));
         });
 
-        // create http-server on port 8080
+        // Create http-server on port 8080
         Router router = Router.router(vertx);
 
         // Handlers for cookies, sessions and request bodies
