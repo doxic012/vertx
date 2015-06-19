@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Diagram>
+  <ID>JAVA</ID>
+  <OriginalElement>io.vertx.webchat.models.Contact</OriginalElement>
+  <nodes>
+    <node x="10.560344827586164" y="460.8241379310345">io.vertx.webchat.mapper.UserMapper</node>
+    <node x="369.8534482758621" y="424.0">io.vertx.webchat.models.User</node>
+    <node x="37.60344827586209" y="250.97586206896554">io.vertx.webchat.mapper.MessageMapper</node>
+    <node x="374.398275862069" y="36.04310344827586">io.vertx.webchat.models.Contact</node>
+    <node x="371.99999999999994" y="207.0">io.vertx.webchat.models.Message</node>
+    <node x="17.51034482758621" y="26.275862068965523">io.vertx.webchat.mapper.ContactMapper</node>
+  </nodes>
+  <notes />
+  <edges>
+    <edge source="io.vertx.webchat.mapper.UserMapper" target="io.vertx.webchat.models.User">
+      <point x="0.0" y="0.0" />
+      <point x="0.0" y="0.0" />
+    </edge>
+    <edge source="io.vertx.webchat.mapper.ContactMapper" target="io.vertx.webchat.models.Contact">
+      <point x="0.0" y="0.0" />
+      <point x="0.0" y="0.0" />
+    </edge>
+    <edge source="io.vertx.webchat.mapper.MessageMapper" target="io.vertx.webchat.models.Message">
+      <point x="0.0" y="0.0" />
+      <point x="0.0" y="0.0" />
+    </edge>
+  </edges>
+  <settings layout="Hierarchic Group" zoom="0.928" x="339.0" y="328.5" />
+  <SelectedNodes />
+  <Categories>
+    <Category>Properties</Category>
+    <Category>Methods</Category>
+  </Categories>
+  <SCOPE>All</SCOPE>
+  <VISIBILITY>public</VISIBILITY>
+</Diagram>
+
