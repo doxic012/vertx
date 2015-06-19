@@ -22,8 +22,8 @@ CREATE TABLE message (
   `timestamp`   TIMESTAMP NOT NULL,
   `messageRead` TINYINT   NOT NULL,
   PRIMARY KEY (`id`),
-  FOREIGN KEY (`uid`) REFERENCES owner (`uid`),
-  FOREIGN KEY (`uidForeign`) REFERENCES owner (`uid`),
+  FOREIGN KEY (`uid`) REFERENCES user (`uid`),
+  FOREIGN KEY (`uidForeign`) REFERENCES user (`uid`),
   UNIQUE KEY `id_unique` (`id`)
 )
   ENGINE = InnoDB
@@ -37,8 +37,8 @@ CREATE TABLE contact (
   `notified`   BOOLEAN DEFAULT NULL,
   `timestamp`  TIMESTAMP,
   PRIMARY KEY (`uid`, `uidForeign`),
-  FOREIGN KEY (`uid`) REFERENCES owner (`uid`),
-  FOREIGN KEY (`uidForeign`) REFERENCES owner (`uid`)
+  FOREIGN KEY (`uid`) REFERENCES user (`uid`),
+  FOREIGN KEY (`uidForeign`) REFERENCES user (`uid`)
 )
   ENGINE = InnoDB
   AUTO_INCREMENT = 7
