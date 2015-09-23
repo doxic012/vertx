@@ -57,7 +57,7 @@ public class User implements Serializable {
 	@Column
 	private Timestamp timestamp;
 
-	@OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
 	@JoinTable(name = "contact", joinColumns = @JoinColumn(name = "uid"), inverseJoinColumns = @JoinColumn(name = "uidForeign"))
 	private List<User> contacts;
 	

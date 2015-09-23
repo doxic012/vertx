@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.hibernate.Session;
+import org.hibernate.Transaction;
 
 public class ContactMapper extends Contact {
     private static final Logger log = LoggerFactory.getLogger(ContactMapper.class);
@@ -46,7 +47,7 @@ public class ContactMapper extends Contact {
 
     public static JsonObject addContact(int uid, int uidForeign) {
         Session session = HibernateUtil.getSession();
-        session.beginTransaction();
+        Transaction transaction = session.beginTransaction();
 
         try {
             Contact contact = new Contact();
@@ -61,7 +62,7 @@ public class ContactMapper extends Contact {
         } catch (Exception e) {
             log.debug("Exception at addContact to database: "+e.getMessage());
         } finally {
-            session.getTransaction().commit();
+            transaction.commit();
 
             if (session.isOpen())
                 session.close();
@@ -71,7 +72,7 @@ public class ContactMapper extends Contact {
 
     public static boolean removeContact(int uid, int uidForeign) {
         Session session = HibernateUtil.getSession();
-        session.beginTransaction();
+        Transaction transaction = session.beginTransaction();
 
         try {
             session.createSQLQuery("DELETE FROM Contact WHERE uid = " + uid + " AND uidForeign = " + uidForeign).executeUpdate();
@@ -79,7 +80,7 @@ public class ContactMapper extends Contact {
         } catch (Exception e) {
             log.debug("Exception at removeContact from database: "+e.getMessage());
         } finally {
-            session.getTransaction().commit();
+            transaction.commit();
 
             if (session.isOpen())
                 session.close();
@@ -101,7 +102,7 @@ public class ContactMapper extends Contact {
 
     public static boolean setNotification(int uid, int uidForeign, boolean status) {
         Session session = HibernateUtil.getSession();
-        session.beginTransaction();
+        Transaction transaction = session.beginTransaction();
 
         try {
             Contact contact = (Contact) session.createQuery("FROM Contact WHERE uid = :uid AND uidForeign = :uidForeign").setParameter("uid", uid).setParameter("uidForeign", uidForeign).uniqueResult();
@@ -113,7 +114,7 @@ public class ContactMapper extends Contact {
             log.debug("Exception at setNotification to database: "+e.getMessage());
 
         } finally {
-            session.getTransaction().commit();
+            transaction.commit();
 
             if (session.isOpen())
                 session.close();

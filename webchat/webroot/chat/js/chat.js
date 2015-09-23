@@ -29,7 +29,7 @@ angular.module('chatApp', ['ngSanitize']).
 
                 $scope.sendMessage(message);
             }
-        }
+        };
         // alle Kontakte
         $scope.getContacts = function () {
             return cm.getContacts();

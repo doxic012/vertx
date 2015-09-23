@@ -28,6 +28,15 @@ public class WebSocketManager {
 
     private HashMap<MessageType, BiConsumer<ServerWebSocket, WebSocketMessage>> socketEvents = new HashMap<>();
 
+    /**
+     * ServerWebSocket zum Manager hinzufügen, inkl. einer aktiven, zugehörigen Session.
+     * Dabei wird automatisch der WebSocket mit Benutzerdaten, Kontaktliste und allen registrierten Benutzern benachrichtigt.
+     *
+     * Alle anderen 'online'-Benutzer werden vom Online-Status des neuen Benutzers benachrichtigt.
+     * @param socket Der neue ServerWebSocket
+     * @param session Die zum Websocket gehörige Session mit Benutzerdaten, etc.
+     * @throws Exception
+     */
     public void addWebSocket(ServerWebSocket socket, Session session) throws Exception {
 
         // TODO: correct exception type
@@ -65,11 +74,12 @@ public class WebSocketManager {
     /**
      * Nachrichten vom Client abhandeln (socket.send)
      *
-     * @return
+     * @return Gibt einen FrameHandler zurück, der eingehende Frames bearbeitet, auf korrektheit prüft und
+     * das entsprechende Event-Mapping vornimmt.
      */
     private Handler<WebSocketFrame> getFrameHandler(ServerWebSocket socket, Session session) {
+
         return frame -> {
-            // TODO Alle Sockets des Benutzers schließen
             // Wenn Session ausgelaufen oder Benutzer ausgeloggt, socket schließen
             if (session.isDestroyed() || !session.isLoggedIn()) {
                 log.error("session destroyed, rejecting socket");
@@ -84,7 +94,8 @@ public class WebSocketManager {
                 WebSocketMessage message = Json.decodeValue(frame.textData(), WebSocketMessage.class);
                 message.setOrigin(session.getPrincipal());
 
-                // handle the frame
+                // In SocketEvents die definierte Funktion für den gesendeten Message-Type
+                // ermitteln und mit WebSocket, WebSocketMessage aufrufen (accept).
                 if (socketEvents.containsKey(message.getMessageType()))
                     socketEvents.get(message.getMessageType()).accept(socket, message);
 
@@ -99,7 +110,10 @@ public class WebSocketManager {
      * The closing handler for the websocket.
      * This handler removes the current owner from the list of online users
      *
-     * @return
+     * @return Gibt einen closing-handler zurück, der bei schliessen eines WebSockets die
+     * entsprechende SessionMap aktualisiert und ggfs. löscht.
+     *
+     * Benachrichtigt außerdem alle anderen Benutzer vom offline-status des Benutzers
      */
     private Handler<Void> getCloseHandler(ServerWebSocket socket, Session session) {
         return handler -> {

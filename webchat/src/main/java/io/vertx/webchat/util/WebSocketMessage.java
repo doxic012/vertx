@@ -12,8 +12,10 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 public class WebSocketMessage {
 
-	public static enum MessageType {
-		USER_DATA, USER_LIST, MESSAGE_SEND, MESSAGE_READ, MESSAGE_HISTORY, CONTACT_LIST, CONTACT_ADD, CONTACT_REMOVE, CONTACT_NOTIFIED, USER_STATUS
+	public enum MessageType {
+		USER_STATUS, USER_DATA, USER_LIST,
+		MESSAGE_SEND, MESSAGE_READ, MESSAGE_HISTORY,
+		CONTACT_LIST, CONTACT_ADD, CONTACT_REMOVE, CONTACT_NOTIFIED,
 	}
 
 	private MessageType messageType;

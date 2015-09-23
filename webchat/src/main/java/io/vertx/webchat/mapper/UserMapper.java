@@ -18,6 +18,7 @@ import org.apache.shiro.crypto.SecureRandomNumberGenerator;
 import org.apache.shiro.crypto.hash.SimpleHash;
 import org.apache.shiro.util.ByteSource;
 import org.hibernate.Session;
+import org.hibernate.Transaction;
 
 public class UserMapper extends User {
 	public static User getUserCredentials(String email) {
@@ -59,7 +60,7 @@ public class UserMapper extends User {
 	public static JsonObject addUser(HashInfo hashingInfo, String username, String email, String plainTextPassword) {
 		JsonObject userObject;
 		Session session = HibernateUtil.getSession();
-		session.beginTransaction();
+		Transaction transaction = session.beginTransaction();
 
 		try {
 			ByteSource salt = new SecureRandomNumberGenerator().nextBytes();
@@ -78,7 +79,7 @@ public class UserMapper extends User {
 			session.save(user);
 			userObject = user.toJson();
 		} finally {
-			session.getTransaction().commit();
+			transaction.commit();
 			
 			if(session.isOpen())
 				session.close();

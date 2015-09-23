@@ -58,7 +58,9 @@
                         <div class="container-contact-padding container-contact no-border"
                              ng-repeat="(uid, contact) in getContacts()" ng-class="{active : isActiveContact(contact) }"
                              ng-click="setActiveContact(contact)">
-                            <span class="icon-status glyphicon glyphicon-asterisk" ng-show="contact.notified || contact.online" ng-class="{online: contact.online, notified: contact.notified }"></span>
+                            <span class="icon-status glyphicon glyphicon-asterisk"
+                                  ng-show="contact.notified || contact.online"
+                                  ng-class="{online: contact.online, notified: contact.notified }"></span>
                             <span>{{contact.name}}</span>
                             <i class="contact-action remove-contact glyphicon glyphicon-minus"
                                ng-click="removeContact(contact)"></i>
@@ -66,17 +68,26 @@
                     </div>
                     <div class="col-xs-9">
                         <div class="container-message">
-                            <div class="old-messages" ng-click="getAllMessages(activeContact)" ng-show="activeContact"><span>Alte Nachrichten laden...</span></div>
+                            <div class="old-messages" ng-click="getAllMessages(activeContact)" ng-show="activeContact">
+                                <span>Alte Nachrichten laden...</span></div>
                             <!-- message display -->
                             <div class="container-message-box">
-                                <div class="message-box" ng-repeat="message in getActiveMessages() | orderBy : 'id' : reverse" ng-class="{'foreign-box' : isForeign(message.uid) }" on-last-repeat>
-                                    <div class="name"><span>{{activeContact.uid==message.uid?activeContact.name:owner.name}}</span></div>
+                                <div class="message-box"
+                                     ng-repeat="message in getActiveMessages() | orderBy : 'id' : reverse"
+                                     ng-class="{'foreign-box' : isForeign(message.uid) }" on-last-repeat>
+                                    <div class="name"><span>{{activeContact.uid==message.uid?activeContact.name:owner.name}}</span>
+                                    </div>
                                     <div class="message" ng-class="{foreign : isForeign(message.uid) }">
                                         <p ng-bind-html="replaceBreaks(message.message)"></p>
+
                                         <div style="clear: both;"></div>
                                     </div>
-                                    <span class="glyphicon glyphicon-myok" aria-hidden="true" ng-hide="isForeign(message.uid)" ng-class="{sent: !message.messageRead, read: message.messageRead}"></span>
-                                    <div class="timestamp"><span>{{message.timestamp | date:"dd/MM/yyyy 'um' hh:mm"}}</span></div>
+                                    <span class="glyphicon glyphicon-myok" aria-hidden="true"
+                                          ng-hide="isForeign(message.uid)"
+                                          ng-class="{sent: !message.messageRead, read: message.messageRead}"></span>
+
+                                    <div class="timestamp">
+                                        <span>{{message.timestamp | date:"dd/MM/yyyy 'um' hh:mm"}}</span></div>
                                     <div style="clear: both;"></div>
                                 </div>
                             </div>
@@ -85,7 +96,8 @@
                             <div class="container-new-message">
                                 <div class="container-textarea">
                                     <textarea placeholder="Schreibe eine Nachricht..." name="message"
-                                              ng-model="textMessage" ng-keypress="checkKeypress($event, textMessage);"></textarea>
+                                              ng-model="textMessage"
+                                              ng-keypress="checkKeypress($event, textMessage);"></textarea>
                                 </div>
                                 <button class="btn btn-send-message" name="sendmessage"
                                         ng-click="sendMessage(textMessage)" ng-disabled="activeContact == null">
