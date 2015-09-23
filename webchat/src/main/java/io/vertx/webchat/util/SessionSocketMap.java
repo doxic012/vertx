@@ -78,6 +78,8 @@ public final class SessionSocketMap extends HashMap<Session, List<ServerWebSocke
     public List<ServerWebSocket> getUserSockets(JsonObject principal) {
         int principalUid = principal.getInteger("uid");
 
+        // Inhalt der "apply"-Funktion von "filter"
+        // Vergleich von aktuellem principal und allen Principals der HashMap
         return filter(json -> {
             int jsonUid = json.getInteger("uid");
             return jsonUid == principalUid;

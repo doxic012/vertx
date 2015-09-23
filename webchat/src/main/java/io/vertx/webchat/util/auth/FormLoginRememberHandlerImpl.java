@@ -82,20 +82,20 @@ public class FormLoginRememberHandlerImpl implements FormLoginRememberHandler {
 			}
 
 			// Get principle-data to save in the session
-				JsonObject principleData = UserMapper.getUserByEmail(userMail);
+			JsonObject principleData = UserMapper.getUserByEmail(userMail);
 
-				// Mark the owner as logged in
-				session.setPrincipal(principleData);
-				session.setAuthProvider(authProvider);
+			// Mark the owner as logged in
+			session.setPrincipal(principleData);
+			session.setAuthProvider(authProvider);
 
-				String redirectURL = params.get(returnURLParam);
-				if (redirectURL == null)
-					redirectURL = session.remove(returnURLParam);
-				if (redirectURL == null)
-					redirectURL = defaultReturnURL;
+			String redirectURL = params.get(returnURLParam);
+			if (redirectURL == null)
+				redirectURL = session.remove(returnURLParam);
+			if (redirectURL == null)
+				redirectURL = defaultReturnURL;
 
-				req.response().putHeader("location", redirectURL)
-						.setStatusCode(302).end();
+			req.response().putHeader("location", redirectURL)
+					.setStatusCode(302).end();
 			});
 	}
 }

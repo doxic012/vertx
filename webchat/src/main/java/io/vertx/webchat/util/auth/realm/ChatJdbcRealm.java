@@ -25,7 +25,6 @@ public class ChatJdbcRealm extends JdbcRealm {
 	 * additional
 	 * information about the hashing-algorithm, the iterations, etc.
 	 * 
-	 * @param factory The hibernate session-factory
 	 * @param hashingInfo The hashing information
 	 */
 	public ChatJdbcRealm(HashInfo hashingInfo) {

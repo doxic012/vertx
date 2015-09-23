@@ -102,7 +102,6 @@ public class Message implements Serializable {
 		this.messageRead = messageRead;
 	}
 
-	// TODO: Message.tojson anpassen
 	public JsonObject toJson() {
 		JsonObject message = new JsonObject().put("uid", getUid()).put("uidForeign", getUid()).put("id", getId()).put("timestamp", getTimestamp().toString()).put("message", getMessage());
 		return message;

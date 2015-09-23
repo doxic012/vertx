@@ -1,14 +1,10 @@
 package io.vertx.webchat.controller;
 
-import com.mysql.fabric.Server;
 import io.vertx.core.AbstractVerticle;
-import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.http.HttpServerResponse;
-import io.vertx.core.http.ServerWebSocket;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import io.vertx.core.json.impl.Json;
 import io.vertx.ext.apex.Router;
 import io.vertx.ext.apex.Session;
 import io.vertx.ext.apex.handler.BodyHandler;
@@ -21,9 +17,6 @@ import io.vertx.ext.auth.AuthProvider;
 import io.vertx.ext.auth.shiro.ShiroAuthProvider;
 import io.vertx.webchat.mapper.ContactMapper;
 import io.vertx.webchat.mapper.MessageMapper;
-import io.vertx.webchat.mapper.UserMapper;
-import io.vertx.webchat.models.Message;
-import io.vertx.webchat.models.User;
 import io.vertx.webchat.util.SessionSocketMap;
 import io.vertx.webchat.util.WebSocketManager;
 import io.vertx.webchat.util.WebSocketMessage;
@@ -32,11 +25,7 @@ import io.vertx.webchat.util.auth.FormLoginRememberHandler;
 import io.vertx.webchat.util.auth.FormRegistrationHandler;
 import io.vertx.webchat.util.auth.HashInfo;
 import io.vertx.webchat.util.auth.realm.ChatAuthRealm;
-
 import java.io.IOException;
-import java.time.LocalDate;
-import java.util.HashMap;
-
 import org.apache.shiro.crypto.hash.Sha256Hash;
 
 public class ChatServerVerticle extends AbstractVerticle {

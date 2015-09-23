@@ -30,7 +30,6 @@ public class ChatAuthRealm extends ShiroAuthRealmBase {
 	 * This {@link ChatAuthRealm} adapts a {@link ChatJdbcRealm} that uses a
 	 * {@link HashedCredentialsMatcher}.
 	 * 
-	 * @param factory A hibernate session-factory
 	 * @param hashingInfo Information about a hashing-algorithm that shall be
 	 *            used when decoding the owner credentials
 	 */
@@ -61,13 +60,5 @@ public class ChatAuthRealm extends ShiroAuthRealmBase {
 		} catch (AuthenticationException e) {
 			throw new VertxException(e);
 		}
-	}
-	
-	@Override
-	public boolean hasRole(JsonObject principal, String role) {
-		if(principal == null || role.isEmpty())
-			return false;
-		
-		return principal.getString("roles").contains(role);
 	}
 }
