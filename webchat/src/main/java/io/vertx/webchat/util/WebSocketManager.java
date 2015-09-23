@@ -50,6 +50,7 @@ public class WebSocketManager {
 
         log.debug("registering new connection with id: " + socket.textHandlerID() + " for owner: " + session.getPrincipal().getString("email") + ", users online: " + sessionMap.size());
 
+        //Dem Socket die Handler zuweisen. Damit dieser weiß, was beim empfangen und beim schließen zu tun ist
         socket.closeHandler(getCloseHandler(socket, session));
         socket.frameHandler(getFrameHandler(socket, session));
 
